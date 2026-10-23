@@ -25,7 +25,7 @@ export function PerlaApp() {
   return (
     <div className="min-h-screen bg-secondary sm:py-8">
       <Toaster position="top-center" />
-      <div className="relative mx-auto flex min-h-screen w-full max-w-[430px] flex-col overflow-hidden bg-background sm:min-h-[860px] sm:rounded-[2.5rem] sm:border sm:shadow-soft">
+      <div className="relative mx-auto flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-background sm:h-[860px] sm:rounded-[2.5rem] sm:border sm:shadow-soft">
         <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b px-5 py-3">
           <div className="flex min-w-0 items-center gap-2">
             <img src={logo.url} alt="PERLA" className="h-10 w-10 shrink-0 rounded-full object-cover object-[50%_35%]" />
