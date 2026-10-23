@@ -1,24 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PerlaApp } from "@/components/perla/PerlaApp";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "PERLA — Virtual Try-On & AI Fashion Studio" },
+      { name: "description", content: "Upload your photo, build outfits and try them on virtually with PERLA." },
+      { property: "og:title", content: "PERLA — Elegance, Reimagined" },
+      { property: "og:description", content: "Virtual try-on, outfit builder and AI fashion photos." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: PerlaApp,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
