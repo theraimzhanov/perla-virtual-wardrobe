@@ -88,7 +88,7 @@ function TryOn({ spend }: { spend: (n: number) => boolean }) {
   const onPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) return toast.error("Use a JPEG, PNG or WebP photo");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) { toast.error("Use a JPEG, PNG or WebP photo"); return; }
     setPhoto(URL.createObjectURL(f));
     setState("idle");
   };
@@ -101,8 +101,8 @@ function TryOn({ spend }: { spend: (n: number) => boolean }) {
     toast.success("Saved to your wardrobe");
   };
   const generate = () => {
-    if (!photo) return toast.error("Add your photo first");
-    if (!picked.length) return toast.error("Choose at least one piece");
+    if (!photo) { toast.error("Add your photo first"); return; }
+    if (!picked.length) { toast.error("Choose at least one piece"); return; }
     if (!spend(CREDIT_COST.tryOn)) return;
     setState("loading");
     setTimeout(() => setState("done"), 2200);
