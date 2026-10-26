@@ -41,7 +41,7 @@ function useTryOnState() {
   const shareLook = (id: string) => setLooks((all) => all.map((look) => look.id === id ? { ...look, shared: true } : look));
   const unshareLook = (id: string) => setLooks((all) => all.map((look) => look.id === id ? { ...look, shared: false } : look));
   const deleteLook = (id: string) => setLooks((all) => all.filter((look) => look.id !== id));
-  const [triedIds, setTriedIds] = useState<string[]>(["trench", "blouse"].filter((id) => discoverProducts.some((p) => p.id === id)));
+  const [triedIds, setTriedIds] = useState<string[]>(discoverProducts.slice(0, 2).map((p) => p.id));
   const markTried = (ids: string[]) => setTriedIds((all) => [...new Set([...ids, ...all])]);
   const removeTried = (id: string) => setTriedIds((all) => all.filter((item) => item !== id));
   const triedProducts = triedIds.map((id) => discoverProducts.find((p) => p.id === id)).filter((p): p is DiscoverProduct => !!p);
