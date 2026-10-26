@@ -30,7 +30,7 @@ function Landing() {
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-3">
-          <img src={logo.url} alt="PERLA" className="h-11 w-11 rounded-full object-cover object-[50%_35%] shadow-card" />
+          <img src={logo.url} alt="PERLA" className="h-11 w-11 rounded-full object-cover object-[50%_25%] scale-125 shadow-card" />
           <span className="font-serif text-2xl tracking-[0.28em]">PERLA</span>
         </div>
         <nav className="flex items-center gap-6 text-sm">
