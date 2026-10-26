@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { discoverCategories, discoverProducts } from "@/components/web/data";
-import { addSelection, generationIssue, photoQuestions, showFeedback, videoQuestions } from "@/components/web/try-on-rules";
+import { addSelection, generationIssue, lookSource, photoQuestions, questionsFor, showFeedback, videoQuestions } from "@/components/web/try-on-rules";
 
 describe("Discover and Try-On rules", () => {
   it("offers Clothes, Bag, Hat and Shoes", () => {
@@ -27,7 +27,13 @@ describe("Discover and Try-On rules", () => {
   it("has exactly three video questions for discovered products", () => {
     expect(videoQuestions).toHaveLength(3);
   });
-  it("skips feedback for personally uploaded products", () => {
-    expect(showFeedback("personal")).toBe(false);
+  it("asks three photo and three video questions for own uploads", () => {
+    expect(showFeedback("personal")).toBe(true);
+    expect(questionsFor("photo", "personal")).toHaveLength(3);
+    expect(questionsFor("video", "personal")).toHaveLength(3);
+  });
+  it("labels looks from own uploads as own, not Discover", () => {
+    expect(lookSource("personal")).toBe("own");
+    expect(lookSource("discover")).toBe("discover");
   });
 });

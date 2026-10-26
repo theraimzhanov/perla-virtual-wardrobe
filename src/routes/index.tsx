@@ -41,7 +41,7 @@ function Landing() {
       <section className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-12 md:grid-cols-2 md:py-20">
         <div>
           <Eyebrow>AI fashion discovery</Eyebrow>
-          <h1 className="mt-4 font-serif text-6xl leading-[1.02] md:text-7xl">Wear it <em className="text-gold">before</em> you buy it.</h1>
+          <h1 className="mt-4 font-serif text-6xl leading-[1.02] md:text-7xl">Wear it <em className="text-gold">before</em> anyone.</h1>
           <p className="mt-6 max-w-md text-lg text-muted-foreground">PERLA dresses you in any piece with virtual try-on, and tells brands exactly what you'd love to own.</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/app/try-on" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-primary-foreground shadow-soft">Try it on <ArrowRight className="h-4 w-4" /></Link>

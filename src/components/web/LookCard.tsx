@@ -12,6 +12,7 @@ export function LookCard({ look, showShare = false }: { look: Look; showShare?: 
       <div className="relative">
         <img src={look.image} alt={look.title} loading="lazy" className="aspect-[3/4] w-full object-cover" />
         {look.kind === "video" && <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-background/90 px-2.5 py-1 text-[10px] uppercase"><Film className="h-3 w-3" />Video</span>}
+        {look.source === "own" && <span className="absolute bottom-3 left-3 rounded-full border border-gold bg-background/95 px-2.5 py-1 text-[10px] uppercase text-gold">Own upload · not from Discover</span>}
         {look.shared && <span className="absolute right-3 top-3 rounded-full bg-primary px-2.5 py-1 text-[10px] uppercase text-primary-foreground">Shared</span>}
       </div>
       <div className="flex items-center gap-2 p-3">

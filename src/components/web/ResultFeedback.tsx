@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Check, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { photoQuestions, videoQuestions } from "./try-on-rules";
+import { questionsFor, type ProductMode } from "./try-on-rules";
 import { cn } from "@/lib/utils";
 
-export function ResultFeedback({ kind }: { kind: "photo" | "video" }) {
-  const questions = kind === "photo" ? photoQuestions : videoQuestions;
+export function ResultFeedback({ kind, mode = "discover" }: { kind: "photo" | "video"; mode?: ProductMode }) {
+  const questions = questionsFor(kind, mode);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   return (
