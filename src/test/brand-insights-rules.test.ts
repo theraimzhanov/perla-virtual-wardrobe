@@ -5,7 +5,9 @@ import { seedLooks, sourceFromFeedback, toggleLike, type Look } from "@/componen
 
 describe("Brand Insights rules", () => {
   it("ranks only products from Discover, never own uploads", () => {
-    const ownProduct = { ...discoverProducts[0], id: "personal", source: "personal" as const };
+    const base = discoverProducts[0];
+    if (!base) throw new Error("Missing sample product");
+    const ownProduct = { ...base, id: "personal", source: "personal" as const };
     const result = rankDiscoverProducts([...discoverProducts, ownProduct], [{ id: "personal", tryOns: 99999, likes: 99999 }], "tryOns");
     expect(result.map((product) => product.id)).toEqual(discoverProducts.map((product) => product.id));
     expect(result.every((product) => product.source === "discover")).toBe(true);
@@ -25,7 +27,7 @@ describe("Brand Insights rules", () => {
       { ...base, id: "photo", shared: true, kind: "photo", likes: 4 },
       { ...base, id: "private", shared: false, likes: 100 },
       { ...base, id: "video", shared: true, kind: "video", video: { webm: "sample.webm" }, likes: 8 },
-      { ...base, id: "no-video", shared: true, kind: "video", video: undefined, likes: 50 },
+      { ...base, id: "no-video", shared: true, kind: "video", video: {}, likes: 50 },
     ];
     expect(sharedVirtualLooks(looks).map((look) => look.id)).toEqual(["video", "photo"]);
   });
