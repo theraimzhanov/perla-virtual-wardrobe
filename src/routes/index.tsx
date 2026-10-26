@@ -4,6 +4,9 @@ import logo from "@/assets/perla-emblem.svg.asset.json";
 import { CompareSlider } from "@/components/perla/CompareSlider";
 import { modelBefore, modelAfter } from "@/components/perla/data";
 import { Eyebrow } from "@/components/web/ui";
+import { SiteFooter } from "@/components/web/SiteFooter";
+import { useTryOn } from "@/components/web/TryOnContext";
+import { sharedVirtualLooks } from "@/components/web/brand-insights-rules";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,6 +29,8 @@ const features = [
 ];
 
 function Landing() {
+  const { looks } = useTryOn();
+  const sharedCount = sharedVirtualLooks(looks).length;
   return (
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
@@ -47,9 +52,9 @@ function Landing() {
             <Link to="/app/try-on" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-primary-foreground shadow-soft">Try it on <ArrowRight className="h-4 w-4" /></Link>
             <Link to="/mobile" className="rounded-full bg-card px-7 py-3.5 shadow-card">See mobile app</Link>
           </div>
-          <div className="mt-10 flex gap-10">
-            {[["120k", "try-ons"], ["340", "brands"], ["4.9", "rating"]].map(([v, l]) => (
-              <div key={l}><p className="font-serif text-4xl">{v}</p><p className="text-xs uppercase tracking-widest text-muted-foreground">{l}</p></div>
+          <div className="mt-10 grid grid-cols-3 gap-4 sm:gap-10">
+            {[["120k", "try-ons"], ["340", "brands"], [sharedCount.toLocaleString(), "shared virtual try-ons"]].map(([v, l]) => (
+              <div key={l} className="min-w-0"><p className="font-serif text-4xl">{v}</p><p className="mt-1 max-w-32 text-xs uppercase text-muted-foreground">{l}</p></div>
             ))}
           </div>
         </div>
@@ -64,6 +69,7 @@ function Landing() {
           </div>
         ))}
       </section>
+      <SiteFooter />
     </div>
   );
 }

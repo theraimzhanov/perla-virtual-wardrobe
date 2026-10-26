@@ -1,12 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import { Heart, Sparkles, Wand2 } from "lucide-react";
 import { discoverProducts, products } from "@/components/web/data";
 import { PageHeader, Panel, Eyebrow } from "@/components/web/ui";
-import { Button } from "@/components/ui/button";
 import { useTryOn } from "@/components/web/TryOnContext";
 import { LookCard } from "@/components/web/LookCard";
-import { rankDiscoverProducts, sharedVirtualLooks, type ProductRanking } from "@/components/web/brand-insights-rules";
+import { rankDiscoverProducts, sharedVirtualLooks } from "@/components/web/brand-insights-rules";
 
 export const Route = createFileRoute("/app/insights")({
   head: () => ({
@@ -40,8 +38,7 @@ const aiInsights = [
 
 function Insights() {
   const { looks } = useTryOn();
-  const [ranking, setRanking] = useState<ProductRanking>("tryOns");
-  const ranked = rankDiscoverProducts(discoverProducts, productSignals, ranking).slice(0, 4);
+  const ranked = rankDiscoverProducts(discoverProducts, productSignals, "tryOns").slice(0, 4);
   const community = sharedVirtualLooks(looks);
   return (
     <div>
@@ -49,15 +46,15 @@ function Insights() {
       <section aria-label="Discover product rankings">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
           <h2 className="font-serif text-3xl">Most tried on <em className="text-gold">& most liked</em></h2>
-          <div role="group" aria-label="Sort Discover products" className="flex gap-1 rounded-full bg-secondary p-1">
-            <Button variant={ranking === "tryOns" ? "default" : "ghost"} aria-pressed={ranking === "tryOns"} title="Sort by most tried on" onClick={() => setRanking("tryOns")} className="rounded-full text-xs"><Wand2 />Try-ons</Button>
-            <Button variant={ranking === "likes" ? "default" : "ghost"} aria-pressed={ranking === "likes"} title="Sort by most liked" onClick={() => setRanking("likes")} className="rounded-full text-xs"><Heart />Likes</Button>
-          </div>
         </div>
-        <ol className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-          {ranked.map((product) => <li key={product.id} aria-label={product.name} className="min-w-0 overflow-hidden rounded-lg bg-card shadow-card">
+        <ol tabIndex={0} aria-label="Most tried on and most liked products" className="grid snap-x snap-mandatory auto-cols-[min(15rem,80%)] grid-flow-col gap-4 overflow-x-auto pb-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring xl:auto-cols-[calc((100%_-_3rem)/4)]">
+          {ranked.map((product) => <li key={product.id} aria-label={product.name} className="min-w-0 snap-start overflow-hidden rounded-lg bg-card shadow-card">
             <img src={product.image} alt={product.name} loading="lazy" className="aspect-[3/5] w-full object-cover" />
-            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 px-3 py-4 text-xs tabular-nums sm:px-4">
+            <div className="px-3 pt-4 sm:px-4">
+              <p className="break-words text-[10px] uppercase text-gold">{product.brand}</p>
+              <h3 className="mt-1 break-words font-serif text-xl leading-tight">{product.name}</h3>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 px-3 pb-4 pt-3 text-xs tabular-nums sm:px-4">
               <span className="flex items-center gap-1.5" aria-label={`${product.tryOns} try-ons`}><Wand2 className="h-3.5 w-3.5 shrink-0 text-gold" />{product.tryOns.toLocaleString()} <span className="text-muted-foreground">try-ons</span></span>
               <span className="flex items-center gap-1.5" aria-label={`${product.likes} likes`}><Heart className="h-3.5 w-3.5 shrink-0 text-gold" />{product.likes.toLocaleString()} <span className="text-muted-foreground">likes</span></span>
             </div>
@@ -67,7 +64,7 @@ function Insights() {
 
       <section aria-label="Community looks" className="mt-10">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><h2 className="font-serif text-3xl">Best looks <em className="text-gold">from the community</em></h2><span className="text-xs text-muted-foreground">{community.length} shared · most liked first</span></div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{community.map((look) => <LookCard key={look.id} look={look} />)}</div>
+        <div tabIndex={0} role="group" aria-label="Shared community photos and videos" className="grid snap-x snap-mandatory auto-cols-[min(15rem,80%)] grid-flow-col gap-4 overflow-x-auto pb-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring xl:auto-cols-[calc((100%_-_3rem)/4)]">{community.map((look) => <div key={look.id} className="min-w-0 snap-start"><LookCard look={look} /></div>)}</div>
       </section>
 
       <Panel className="mt-10">

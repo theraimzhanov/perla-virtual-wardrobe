@@ -37,6 +37,11 @@ describe("Brand Insights rules", () => {
     const looks: Look[] = [{ ...base, id: "own", source: "own", shared: true }, { ...base, id: "internet", source: "internet", shared: true }];
     expect(sharedVirtualLooks(looks).map((look) => look.source)).toEqual(["own", "internet"]);
   });
+  it("counts shared virtual try-ons for the homepage, updating when a look is shared", () => {
+    expect(sharedVirtualLooks(seedLooks)).toHaveLength(6);
+    const afterShare = seedLooks.map((look) => look.id === "l2" ? { ...look, shared: true } : look);
+    expect(sharedVirtualLooks(afterShare)).toHaveLength(7);
+  });
   it("uses the user's source answer rather than assuming internet origin", () => {
     expect(sourceFromFeedback("Internet")).toBe("internet");
     expect(sourceFromFeedback("Own closet")).toBe("own");
