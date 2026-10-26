@@ -19,6 +19,8 @@ export const Route = createFileRoute("/app/studio")({
       { name: "description", content: "Create editorial fashion photos of your outfits with AI." },
       { property: "og:title", content: "AI Studio — PERLA" },
       { property: "og:description", content: "Editorial AI fashion photography from a prompt." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Studio,
@@ -34,7 +36,7 @@ function Studio() {
         <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3} className="w-full resize-none rounded-2xl bg-secondary p-4 font-serif text-xl outline-none" />
         <div className="mt-4 flex flex-wrap items-center gap-2">
           {studioStyles.map((s) => <Pill key={s} active={s === style} onClick={() => setStyle(s)}>{s}</Pill>)}
-          <GoldButton className="ml-auto" onClick={() => toast.success(`${style} shoot queued · 2 credits`)}><Sparkles className="h-4 w-4" /> Create · 2 credits</GoldButton>
+          <GoldButton className="ml-auto" onClick={() => toast.success(`${style} sample shoot queued`)}><Sparkles className="h-4 w-4" /> Generate look</GoldButton>
         </div>
       </Panel>
       <h2 className="mb-4 font-serif text-3xl">Recent creations</h2>

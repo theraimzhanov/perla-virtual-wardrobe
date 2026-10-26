@@ -8,6 +8,8 @@ export const Route = createFileRoute("/mobile")({
       { name: "description", content: "The PERLA mobile experience: try-on, AI Studio and profile." },
       { property: "og:title", content: "PERLA Mobile" },
       { property: "og:description", content: "Virtual try-on in your pocket." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: PerlaApp,

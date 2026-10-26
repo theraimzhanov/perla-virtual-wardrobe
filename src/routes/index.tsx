@@ -35,7 +35,6 @@ function Landing() {
         </div>
         <nav className="flex items-center gap-6 text-sm">
           <Link to="/app/insights" className="hidden text-muted-foreground hover:text-foreground sm:inline">For brands</Link>
-          <Link to="/app/credits" className="hidden text-muted-foreground hover:text-foreground sm:inline">Pricing</Link>
           <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
           <Link to="/app" className="rounded-full bg-primary px-5 py-2.5 text-primary-foreground">Open app</Link>
         </nav>

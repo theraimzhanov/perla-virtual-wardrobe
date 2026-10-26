@@ -11,6 +11,8 @@ export const Route = createFileRoute("/app/insights")({
       { name: "description", content: "Demand intelligence from virtual try-ons and shopper buy intent." },
       { property: "og:title", content: "Brand Insights — PERLA" },
       { property: "og:description", content: "See what shoppers want before you produce it." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Insights,
@@ -26,7 +28,7 @@ function Insights() {
         <Stat label="Try-ons this week" value="8,620" delta="+18.4% vs last week" />
         <Stat label="Avg. buy intent" value="61%" delta="+6 pts" />
         <Stat label="Willing price" value="$172" delta="+$14 above list" />
-        <Stat label="Saved to wardrobe" value="2,914" delta="+9.2%" />
+        <Stat label="Liked looks" value="2,914" delta="+9.2%" />
       </div>
       <div className="mt-6 grid gap-6 xl:grid-cols-3">
         <Panel className="xl:col-span-2">

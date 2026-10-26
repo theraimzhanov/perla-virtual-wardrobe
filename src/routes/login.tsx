@@ -9,6 +9,8 @@ export const Route = createFileRoute("/login")({
       { name: "description", content: "Sign in to PERLA to try on, create and save looks." },
       { property: "og:title", content: "Sign in — PERLA" },
       { property: "og:description", content: "Welcome back to PERLA." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Login,

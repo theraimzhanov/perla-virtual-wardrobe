@@ -24,18 +24,10 @@ export const wardrobe: Garment[] = [
   { id: "g6", name: "Gilded Top Handle", brand: "Or Paris", category: "Accessories", image: bag },
 ];
 
-export const creditPacks = [
-  { id: "p1", credits: 10, price: "$4.99", label: "Starter" },
-  { id: "p2", credits: 50, price: "$19.99", label: "Signature", popular: true },
-  { id: "p3", credits: 150, price: "$49.99", label: "Couture" },
-];
-
-export const CREDIT_COST = { tryOn: 1, studio: 2 };
-
 export const studioStyles = ["Editorial", "Street", "Runway", "Golden Hour", "Studio White", "Riviera"];
 
 export const history = [
-  { id: "h1", title: "Parisian Neutrals", date: "Oct 21", image: after, credits: -1 },
-  { id: "h2", title: "Evening Slip", date: "Oct 18", image: dress, credits: -1 },
-  { id: "h3", title: "Riviera Editorial", date: "Oct 15", image: trench, credits: -2 },
+  { id: "h1", title: "Parisian Neutrals", date: "Oct 21", image: after },
+  { id: "h2", title: "Evening Slip", date: "Oct 18", image: dress },
+  { id: "h3", title: "Riviera Editorial", date: "Oct 15", image: trench },
 ];
