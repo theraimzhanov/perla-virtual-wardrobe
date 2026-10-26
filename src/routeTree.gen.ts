@@ -14,12 +14,10 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MobileRouteImport } from './routes/mobile'
 import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as AppCreditsRouteImport } from './routes/app.credits'
 import { Route as AppInsightsRouteImport } from './routes/app.insights'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppStudioRouteImport } from './routes/app.studio'
 import { Route as AppTryOnRouteImport } from './routes/app.try-on'
-import { Route as AppWardrobeRouteImport } from './routes/app.wardrobe'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,11 +44,6 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppCreditsRoute = AppCreditsRouteImport.update({
-  id: '/credits',
-  path: '/credits',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppInsightsRoute = AppInsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
@@ -71,35 +64,26 @@ const AppTryOnRoute = AppTryOnRouteImport.update({
   path: '/try-on',
   getParentRoute: () => AppRoute,
 } as any)
-const AppWardrobeRoute = AppWardrobeRouteImport.update({
-  id: '/wardrobe',
-  path: '/wardrobe',
-  getParentRoute: () => AppRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/mobile': typeof MobileRoute
-  '/app/credits': typeof AppCreditsRoute
   '/app/insights': typeof AppInsightsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/studio': typeof AppStudioRoute
   '/app/try-on': typeof AppTryOnRoute
-  '/app/wardrobe': typeof AppWardrobeRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/mobile': typeof MobileRoute
-  '/app/credits': typeof AppCreditsRoute
   '/app/insights': typeof AppInsightsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/studio': typeof AppStudioRoute
   '/app/try-on': typeof AppTryOnRoute
-  '/app/wardrobe': typeof AppWardrobeRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -108,12 +92,10 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/mobile': typeof MobileRoute
-  '/app/credits': typeof AppCreditsRoute
   '/app/insights': typeof AppInsightsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/studio': typeof AppStudioRoute
   '/app/try-on': typeof AppTryOnRoute
-  '/app/wardrobe': typeof AppWardrobeRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -123,24 +105,20 @@ export interface FileRouteTypes {
     | '/app'
     | '/login'
     | '/mobile'
-    | '/app/credits'
     | '/app/insights'
     | '/app/profile'
     | '/app/studio'
     | '/app/try-on'
-    | '/app/wardrobe'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/mobile'
-    | '/app/credits'
     | '/app/insights'
     | '/app/profile'
     | '/app/studio'
     | '/app/try-on'
-    | '/app/wardrobe'
     | '/app'
   id:
     | '__root__'
@@ -148,12 +126,10 @@ export interface FileRouteTypes {
     | '/app'
     | '/login'
     | '/mobile'
-    | '/app/credits'
     | '/app/insights'
     | '/app/profile'
     | '/app/studio'
     | '/app/try-on'
-    | '/app/wardrobe'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
@@ -201,13 +177,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/credits': {
-      id: '/app/credits'
-      path: '/credits'
-      fullPath: '/app/credits'
-      preLoaderRoute: typeof AppCreditsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/insights': {
       id: '/app/insights'
       path: '/insights'
@@ -236,33 +205,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTryOnRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/wardrobe': {
-      id: '/app/wardrobe'
-      path: '/wardrobe'
-      fullPath: '/app/wardrobe'
-      preLoaderRoute: typeof AppWardrobeRouteImport
-      parentRoute: typeof AppRoute
-    }
   }
 }
 
 interface AppRouteChildren {
-  AppCreditsRoute: typeof AppCreditsRoute
   AppInsightsRoute: typeof AppInsightsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppStudioRoute: typeof AppStudioRoute
   AppTryOnRoute: typeof AppTryOnRoute
-  AppWardrobeRoute: typeof AppWardrobeRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppCreditsRoute: AppCreditsRoute,
   AppInsightsRoute: AppInsightsRoute,
   AppProfileRoute: AppProfileRoute,
   AppStudioRoute: AppStudioRoute,
   AppTryOnRoute: AppTryOnRoute,
-  AppWardrobeRoute: AppWardrobeRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

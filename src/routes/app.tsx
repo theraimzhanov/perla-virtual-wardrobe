@@ -1,7 +1,8 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { Toaster } from "sonner";
-import { Bell, Coins, Compass, LayoutDashboard, Shirt, Sparkles, User, Wand2, Search, Smartphone } from "lucide-react";
+import { Bell, Compass, LayoutDashboard, Sparkles, User, Wand2, Search, Smartphone } from "lucide-react";
 import logo from "@/assets/perla-logo-clean.png.asset.json";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/app")({ component: AppLayout });
 
@@ -9,9 +10,7 @@ const nav = [
   { to: "/app", label: "Discover", icon: Compass, exact: true },
   { to: "/app/try-on", label: "Try-On", icon: Wand2 },
   { to: "/app/studio", label: "AI Studio", icon: Sparkles },
-  { to: "/app/wardrobe", label: "Wardrobe", icon: Shirt },
   { to: "/app/insights", label: "Brand Insights", icon: LayoutDashboard },
-  { to: "/app/credits", label: "Credits", icon: Coins },
   { to: "/app/profile", label: "Profile", icon: User },
 ] as const;
 
@@ -37,11 +36,7 @@ function AppLayout() {
             </Link>
           ))}
         </nav>
-        <div className="rounded-[1.5rem] bg-gold-gradient p-5 text-primary-foreground">
-          <p className="font-serif text-xl">Go Couture</p>
-          <p className="mt-1 text-xs opacity-90">150 credits for unlimited looks.</p>
-          <Link to="/app/credits" className="mt-3 inline-block rounded-full bg-background px-4 py-1.5 text-xs text-foreground">Upgrade</Link>
-        </div>
+        <div className="border-t px-2 pt-5"><p className="font-serif text-lg">Made for your next look.</p><p className="mt-1 text-[10px] uppercase text-gold">PERLA · Hackathon edition</p></div>
         <Link to="/mobile" className="mt-4 flex items-center gap-2 px-2 text-xs text-muted-foreground hover:text-foreground">
           <Smartphone className="h-3.5 w-3.5" /> Open mobile version
         </Link>
@@ -52,11 +47,8 @@ function AppLayout() {
             <Search className="h-4 w-4 text-muted-foreground" />
             <input placeholder="Search pieces, brands, styles…" className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
           </div>
-          <Link to="/app/credits" className="flex items-center gap-2 rounded-full bg-card px-4 py-2.5 text-sm shadow-card">
-            <Coins className="h-4 w-4 text-gold" /> 12
-          </Link>
-          <button className="grid h-10 w-10 place-items-center rounded-full bg-card shadow-card" aria-label="Notifications"><Bell className="h-4 w-4" /></button>
-          <Link to="/app/profile" className="grid h-10 w-10 place-items-center rounded-full bg-gold-gradient text-sm font-semibold text-primary-foreground">NR</Link>
+          <Button size="icon" variant="ghost" className="hidden h-10 w-10 shrink-0 rounded-full bg-card shadow-card sm:inline-flex" aria-label="Notifications" title="Notifications"><Bell className="h-4 w-4" /></Button>
+          <Link to="/app/profile" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold-gradient text-sm font-semibold text-primary-foreground">NR</Link>
         </header>
         <nav className="no-scrollbar flex gap-2 overflow-x-auto border-b px-6 py-3 lg:hidden">
           {nav.map((n) => (

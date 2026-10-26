@@ -10,6 +10,8 @@ export const Route = createFileRoute("/app/profile")({
       { name: "description", content: "Your PERLA profile, style preferences and history." },
       { property: "og:title", content: "Profile — PERLA" },
       { property: "og:description", content: "Your style profile on PERLA." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Profile,
@@ -41,7 +43,7 @@ function Profile() {
             <h2 className="mb-4 font-serif text-2xl">Recent looks</h2>
             <div className="grid gap-4 sm:grid-cols-3">
               {history.map((h) => (
-                <div key={h.id}><img src={h.image} alt={h.title} className="aspect-[3/4] w-full rounded-2xl object-cover" /><p className="mt-2 font-serif text-lg">{h.title}</p><p className="text-xs text-muted-foreground">{h.date} · {h.credits} credit</p></div>
+                <div key={h.id}><img src={h.image} alt={h.title} className="aspect-[3/4] w-full rounded-2xl object-cover" /><p className="mt-2 font-serif text-lg">{h.title}</p><p className="text-xs text-muted-foreground">{h.date}</p></div>
               ))}
             </div>
           </Panel>

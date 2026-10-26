@@ -85,6 +85,7 @@
   --gold: oklch(0.62 0.09 70);
   --gold-soft: oklch(0.9 0.045 80);
   --pearl: oklch(0.88 0.03 200);
+  --shimmer: oklch(0.985 0.01 85 / 0.65);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.98 0 0);
   --border: oklch(0.885 0.02 78);
@@ -114,3 +115,19 @@
 @utility bg-gold-gradient { background-image: var(--gradient-gold); }
 @utility shadow-soft { box-shadow: var(--shadow-soft); }
 @utility no-scrollbar { scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
+
+.generation-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 25%, var(--shimmer) 50%, transparent 75%);
+  transform: translateX(-100%);
+  animation: perla-shimmer 2.4s ease-in-out infinite;
+}
+.generation-progress { animation: perla-progress 1.8s ease-in-out infinite alternate; }
+@keyframes perla-shimmer { to { transform: translateX(100%); } }
+@keyframes perla-progress { to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .generation-skeleton::after, .generation-progress { animation: none; }
+}
