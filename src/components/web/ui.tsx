@@ -48,9 +48,9 @@ export function Pill({ active, children, onClick }: { active?: boolean; children
   );
 }
 
-export function GoldButton({ children, onClick, className }: { children: ReactNode; onClick?: () => void; className?: string }) {
+export function GoldButton({ children, onClick, className, disabled }: { children: ReactNode; onClick?: () => void; className?: string; disabled?: boolean }) {
   return (
-    <button onClick={onClick} className={cn("inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-soft transition hover:opacity-90", className)}>
+    <button onClick={onClick} disabled={disabled} className={cn("inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-soft transition hover:opacity-90 disabled:opacity-50", className)}>
       {children}
     </button>
   );
