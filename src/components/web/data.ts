@@ -2,10 +2,10 @@ import { wardrobe } from "@/components/perla/data";
 
 export const products = wardrobe.map((g, i) => ({
   ...g,
-  price: [128, 165, 340, 210, 145, 290][i],
-  trend: [92, 81, 88, 95, 74, 86][i],
-  intent: [64, 48, 71, 83, 39, 57][i],
-  tryOns: [1842, 1210, 2390, 3105, 980, 1544][i],
+  price: [128, 165, 340, 210, 145, 290][i] ?? 150,
+  trend: [92, 81, 88, 95, 74, 86][i] ?? 80,
+  intent: [64, 48, 71, 83, 39, 57][i] ?? 50,
+  tryOns: [1842, 1210, 2390, 3105, 980, 1544][i] ?? 1000,
 }));
 
 export const demandSeries = [
