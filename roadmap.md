@@ -15,6 +15,3 @@
 - [x] Put both Brand Insights collections in single horizontal rows, remove ranking tabs, and show product and brand names.
 - [x] Replace the homepage rating with the shared virtual try-on count and add Product, Account and Legal footer sections with the supplied support email.
 - [x] Verify horizontal rows, shared count, footer links and existing tests.
-
-## Accounts and saved content — paused
-- [ ] Restore the previous version and connect the user's external Supabase. Waiting on the user's Restore and connection actions; do not continue with Lovable Cloud.
