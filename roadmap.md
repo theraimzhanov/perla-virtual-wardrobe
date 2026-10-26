@@ -15,3 +15,7 @@
 - [x] Put both Brand Insights collections in single horizontal rows, remove ranking tabs, and show product and brand names.
 - [x] Replace the homepage rating with the shared virtual try-on count and add Product, Account and Legal footer sections with the supplied support email.
 - [x] Verify horizontal rows, shared count, footer links and existing tests.
+
+## External database setup
+- [ ] Connect the user's separate external database; blocked because this Cloud-connected project cannot switch to external Supabase. Requires a new project without Cloud connected through Settings → General → External Supabase. Do not create tables in the existing managed backend.
+- [ ] Create and verify tables for profiles, products, media, looks, collections, likes and feedback after the external connection is established.
