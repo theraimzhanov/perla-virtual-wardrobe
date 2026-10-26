@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { history } from "@/components/perla/data";
+import { useTryOn } from "@/components/web/TryOnContext";
+import { LookCard } from "@/components/web/LookCard";
+import { byLikes } from "@/components/web/looks";
 import { PageHeader, Panel, Stat } from "@/components/web/ui";
 import { Switch } from "@/components/ui/switch";
 
@@ -20,6 +22,7 @@ export const Route = createFileRoute("/app/profile")({
 const prefs = ["Minimal", "Neutrals", "Tailored", "Silk", "Parisian"];
 
 function Profile() {
+  const { looks } = useTryOn();
   return (
     <div>
       <PageHeader eyebrow="Member since Oct 2026" title="Nursultan" accent="Raimzhanov" />
@@ -40,11 +43,9 @@ function Profile() {
             <Stat label="Try-ons" value="48" /><Stat label="Studio shots" value="17" /><Stat label="Saved pieces" value="36" />
           </div>
           <Panel>
-            <h2 className="mb-4 font-serif text-2xl">Recent looks</h2>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {history.map((h) => (
-                <div key={h.id}><img src={h.image} alt={h.title} className="aspect-[3/4] w-full rounded-2xl object-cover" /><p className="mt-2 font-serif text-lg">{h.title}</p><p className="text-xs text-muted-foreground">{h.date}</p></div>
-              ))}
+            <div className="mb-4 flex items-end justify-between gap-3"><h2 className="font-serif text-2xl">My looks & videos</h2><span className="text-xs text-muted-foreground">Sorted by likes</span></div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {byLikes(looks.filter((look) => look.mine)).map((look) => <LookCard key={look.id} look={look} showShare />)}
             </div>
           </Panel>
         </div>
