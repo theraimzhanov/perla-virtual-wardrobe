@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import logo from "@/assets/perla-logo-clean.png.asset.json";
+import logo from "@/assets/perla-emblem.svg.asset.json";
 import after from "@/assets/model-after.jpg";
 
 export const Route = createFileRoute("/login")({

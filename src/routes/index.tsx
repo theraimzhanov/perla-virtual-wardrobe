@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BarChart3, Sparkles, Wand2 } from "lucide-react";
-import logo from "@/assets/perla-logo-clean.png.asset.json";
+import logo from "@/assets/perla-emblem.svg.asset.json";
 import { CompareSlider } from "@/components/perla/CompareSlider";
 import { modelBefore, modelAfter } from "@/components/perla/data";
 import { Eyebrow } from "@/components/web/ui";
@@ -30,7 +30,7 @@ function Landing() {
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-3">
-          <img src={logo.url} alt="PERLA" className="h-12 w-12 rounded-full object-cover object-[50%_25%] scale-125 shadow-card" />
+          <img src={logo.url} alt="" className="h-11 w-auto" /><span className="font-serif text-2xl tracking-[0.28em]">PERLA</span>
         </div>
         <nav className="flex items-center gap-6 text-sm">
           <Link to="/app/insights" className="hidden text-muted-foreground hover:text-foreground sm:inline">For brands</Link>
