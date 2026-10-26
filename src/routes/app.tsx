@@ -1,7 +1,7 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 import { Bell, Compass, LayoutDashboard, Sparkles, User, Wand2, Search, Smartphone } from "lucide-react";
-import logo from "@/assets/perla-logo-clean.png.asset.json";
+import logo from "@/assets/perla-emblem.svg.asset.json";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/app")({ component: AppLayout });
@@ -15,12 +15,13 @@ const nav = [
 ] as const;
 
 function AppLayout() {
+  const isDiscover = useLocation({ select: (l) => l.pathname.replace(/\/$/, "") === "/app" });
   return (
     <div className="flex min-h-screen bg-background">
       <Toaster position="top-center" />
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r px-5 py-6 lg:flex">
         <Link to="/" className="flex items-center gap-3 px-2">
-          <img src={logo.url} alt="PERLA" className="h-12 w-12 rounded-full object-cover object-[50%_25%] scale-125 shadow-card" />
+          <img src={logo.url} alt="" className="h-11 w-auto" /><span className="font-serif text-2xl tracking-[0.28em]">PERLA</span>
         </Link>
         <nav className="mt-10 flex flex-1 flex-col gap-1">
           {nav.map((n) => (
@@ -42,10 +43,10 @@ function AppLayout() {
       </aside>
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-10 flex items-center gap-4 border-b bg-background/85 px-6 py-4 backdrop-blur md:px-10">
-          <div className="flex flex-1 items-center gap-2 rounded-full bg-card px-4 py-2.5 shadow-card">
+          {isDiscover ? <div className="flex flex-1 items-center gap-2 rounded-full bg-card px-4 py-2.5 shadow-card">
             <Search className="h-4 w-4 text-muted-foreground" />
             <input placeholder="Search pieces, brands, styles…" className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
-          </div>
+          </div> : <div className="flex-1" />}
           <Button size="icon" variant="ghost" className="hidden h-10 w-10 shrink-0 rounded-full bg-card shadow-card sm:inline-flex" aria-label="Notifications" title="Notifications"><Bell className="h-4 w-4" /></Button>
           <Link to="/app/profile" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold-gradient text-sm font-semibold text-primary-foreground">NR</Link>
         </header>
