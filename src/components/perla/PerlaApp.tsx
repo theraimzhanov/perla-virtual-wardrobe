@@ -17,7 +17,7 @@ export function PerlaApp() {
       <Toaster position="top-center" />
       <div className="relative mx-auto flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-background sm:h-[860px] sm:rounded-[2.75rem] sm:border sm:shadow-soft">
         <header className="flex items-center justify-between gap-3 px-6 pb-2 pt-5">
-          <div className="flex items-center gap-2.5"><img src={logo.url} alt="PERLA" className="h-11 w-11 shrink-0 rounded-full object-cover object-[50%_25%] scale-125 shadow-card" /><span className="font-serif text-2xl">PERLA</span></div>
+          <div className="flex items-center gap-2.5"><img src={logo.url} alt="PERLA" className="h-11 w-11 shrink-0 rounded-full object-cover object-[50%_25%] scale-125 shadow-card" /></div>
           <Button size="icon" onClick={() => setTab("profile")} title="Profile" aria-label="Profile" className="rounded-full bg-gold-gradient text-xs text-primary-foreground">NR</Button>
         </header>
         <main className="no-scrollbar flex-1 overflow-y-auto px-5 pb-32 pt-6">

@@ -30,8 +30,7 @@ function Landing() {
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-3">
-          <img src={logo.url} alt="PERLA" className="h-11 w-11 rounded-full object-cover object-[50%_25%] scale-125 shadow-card" />
-          <span className="font-serif text-2xl tracking-[0.28em]">PERLA</span>
+          <img src={logo.url} alt="PERLA" className="h-12 w-12 rounded-full object-cover object-[50%_25%] scale-125 shadow-card" />
         </div>
         <nav className="flex items-center gap-6 text-sm">
           <Link to="/app/insights" className="hidden text-muted-foreground hover:text-foreground sm:inline">For brands</Link>
@@ -42,7 +41,7 @@ function Landing() {
       <section className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-12 md:grid-cols-2 md:py-20">
         <div>
           <Eyebrow>AI fashion discovery</Eyebrow>
-          <h1 className="mt-4 font-serif text-6xl leading-[1.02] md:text-7xl">Wear it <em className="text-gold">before</em> you buy it.</h1>
+          <h1 className="mt-4 font-serif text-6xl leading-[1.02] md:text-7xl">Wear it <em className="text-gold">before</em> anyone.</h1>
           <p className="mt-6 max-w-md text-lg text-muted-foreground">PERLA dresses you in any piece with virtual try-on, and tells brands exactly what you'd love to own.</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/app/try-on" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-primary-foreground shadow-soft">Try it on <ArrowRight className="h-4 w-4" /></Link>
