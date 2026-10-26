@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Shirt, Sparkles, User, Gem, Upload, Camera, X, Plus, Check, Loader2, Download, Share2, Heart, RefreshCw, ChevronRight, Shield, Bell, LogOut, CreditCard, ImagePlus, Trash2, Search } from "lucide-react";
 import { toast, Toaster } from "sonner";
-import logo from "@/assets/perla-logo.png.asset.json";
+import logo from "@/assets/perla-logo-clean.png.asset.json";
 import { CompareSlider } from "./CompareSlider";
 import { wardrobe, categories, creditPacks, CREDIT_COST, studioStyles, history, modelBefore, modelAfter, type Garment, type Category } from "./data";
 
@@ -30,7 +30,6 @@ export function PerlaApp() {
           <div className="flex min-w-0 items-center gap-2.5">
             <img src={logo.url} alt="PERLA" className="h-11 w-11 shrink-0 rounded-full object-cover object-[50%_35%] shadow-card" />
             <div className="min-w-0">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Elegance, reimagined</p>
               <span className="font-serif text-2xl leading-none tracking-[0.28em] text-foreground">PERLA</span>
             </div>
           </div>
