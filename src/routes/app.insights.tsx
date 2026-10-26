@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { Heart, Sparkles, Wand2 } from "lucide-react";
-import { products } from "@/components/web/data";
+import { discoverProducts, products } from "@/components/web/data";
 import { PageHeader, Panel, Eyebrow } from "@/components/web/ui";
+import { Button } from "@/components/ui/button";
 import { useTryOn } from "@/components/web/TryOnContext";
 import { LookCard } from "@/components/web/LookCard";
-import { byLikes } from "@/components/web/looks";
+import { rankDiscoverProducts, sharedVirtualLooks, type ProductRanking } from "@/components/web/brand-insights-rules";
 
 export const Route = createFileRoute("/app/insights")({
   head: () => ({
@@ -21,9 +23,7 @@ export const Route = createFileRoute("/app/insights")({
 });
 
 const likesFor = [1240, 860, 1510, 1980, 540, 1120];
-const ranked = products.map((p, i) => ({ ...p, likes: likesFor[i] ?? 500 }));
-const mostTried = [...ranked].sort((a, b) => b.tryOns - a.tryOns).slice(0, 3);
-const mostLiked = [...ranked].sort((a, b) => b.likes - a.likes).slice(0, 3);
+const productSignals = [...products.map((p, i) => ({ id: p.id, tryOns: p.tryOns, likes: likesFor[i] ?? 500 })), { id: "g7", tryOns: 760, likes: 420 }];
 
 const trends = [
   { label: "Soft neutral tones", share: 78, note: "Cream, sand and camel lead feedback" },
@@ -38,39 +38,36 @@ const aiInsights = [
   "Own uploads are mostly vintage outerwear — a signal to explore a heritage trench capsule.",
 ];
 
-function ProductRank({ title, icon: Icon, items, metric }: { title: string; icon: typeof Wand2; items: typeof ranked; metric: "tryOns" | "likes" }) {
-  return (
-    <Panel>
-      <h2 className="flex items-center gap-2 font-serif text-2xl"><Icon className="h-5 w-5 text-gold" />{title}</h2>
-      <ol className="mt-4 space-y-3">
-        {items.map((p, i) => (
-          <li key={p.id} className="flex items-center gap-3">
-            <span className="w-5 font-serif text-xl text-gold">{i + 1}</span>
-            <img src={p.image} alt="" className="h-14 w-14 rounded-xl object-cover" />
-            <div className="min-w-0 flex-1"><p className="truncate font-serif text-lg leading-tight">{p.name}</p><p className="text-[11px] uppercase text-muted-foreground">{p.brand}</p></div>
-            <div className="text-right text-xs text-muted-foreground"><p className="text-sm text-foreground">{p.tryOns.toLocaleString()} try-ons</p><p>{p.likes.toLocaleString()} likes</p></div>
-          </li>
-        ))}
-      </ol>
-      <p className="sr-only">Sorted by {metric}</p>
-    </Panel>
-  );
-}
-
 function Insights() {
   const { looks } = useTryOn();
-  const community = byLikes(looks.filter((look) => look.shared));
+  const [ranking, setRanking] = useState<ProductRanking>("tryOns");
+  const ranked = rankDiscoverProducts(discoverProducts, productSignals, ranking).slice(0, 4);
+  const community = sharedVirtualLooks(looks);
   return (
     <div>
       <PageHeader eyebrow="For brands · Maison Ivoire" title="What shoppers" accent="love" desc="Signals from try-ons, likes and feedback on new pieces." />
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ProductRank title="Most tried on" icon={Wand2} items={mostTried} metric="tryOns" />
-        <ProductRank title="Most liked" icon={Heart} items={mostLiked} metric="likes" />
-      </div>
+      <section aria-label="Discover product rankings">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+          <h2 className="font-serif text-3xl">Most tried on <em className="text-gold">& most liked</em></h2>
+          <div role="group" aria-label="Sort Discover products" className="flex gap-1 rounded-full bg-secondary p-1">
+            <Button variant={ranking === "tryOns" ? "default" : "ghost"} aria-pressed={ranking === "tryOns"} title="Sort by most tried on" onClick={() => setRanking("tryOns")} className="rounded-full text-xs"><Wand2 />Try-ons</Button>
+            <Button variant={ranking === "likes" ? "default" : "ghost"} aria-pressed={ranking === "likes"} title="Sort by most liked" onClick={() => setRanking("likes")} className="rounded-full text-xs"><Heart />Likes</Button>
+          </div>
+        </div>
+        <ol className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+          {ranked.map((product) => <li key={product.id} aria-label={product.name} className="min-w-0 overflow-hidden rounded-lg bg-card shadow-card">
+            <img src={product.image} alt={product.name} loading="lazy" className="aspect-[3/5] w-full object-cover" />
+            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 px-3 py-4 text-xs tabular-nums sm:px-4">
+              <span className="flex items-center gap-1.5" aria-label={`${product.tryOns} try-ons`}><Wand2 className="h-3.5 w-3.5 shrink-0 text-gold" />{product.tryOns.toLocaleString()} <span className="text-muted-foreground">try-ons</span></span>
+              <span className="flex items-center gap-1.5" aria-label={`${product.likes} likes`}><Heart className="h-3.5 w-3.5 shrink-0 text-gold" />{product.likes.toLocaleString()} <span className="text-muted-foreground">likes</span></span>
+            </div>
+          </li>)}
+        </ol>
+      </section>
 
       <section aria-label="Community looks" className="mt-10">
-        <div className="mb-4 flex items-end justify-between gap-3"><h2 className="font-serif text-3xl">Best looks <em className="text-gold">from the community</em></h2><span className="text-xs text-muted-foreground">{community.length} shared · most liked first</span></div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{community.map((look) => <LookCard key={look.id} look={look} />)}</div>
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><h2 className="font-serif text-3xl">Best looks <em className="text-gold">from the community</em></h2><span className="text-xs text-muted-foreground">{community.length} shared · most liked first</span></div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{community.map((look) => <LookCard key={look.id} look={look} />)}</div>
       </section>
 
       <Panel className="mt-10">

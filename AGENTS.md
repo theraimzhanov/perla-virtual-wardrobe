@@ -13,3 +13,4 @@
 - Reuse TryOnExperience for both web and mobile so upload validation, photo/video stages and personal-product feedback rules cannot diverge.
 - Keep generation preview-only with bundled sample photo and video assets until real generation is explicitly requested; uploaded images must never silently be sent to third parties.
 - Keep product-selection and feedback rules in a pure module with focused tests so changes to the intended flow remain verifiable.
+- Keep Discover rankings and shared-look filtering in pure rules, and store media, product/source metadata and likes in TryOnProvider so community and profile cards remain consistent with Try-On results.

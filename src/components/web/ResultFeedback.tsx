@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { questionsFor, type ProductMode } from "./try-on-rules";
 import { cn } from "@/lib/utils";
 
-export function ResultFeedback({ kind, mode = "discover" }: { kind: "photo" | "video"; mode?: ProductMode }) {
+export function ResultFeedback({ kind, mode = "discover", onAnswer }: { kind: "photo" | "video"; mode?: ProductMode; onAnswer?: (question: string, answer: string) => void }) {
   const questions = questionsFor(kind, mode);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -15,7 +15,7 @@ export function ResultFeedback({ kind, mode = "discover" }: { kind: "photo" | "v
         {questions.map((question, index) => (
           <fieldset key={question.id} disabled={submitted}>
             <legend className="mb-2 text-sm">{index + 1}. {question.text}</legend>
-            <div className="flex flex-wrap gap-2">{question.options.map((option) => <Button key={option} size="sm" variant="outline" aria-pressed={answers[question.id] === option} onClick={() => setAnswers((current) => ({ ...current, [question.id]: option }))} className={cn("rounded-full", answers[question.id] === option && "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground")}>{option}</Button>)}</div>
+            <div className="flex flex-wrap gap-2">{question.options.map((option) => <Button key={option} size="sm" variant="outline" aria-pressed={answers[question.id] === option} onClick={() => { setAnswers((current) => ({ ...current, [question.id]: option })); onAnswer?.(question.id, option); }} className={cn("rounded-full", answers[question.id] === option && "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground")}>{option}</Button>)}</div>
           </fieldset>
         ))}
       </div>
