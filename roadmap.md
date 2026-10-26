@@ -17,5 +17,5 @@
 - [x] Verify horizontal rows, shared count, footer links and existing tests.
 
 ## External database setup
-- [ ] Connect the user's separate external database; blocked until an external connection is available. Do not create tables in the existing managed backend.
+- [ ] Connect the user's separate external database; blocked because this Cloud-connected project cannot switch to external Supabase. Requires a new project without Cloud connected through Settings → General → External Supabase. Do not create tables in the existing managed backend.
 - [ ] Create and verify tables for profiles, products, media, looks, collections, likes and feedback after the external connection is established.
