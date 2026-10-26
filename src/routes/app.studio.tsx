@@ -48,7 +48,7 @@ function Studio() {
   };
   const update = (id: string, patch: Partial<Creation>) => setCreations((all) => all.map((c) => c.id === id ? { ...c, ...patch } : c));
   const save = (c: Creation) => {
-    addLook({ id: c.id, title: `${c.style} · ${c.base}`, product: c.base, kind: c.kind, image: c.image, video: c.kind === "video" ? sampleLookVideo : undefined, source: "discover" });
+    addLook({ id: c.id, title: `${c.style} · ${c.base}`, product: c.base, kind: c.kind, image: c.image, ...(c.kind === "video" ? { video: sampleLookVideo } : {}), source: "discover" });
     update(c.id, { saved: true });
     toast.success("Saved to your collection in Profile");
   };
