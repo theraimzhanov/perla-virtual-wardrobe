@@ -39,9 +39,15 @@ function useTryOnState() {
   };
   const likeLook = (id: string) => setLooks((all) => all.map((look) => look.id === id ? toggleLike(look) : look));
   const shareLook = (id: string) => setLooks((all) => all.map((look) => look.id === id ? { ...look, shared: true } : look));
+  const unshareLook = (id: string) => setLooks((all) => all.map((look) => look.id === id ? { ...look, shared: false } : look));
+  const deleteLook = (id: string) => setLooks((all) => all.filter((look) => look.id !== id));
+  const [triedIds, setTriedIds] = useState<string[]>(discoverProducts.slice(0, 2).map((p) => p.id));
+  const markTried = (ids: string[]) => setTriedIds((all) => [...new Set([...ids, ...all])]);
+  const removeTried = (id: string) => setTriedIds((all) => all.filter((item) => item !== id));
+  const triedProducts = triedIds.map((id) => discoverProducts.find((p) => p.id === id)).filter((p): p is DiscoverProduct => !!p);
   const updateLookSource = (ids: string[], source: LookSource) => setLooks((all) => all.map((look) => ids.includes(look.id) ? { ...look, source } : look));
 
-  return { photo, setPhoto, uploadPhoto, uploadProduct, personal, setPersonal, selectedIds, selectProduct, selected, mode, setMode, preparing, setPreparing, removeProduct: (id: string) => setSelectedIds((ids) => ids.filter((item) => item !== id)), looks, addLook, likeLook, shareLook, updateLookSource };
+  return { photo, setPhoto, uploadPhoto, uploadProduct, personal, setPersonal, selectedIds, selectProduct, selected, mode, setMode, preparing, setPreparing, removeProduct: (id: string) => setSelectedIds((ids) => ids.filter((item) => item !== id)), looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, triedProducts, markTried, removeTried };
 }
 
 type TryOnState = ReturnType<typeof useTryOnState>;
