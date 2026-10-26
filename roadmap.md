@@ -12,6 +12,6 @@
 - [x] Verify sharing, liking, video playback and layout; preserve the remaining sections.
 
 ## Horizontal rows and homepage footer
-- [ ] Put both Brand Insights collections in single horizontal rows, remove ranking tabs, and show product and brand names.
-- [ ] Replace the homepage rating with the shared virtual try-on count and add Product, Account and Legal footer sections with the supplied support email.
-- [ ] Verify horizontal rows, shared count, footer links and existing tests.
+- [x] Put both Brand Insights collections in single horizontal rows, remove ranking tabs, and show product and brand names.
+- [x] Replace the homepage rating with the shared virtual try-on count and add Product, Account and Legal footer sections with the supplied support email.
+- [x] Verify horizontal rows, shared count, footer links and existing tests.
