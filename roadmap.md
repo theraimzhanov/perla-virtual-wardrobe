@@ -10,3 +10,8 @@
 - [x] Combine Discover-only product rankings into tall image cards with try-ons and likes.
 - [x] Show shared virtual photos and playable videos with product, creator, likes and upload-source labels.
 - [x] Verify sharing, liking, video playback and layout; preserve the remaining sections.
+
+## Horizontal rows and homepage footer
+- [ ] Put both Brand Insights collections in single horizontal rows, remove ranking tabs, and show product and brand names.
+- [ ] Replace the homepage rating with the shared virtual try-on count and add Product, Account and Legal footer sections with the supplied support email.
+- [ ] Verify horizontal rows, shared count, footer links and existing tests.
