@@ -20,8 +20,7 @@ function AppLayout() {
       <Toaster position="top-center" />
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r px-5 py-6 lg:flex">
         <Link to="/" className="flex items-center gap-3 px-2">
-          <img src={logo.url} alt="PERLA" className="h-11 w-11 rounded-full object-cover object-[50%_25%] scale-125 shadow-card" />
-          <span className="font-serif text-2xl tracking-[0.28em]">PERLA</span>
+          <img src={logo.url} alt="PERLA" className="h-12 w-12 rounded-full object-cover object-[50%_25%] scale-125 shadow-card" />
         </Link>
         <nav className="mt-10 flex flex-1 flex-col gap-1">
           {nav.map((n) => (
