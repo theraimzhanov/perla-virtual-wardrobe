@@ -1,3 +1,4 @@
+import type React from "react";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { discoverProducts, type DiscoverProduct } from "./data";
 import { addSelection, type ProductMode } from "./try-on-rules";
@@ -43,7 +44,10 @@ function useTryOnState() {
 }
 
 type TryOnState = ReturnType<typeof useTryOnState>;
-const TryOnContext = createContext<TryOnState | null>(null);
+const globalKey = "__perlaTryOnContext" as const;
+const store = globalThis as unknown as Record<typeof globalKey, React.Context<TryOnState | null> | undefined>;
+// Reuse one context across hot reloads so the provider and consumers never get out of sync.
+const TryOnContext = (store[globalKey] ??= createContext<TryOnState | null>(null));
 
 export function TryOnProvider({ children }: { children: ReactNode }) {
   const state = useTryOnState();
