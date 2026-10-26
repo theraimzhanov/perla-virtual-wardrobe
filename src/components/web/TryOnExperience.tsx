@@ -36,7 +36,7 @@ async function downloadMedia(url: string, filename: string) {
 }
 
 export function TryOnExperience({ compact = false }: { compact?: boolean }) {
-  const { photo, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource } = useTryOn();
+  const { photo, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource, markTried } = useTryOn();
   const [lookId, setLookId] = useState(0);
   const [photoPhase, setPhotoPhase] = useState<Phase>("idle");
   const [videoPhase, setVideoPhase] = useState<Phase>("idle");
@@ -107,7 +107,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   };
 
   const lookTitle = selected[0]?.name ?? "New look";
-  useEffect(() => { if (photoPhase === "done") addLook({ id: `p${lookId}`, title: lookTitle, product: lookTitle, kind: "photo", image: modelAfter, source: productSource }); }, [photoPhase]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (photoPhase === "done" && mode === "discover") markTried(selectedIds); if (photoPhase === "done") addLook({ id: `p${lookId}`, title: lookTitle, product: lookTitle, kind: "photo", image: modelAfter, source: productSource }); }, [photoPhase]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (videoPhase === "done") addLook({ id: `v${lookId}`, title: lookTitle, product: lookTitle, kind: "video", image: modelAfter, video: sampleLookVideo, source: productSource }); }, [videoPhase]); // eslint-disable-line react-hooks/exhaustive-deps
   const recordSource = (question: string, answer: string) => {
     if (mode !== "personal" || question !== "where") return;
