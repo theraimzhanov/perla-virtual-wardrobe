@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { TryOnProvider } from "@/components/web/TryOnContext";
 
 function NotFoundComponent() {
   return (
@@ -78,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "PERLA — Elegance, Reimagined" },
+      { title: "PERLA — Virtual Fashion" },
       { name: "description", content: "Virtually try on clothes and build outfits with AI." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -119,7 +120,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <TryOnProvider><Outlet /></TryOnProvider>
     </QueryClientProvider>
   );
 }

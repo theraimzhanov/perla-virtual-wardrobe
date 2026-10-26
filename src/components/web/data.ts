@@ -1,4 +1,30 @@
 import { wardrobe } from "@/components/perla/data";
+import hat from "@/assets/g-hat.jpg";
+
+export const discoverCategories = ["Clothes", "Bag", "Hat", "Shoes"] as const;
+export type DiscoverCategory = typeof discoverCategories[number];
+export type DiscoverProduct = {
+  id: string;
+  name: string;
+  brand: string;
+  style: string;
+  image: string;
+  category: DiscoverCategory;
+  source: "discover" | "personal";
+};
+
+export const discoverProducts: DiscoverProduct[] = [
+  ...wardrobe.map((g, i): DiscoverProduct => ({
+    id: g.id,
+    name: g.name,
+    brand: g.brand,
+    style: ["Modern romantic", "Quiet luxury", "City classic", "Evening minimal", "Everyday modern", "Sculptural chic"][i] ?? "Contemporary",
+    image: g.image,
+    category: g.category === "Shoes" ? "Shoes" : g.category === "Accessories" ? "Bag" : "Clothes",
+    source: "discover",
+  })),
+  { id: "g7", name: "Sculpted Wool Bucket", brand: "Forme Studio", style: "Urban sculptural", image: hat, category: "Hat", source: "discover" },
+];
 
 export const products = wardrobe.map((g, i) => ({
   ...g,
