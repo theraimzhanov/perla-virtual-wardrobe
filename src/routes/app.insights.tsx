@@ -3,6 +3,9 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, Res
 import { Sparkles } from "lucide-react";
 import { audience, demandSeries, insights, priceBands, products } from "@/components/web/data";
 import { PageHeader, Panel, Stat, Eyebrow } from "@/components/web/ui";
+import { useTryOn } from "@/components/web/TryOnContext";
+import { LookCard } from "@/components/web/LookCard";
+import { byLikes } from "@/components/web/looks";
 
 export const Route = createFileRoute("/app/insights")({
   head: () => ({
@@ -21,9 +24,15 @@ export const Route = createFileRoute("/app/insights")({
 const pie = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)"];
 
 function Insights() {
+  const { looks } = useTryOn();
+  const community = byLikes(looks.filter((look) => look.shared));
   return (
     <div>
       <PageHeader eyebrow="For brands · Maison Ivoire" title="Demand" accent="intelligence" desc="Real signals from try-ons and 'would buy' feedback across PERLA." />
+      <section aria-label="Community looks" className="mb-8">
+        <div className="mb-4 flex items-end justify-between gap-3"><h2 className="font-serif text-3xl">Best looks <em className="text-gold">from the community</em></h2><span className="text-xs text-muted-foreground">{community.length} shared · most liked first</span></div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{community.map((look) => <LookCard key={look.id} look={look} />)}</div>
+      </section>
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Try-ons this week" value="8,620" delta="+18.4% vs last week" />
         <Stat label="Avg. buy intent" value="61%" delta="+6 pts" />

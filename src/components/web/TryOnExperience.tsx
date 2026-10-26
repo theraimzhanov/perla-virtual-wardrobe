@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { Check, Download, Film, Heart, ImagePlus, RefreshCw, Sparkles, Upload, X } from "lucide-react";
+import { Check, Download, Film, Heart, ImagePlus, RefreshCw, Send, Sparkles, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -35,7 +35,8 @@ async function downloadMedia(url: string, filename: string) {
 }
 
 export function TryOnExperience({ compact = false }: { compact?: boolean }) {
-  const { photo, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing } = useTryOn();
+  const { photo, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks } = useTryOn();
+  const [lookId, setLookId] = useState(0);
   const [photoPhase, setPhotoPhase] = useState<Phase>("idle");
   const [videoPhase, setVideoPhase] = useState<Phase>("idle");
   const [photoDialog, setPhotoDialog] = useState(false);
@@ -100,11 +101,17 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     if (issue === "product") { toast.error("Select a product in Discover or upload your own."); return; }
     setPreparing(false);
     setPhotoPhase("loading");
+    setLookId(Date.now());
     setVideoPhase("idle");
     setLikedPhoto(false);
     setLikedVideo(false);
   };
 
+  const lookTitle = selected[0]?.name ?? "New look";
+  useEffect(() => { if (photoPhase === "done") addLook({ id: `p${lookId}`, title: lookTitle, kind: "photo", image: modelAfter }); }, [photoPhase]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (videoPhase === "done") addLook({ id: `v${lookId}`, title: lookTitle, kind: "video", image: modelAfter }); }, [videoPhase]); // eslint-disable-line react-hooks/exhaustive-deps
+  const isShared = (id: string) => looks.some((look) => look.id === id && look.shared);
+  const ShareButton = ({ id }: { id: string }) => <Button variant="outline" disabled={isShared(id)} onClick={() => { shareLook(id); toast.success("Shared to Brand Insights"); }} className="rounded-full text-xs"><Send />{isShared(id) ? "Shared" : "Share to Brand Insights"}</Button>;
   const busy = photoPhase === "loading" || videoPhase === "loading";
   const hasResult = photoPhase === "done";
   return (
@@ -134,13 +141,13 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
           <div className="mb-3 flex items-center justify-between"><h2 className="font-serif text-2xl">Your selection</h2><span className="text-xs text-muted-foreground">02</span></div>
           <div className="mb-5 flex w-full rounded-full bg-secondary p-1" role="group" aria-label="Product source">
             <Button variant="ghost" disabled={busy} aria-pressed={mode === "discover"} onClick={() => setMode("discover")} className={cn("h-auto flex-1 rounded-full px-3 py-2 text-xs", mode === "discover" && "bg-card shadow-card hover:bg-card")}>From Discover {selectedIds.length > 0 && <span>· {selectedIds.length}</span>}</Button>
-            <Button variant="ghost" disabled={busy} aria-pressed={mode === "personal"} onClick={() => setMode("personal")} className={cn("h-auto flex-1 rounded-full px-3 py-2 text-xs", mode === "personal" && "bg-card shadow-card hover:bg-card")}>My product</Button>
+            <Button variant="ghost" disabled={busy} aria-pressed={mode === "personal"} onClick={() => setMode("personal")} className={cn("h-auto flex-1 rounded-full px-3 py-2 text-xs", mode === "personal" && "bg-card shadow-card hover:bg-card")}>Upload from local</Button>
           </div>
           <div className="space-y-3">
             {selected.map((product) => <div key={product.id} className="flex min-w-0 items-center gap-3 rounded-xl bg-card p-3 shadow-card"><img src={product.image} alt={product.name} className="h-20 w-20 shrink-0 rounded-lg object-cover" /><div className="min-w-0 flex-1"><p className="text-[10px] uppercase text-muted-foreground">{product.brand}</p><p className="break-words font-serif text-xl leading-tight">{product.name}</p><p className="mt-1 text-xs text-gold">{product.style}</p></div><Button size="icon" variant="ghost" title={`Remove ${product.name}`} aria-label={`Remove ${product.name}`} disabled={busy} className="shrink-0 rounded-full" onClick={() => mode === "personal" ? setPersonal(null) : removeProduct(product.id)}><X /></Button></div>)}
             {selected.length === 0 && (mode === "discover" ? <div className="border-y py-8 text-center"><Sparkles className="mx-auto h-6 w-6 text-gold" /><p className="mt-3 font-serif text-xl">Something new awaits</p><Button asChild variant="link" className="mt-2"><Link to="/app">Explore Discover</Link></Button></div> : <div className="grid min-h-48 place-items-center rounded-xl border border-dashed bg-secondary/50"><Button variant="ghost" onClick={() => productInput.current?.click()}><ImagePlus />Upload product photo</Button></div>)}
           </div>
-          {(mode === "discover" || personal) && <Button variant="outline" disabled={busy} onClick={() => productInput.current?.click()} className="mt-4 w-full rounded-full border-dashed"><Upload />{personal && mode === "personal" ? "Change product photo" : "Upload my own product"}</Button>}
+          {mode === "personal" && personal && <Button variant="outline" disabled={busy} onClick={() => productInput.current?.click()} className="mt-4 w-full rounded-full border-dashed"><Upload />Change product photo</Button>}
           <Button disabled={busy || preparing} onClick={generate} className="mt-6 h-auto w-full whitespace-normal rounded-full px-5 py-4 shadow-soft"><Sparkles />{photoPhase === "loading" ? "Creating your look…" : hasResult ? "Generate again" : "Generate try-on"}</Button>
           <div className="mt-7 flex items-center gap-3 border-t pt-5"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold-soft"><Film className="h-4 w-4 text-gold" /></div><div><p className="font-serif text-lg">Then, see it in motion</p><p className="text-xs text-muted-foreground">Photo → Video</p></div></div>
         </section>
@@ -151,7 +158,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
         {preparing || photoPhase === "loading" ? <GenerationSkeleton kind={preparing ? "prepare" : "photo"} className="mx-auto max-w-md" /> : <>
           <div className={cn("grid items-start gap-7", !compact && "sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10")}>
             <div className="min-w-0">{compare && photo ? <CompareSlider before={photo} after={modelAfter} /> : <img src={modelAfter} alt="Sample generated try-on look" className="aspect-[3/4] w-full rounded-2xl object-cover" />}
-              <div className="mt-3 flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Like picture" title="Like picture" aria-pressed={likedPhoto} onClick={() => setLikedPhoto((value) => !value)} className={cn("rounded-full", likedPhoto && "border-gold text-gold")}><Heart className={likedPhoto ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download picture" title="Download picture" onClick={() => downloadMedia(modelAfter, "perla-try-on.jpg")} className="rounded-full"><Download /></Button><Button variant="outline" aria-pressed={compare} onClick={() => setCompare((value) => !value)} className="ml-auto rounded-full text-xs">{compare ? "View picture" : "Compare"}</Button></div>
+              <div className="mt-3 flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Like picture" title="Like picture" aria-pressed={likedPhoto} onClick={() => setLikedPhoto((value) => !value)} className={cn("rounded-full", likedPhoto && "border-gold text-gold")}><Heart className={likedPhoto ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download picture" title="Download picture" onClick={() => downloadMedia(modelAfter, "perla-try-on.jpg")} className="rounded-full"><Download /></Button><Button variant="outline" aria-pressed={compare} onClick={() => setCompare((value) => !value)} className="ml-auto rounded-full text-xs">{compare ? "View picture" : "Compare"}</Button></div><div className="mt-2"><ShareButton id={`p${lookId}`} /></div>
             </div>
             <div className="min-w-0"><p className="text-xs uppercase text-gold">Photo complete <Check className="ml-1 inline h-3 w-3" /></p><h3 className="mt-2 font-serif text-3xl">A different point of view.</h3>{showFeedback(mode) && <ResultFeedback key={`photo:${selectionKey}`} kind="photo" />}<Button disabled={videoPhase === "loading"} onClick={() => { setVideoError(false); setVideoPhase("loading"); }} className="mt-7 h-auto w-full rounded-full py-4"><Film />{videoPhase === "loading" ? "Creating your video…" : videoPhase === "done" ? "Generate video again" : "Generate video"}</Button></div>
           </div>
@@ -159,7 +166,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
       </section>}
 
       {videoPhase !== "idle" && <section ref={videoRef} aria-label="Video result" className="mt-12 scroll-mt-24 border-t pt-7"><div className="mb-5 flex items-center justify-between gap-4"><h2 className="font-serif text-3xl">Your look, in motion</h2><span className="rounded-full border px-3 py-1 text-[10px] uppercase text-muted-foreground">Sample preview</span></div>{videoPhase === "loading" ? <GenerationSkeleton kind="video" className="mx-auto max-w-md" /> : <div className={cn("grid items-start gap-7", !compact && "sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10")}>
-        <div><div className="overflow-hidden rounded-2xl bg-secondary">{videoError ? <div className="grid aspect-[3/4] place-items-center p-6 text-center"><div><p className="text-sm">Video couldn't load.</p><Button variant="outline" className="mt-3" onClick={() => setVideoError(false)}><RefreshCw />Retry video</Button></div></div> : <video poster={modelAfter} controls playsInline loop preload="auto" onError={() => setVideoError(true)} className="aspect-[3/4] w-full object-contain" aria-label="Generated sample try-on video"><source src={demoVideoWebm.url} type="video/webm" /><source src={demoVideo.url} type="video/mp4" /></video>}</div><div className="mt-3 flex gap-2"><Button size="icon" variant="outline" aria-label="Like video" title="Like video" aria-pressed={likedVideo} onClick={() => setLikedVideo((value) => !value)} className={cn("rounded-full", likedVideo && "border-gold text-gold")}><Heart className={likedVideo ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download video" title="Download video" onClick={() => downloadMedia(demoVideo.url, "perla-try-on.mp4")} className="rounded-full"><Download /></Button></div></div>
+        <div><div className="overflow-hidden rounded-2xl bg-secondary">{videoError ? <div className="grid aspect-[3/4] place-items-center p-6 text-center"><div><p className="text-sm">Video couldn't load.</p><Button variant="outline" className="mt-3" onClick={() => setVideoError(false)}><RefreshCw />Retry video</Button></div></div> : <video poster={modelAfter} controls playsInline loop preload="auto" onError={() => setVideoError(true)} className="aspect-[3/4] w-full object-contain" aria-label="Generated sample try-on video"><source src={demoVideoWebm.url} type="video/webm" /><source src={demoVideo.url} type="video/mp4" /></video>}</div><div className="mt-3 flex gap-2"><Button size="icon" variant="outline" aria-label="Like video" title="Like video" aria-pressed={likedVideo} onClick={() => setLikedVideo((value) => !value)} className={cn("rounded-full", likedVideo && "border-gold text-gold")}><Heart className={likedVideo ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download video" title="Download video" onClick={() => downloadMedia(demoVideo.url, "perla-try-on.mp4")} className="rounded-full"><Download /></Button><ShareButton id={`v${lookId}`} /></div></div>
         <div><p className="text-xs uppercase text-gold">Video complete <Check className="ml-1 inline h-3 w-3" /></p><h3 className="mt-2 font-serif text-3xl">Every little movement.</h3>{showFeedback(mode) && <ResultFeedback key={`video:${selectionKey}`} kind="video" />}</div>
       </div>}</section>}
 

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Star, ArrowUpRight, Shirt, ShoppingBag, Footprints, Circle } from "lucide-react";
+import { Sparkles, ArrowUpRight, Shirt, ShoppingBag, Footprints, Circle } from "lucide-react";
 import { useState } from "react";
 import { discoverCategories, discoverProducts, type DiscoverCategory } from "@/components/web/data";
 import { PageHeader, Eyebrow } from "@/components/web/ui";
@@ -37,7 +37,6 @@ function Discover() {
           <h2 className="mt-3 font-serif text-4xl leading-tight">The art of <em className="text-gold">less.</em></h2>
           <p className="mt-3 text-sm text-muted-foreground">Soft silk. Sharp tailoring. A sculptural finish.</p>
           <p className="mt-4 text-[11px] uppercase text-gold">Parisian Neutrals · 03 pieces</p>
-          <Button variant="link" className="mt-3 px-0" onClick={() => { edit.forEach((product) => selectProduct(product.id)); navigate({ to: "/app/try-on" }); }}>Try the edit <ArrowUpRight /></Button>
         </div>
         <div className="grid grid-cols-3 items-center gap-2 sm:gap-4">{edit.map((product, index) => <div key={product.id} className={cn("min-w-0", index === 1 && "pt-8")}><img src={product.image} alt={product.name} className="aspect-[3/4] w-full rounded-lg object-cover" /><p className="mt-2 text-center text-[10px] text-muted-foreground">{product.name}</p></div>)}</div>
       </section>
@@ -48,9 +47,9 @@ function Discover() {
             <div className="relative overflow-hidden bg-muted">
               <img src={product.image} alt={product.name} loading="lazy" className="aspect-[4/5] w-full object-cover transition duration-500 motion-safe:group-hover:scale-105" />
               <span className="absolute left-3 top-3 rounded-full bg-background/90 px-3 py-1 text-[10px] uppercase">New form</span>
-              <Button variant="secondary" size="icon" aria-label={`Try on ${product.name}`} title={`Try on ${product.name}`} onClick={() => { selectProduct(product.id); navigate({ to: "/app/try-on" }); }} className="absolute right-3 top-3 h-10 w-10 rounded-full bg-background/95 text-gold shadow-card"><Star className={selectedIds.includes(product.id) ? "fill-current" : ""} /></Button>
+              <Button variant="secondary" size="icon" aria-label={`Try on ${product.name}`} title={`Try on ${product.name}`} onClick={() => { selectProduct(product.id); navigate({ to: "/app/try-on" }); }} className={cn("absolute right-3 top-3 h-14 w-14 rounded-full shadow-card [&_svg]:size-6", selectedIds.includes(product.id) ? "bg-primary text-gold hover:bg-primary" : "bg-background/95 text-gold")}><Sparkles /></Button>
             </div>
-            <div className="p-5"><p className="text-[10px] uppercase text-muted-foreground">{product.brand}</p><h2 className="mt-1 font-serif text-2xl">{product.name}</h2><div className="mt-3 flex items-center justify-between gap-2 border-t pt-3"><p className="text-xs text-gold">{product.style}</p><ArrowUpRight className="h-4 w-4 text-muted-foreground" /></div></div>
+            <div className="p-5"><p className="text-[10px] uppercase text-muted-foreground">{product.brand}</p><h2 className="mt-1 font-serif text-2xl">{product.name}</h2><div className="mt-3 border-t pt-3"><p className="text-xs text-gold">{product.style}</p></div></div>
           </article>
         ))}
       </div>

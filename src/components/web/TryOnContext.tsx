@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { discoverProducts, type DiscoverProduct } from "./data";
 import { addSelection, type ProductMode } from "./try-on-rules";
+import { seedLooks, toggleLike, type Look } from "./looks";
 
 function useTryOnState() {
   const [photo, setPhoto] = useState<string | null>(null);
@@ -31,7 +32,14 @@ function useTryOnState() {
     ? personal ? [personal] : []
     : discoverProducts.filter((product) => selectedIds.includes(product.id));
 
-  return { photo, setPhoto, uploadPhoto, uploadProduct, personal, setPersonal, selectedIds, selectProduct, selected, mode, setMode, preparing, setPreparing, removeProduct: (id: string) => setSelectedIds((ids) => ids.filter((item) => item !== id)) };
+  const [looks, setLooks] = useState<Look[]>(seedLooks);
+  const addLook = (look: Omit<Look, "likes" | "liked" | "shared" | "mine" | "author">) => {
+    setLooks((all) => all.some((item) => item.id === look.id) ? all : [{ ...look, likes: 0, liked: false, shared: false, mine: true, author: "You" }, ...all]);
+  };
+  const likeLook = (id: string) => setLooks((all) => all.map((look) => look.id === id ? toggleLike(look) : look));
+  const shareLook = (id: string) => setLooks((all) => all.map((look) => look.id === id ? { ...look, shared: true } : look));
+
+  return { photo, setPhoto, uploadPhoto, uploadProduct, personal, setPersonal, selectedIds, selectProduct, selected, mode, setMode, preparing, setPreparing, removeProduct: (id: string) => setSelectedIds((ids) => ids.filter((item) => item !== id)), looks, addLook, likeLook, shareLook };
 }
 
 type TryOnState = ReturnType<typeof useTryOnState>;
