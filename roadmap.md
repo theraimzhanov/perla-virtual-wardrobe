@@ -7,6 +7,6 @@
 - [x] Verify selection, uploads, both result stages, downloads and small-screen layout.
 
 ## Brand Insights refinement
-- [ ] Combine Discover-only product rankings into tall image cards with try-ons and likes.
-- [ ] Show shared virtual photos and playable videos with product, creator, likes and upload-source labels.
-- [ ] Verify sharing, liking, video playback and layout; preserve the remaining sections.
+- [x] Combine Discover-only product rankings into tall image cards with try-ons and likes.
+- [x] Show shared virtual photos and playable videos with product, creator, likes and upload-source labels.
+- [x] Verify sharing, liking, video playback and layout; preserve the remaining sections.
