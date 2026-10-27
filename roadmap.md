@@ -1,8 +1,8 @@
 # Perla update
 
 ## Matching Try-On photo frames
-- [ ] Match input, output and comparison frame dimensions while keeping full photos visible.
-- [ ] Verify frame dimensions stay unchanged when comparison is toggled at wide and narrow widths.
+- [x] Match input, output and comparison frame dimensions while keeping full photos visible.
+- [x] Verify unchanged frame dimensions and working comparison slider at 1280px, 681px and 390px widths; no browser errors or horizontal overflow. Used local photo fixtures because external Supabase authenticated checks remain unavailable.
 
 - [x] Redesign Discover with four product categories, product collage and star-to-Try-On selection.
 - [x] Add photo/product uploads, animated loading, photo results and three-question feedback.
