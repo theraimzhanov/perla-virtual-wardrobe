@@ -24,5 +24,5 @@
 ## Photo and product input storage
 - [x] Approve private user-photo storage and account-linked product-image records; uploaded product category defaults to unknown.
 - [x] Create the required Supabase tables and private upload bucket with owner-only access.
-- [ ] Save uploads and Discover selections through the shared Try-On flow and restore saved inputs after reload.
+- [x] Save uploads and Discover selections through the shared Try-On flow and restore saved inputs after reload.
 - [ ] Verify saved photos, product metadata, failure handling and owner-only access.
