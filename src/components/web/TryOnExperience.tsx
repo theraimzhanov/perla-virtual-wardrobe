@@ -15,6 +15,9 @@ import { generationIssue, lookSource, showFeedback } from "./try-on-rules";
 import { sampleLookVideo, sourceFromFeedback, type LookSource } from "./looks";
 import { cn } from "@/lib/utils";
 import { validateImage } from "./upload-rules";
+import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+import { createGenerationJob } from "./generation.functions";
 
 type Phase = "idle" | "loading" | "done";
 
@@ -39,6 +42,9 @@ async function downloadMedia(url: string, filename: string) {
 export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   const { photo, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource, markTried, savingInputs, inputError, retryInputs, signedIn } = useTryOn();
   const [lookId, setLookId] = useState(0);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [resultImage, setResultImage] = useState<string | null>(null);
+  const startJob = useServerFn(createGenerationJob);
   const [photoPhase, setPhotoPhase] = useState<Phase>("idle");
   const [videoPhase, setVideoPhase] = useState<Phase>("idle");
   const [photoDialog, setPhotoDialog] = useState(false);
@@ -103,7 +109,34 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     setPhotoPhase("loading");
     setLookId(Date.now());
     setVideoPhase("idle");
+    setResultImage(null);
+    setJobId(null);
+    if (!signedIn) return;
+    void (async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (!data.user) return;
+        const job = await startJob({ data: { expectedOwner: data.user.id } });
+        setJobId(job.jobId);
+      } catch (cause) {
+        toast.error(cause instanceof Error ? cause.message : "Couldn't start your try-on.");
+      }
+    })();
   };
+
+  // Listen for n8n writing the finished image back to this job.
+  useEffect(() => {
+    if (!jobId) return;
+    const channel = supabase
+      .channel(`job-${jobId}-${Math.random().toString(36).slice(2)}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "generation_jobs", filter: `id=eq.${jobId}` }, (payload) => {
+        const row = payload.new as { status: string; result_image_url: string | null; error_message: string | null };
+        if (row.status === "completed" && row.result_image_url) { setResultImage(row.result_image_url); setPhotoPhase("done"); }
+        if (row.status === "failed") toast.error(row.error_message ?? "Try-on generation failed.");
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [jobId]);
 
   const lookTitle = selected[0]?.name ?? "New look";
   useEffect(() => { if (photoPhase === "done" && mode === "discover") markTried(selectedIds); if (photoPhase === "done") addLook({ id: `p${lookId}`, title: lookTitle, product: lookTitle, kind: "photo", image: modelAfter, source: productSource }); }, [photoPhase]); // eslint-disable-line react-hooks/exhaustive-deps
