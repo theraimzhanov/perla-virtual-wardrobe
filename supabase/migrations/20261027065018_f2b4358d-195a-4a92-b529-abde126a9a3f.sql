@@ -1,0 +1,1 @@
+INSERT INTO public.generation_jobs (user_id, kind, status, category, photo_id, product_id, person_image_url, item_image_url, product_name, brand_name) SELECT user_id, 'photo', 'pending', category, photo_id, product_id, person_image_url, item_image_url, product_name, brand_name FROM public.generation_jobs WHERE id = 'cf4c70d7-61a0-4c04-b307-4a4fa5eb6fc8';
