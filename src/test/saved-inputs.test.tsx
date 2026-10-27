@@ -52,6 +52,28 @@ describe("Account-scoped saved Try-On inputs", () => {
     expect(result.current.inputError).toContain("Couldn't upload");
     expect(mocks.persist).not.toHaveBeenCalled();
   });
+  it("saves a photo and reads it back when Try-On reopens", async () => {
+    const first = renderHook(() => useSavedTryOnInputs(owner, true));
+    await waitFor(() => expect(first.result.current.savingInputs).toBe(false));
+    await act(async () => { await first.result.current.uploadPhoto(new File(["image"], "selfie.png", { type: "image/png" })); });
+    const metadata = mocks.register.mock.calls[0]?.[0].data;
+    const savedSelection = mocks.persist.mock.calls[0]?.[0].data;
+    expect(savedSelection.photoId).toBe(metadata.id);
+    expect(metadata.storagePath).toContain(`${owner}/photos/`);
+    first.unmount();
+    mocks.load.mockResolvedValue({ selection: savedSelection, photo: { id: metadata.id, storage_path: metadata.storagePath }, products: [] });
+    const second = renderHook(() => useSavedTryOnInputs(owner, true));
+    await waitFor(() => expect(second.result.current.photoId).toBe(metadata.id));
+    expect(second.result.current.photo).toBe(`https://storage.example/${metadata.storagePath}`);
+  });
+  it("blocks new inputs while saved selections are still loading", async () => {
+    let complete: ((value: unknown) => void) | undefined;
+    mocks.load.mockImplementationOnce(() => new Promise((resolve) => { complete = resolve; }));
+    const { result } = renderHook(() => useSavedTryOnInputs(owner, true));
+    expect(result.current.savingInputs).toBe(true);
+    await act(async () => { complete?.({ selection: { ...selection }, photo: null, products: [] }); });
+    await waitFor(() => expect(result.current.savingInputs).toBe(false));
+  });
   it("removes the current photo reference without deleting its saved history", async () => {
     mocks.load.mockResolvedValue({ selection: { ...selection, photoId }, photo: { id: photoId, storage_path: `${owner}/photos/existing.png` }, products: [] });
     const { result } = renderHook(() => useSavedTryOnInputs(owner, true));

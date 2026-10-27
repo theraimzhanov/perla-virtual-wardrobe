@@ -19,10 +19,11 @@
 ## External database setup
 - [x] Connect the user's separate external database (external Supabase connected and rebound).
 - [x] Create `products` table (45 seeded products with real photo URLs) and load Discover from it via a public server function, with a working search bar.
-- [ ] Create and verify tables for media, looks, collections, likes and feedback (profiles table already exists).
+- Deferred: generated looks, collections, likes and feedback tables remain outside the current input-saving scope.
 
 ## Photo and product input storage
 - [x] Approve private user-photo storage and account-linked product-image records; uploaded product category defaults to unknown.
 - [x] Create the required Supabase tables and private upload bucket with owner-only access.
 - [x] Save uploads and Discover selections through the shared Try-On flow and restore saved inputs after reload.
-- [ ] Verify saved photos, product metadata, failure handling and owner-only access.
+- [x] Verify saved-input restoration and failures with focused tests, and owner-only table/storage access with database checks.
+- [ ] Verify an actual signed-in upload and reload in the UI — blocked by unavailable authenticated testing for external Supabase.
