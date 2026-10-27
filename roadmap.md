@@ -20,3 +20,9 @@
 - [x] Connect the user's separate external database (external Supabase connected and rebound).
 - [x] Create `products` table (45 seeded products with real photo URLs) and load Discover from it via a public server function, with a working search bar.
 - [ ] Create and verify tables for media, looks, collections, likes and feedback (profiles table already exists).
+
+## Photo and product input storage
+- [ ] Approve private user-photo storage and account-linked product-image records; uploaded product category defaults to unknown.
+- [ ] Create the required Supabase tables and private upload bucket with owner-only access.
+- [ ] Save uploads and Discover selections through the shared Try-On flow and restore saved inputs after reload.
+- [ ] Verify saved photos, product metadata, failure handling and owner-only access.
