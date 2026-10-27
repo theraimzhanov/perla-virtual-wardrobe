@@ -12,6 +12,7 @@ function useTryOnState() {
   const [mode, setMode] = useState<ProductMode>("discover");
   const [preparing, setPreparing] = useState(false);
   const [catalog, setCatalog] = useState<DiscoverProduct[]>(discoverProducts);
+  const [query, setQuery] = useState("");
   const objectUrls = useRef<string[]>([]);
 
   useEffect(() => () => objectUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
@@ -57,7 +58,7 @@ function useTryOnState() {
   const triedProducts = triedIds.map((id) => catalog.find((p) => p.id === id)).filter((p): p is DiscoverProduct => !!p);
   const updateLookSource = (ids: string[], source: LookSource) => setLooks((all) => all.map((look) => ids.includes(look.id) ? { ...look, source } : look));
 
-  return { photo, setPhoto, uploadPhoto, uploadProduct, personal, setPersonal, selectedIds, selectProduct, selected, mode, setMode, preparing, setPreparing, removeProduct: (id: string) => setSelectedIds((ids) => ids.filter((item) => item !== id)), looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, triedProducts, markTried, removeTried, catalog };
+  return { photo, setPhoto, uploadPhoto, uploadProduct, personal, setPersonal, selectedIds, selectProduct, selected, mode, setMode, preparing, setPreparing, removeProduct: (id: string) => setSelectedIds((ids) => ids.filter((item) => item !== id)), looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, triedProducts, markTried, removeTried, catalog, query, setQuery };
 }
 
 type TryOnState = ReturnType<typeof useTryOnState>;
