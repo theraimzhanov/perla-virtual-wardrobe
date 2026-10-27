@@ -1,10 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTryOn } from "@/components/web/TryOnContext";
 import { LookCard } from "@/components/web/LookCard";
 import { byLikes } from "@/components/web/looks";
 import { PageHeader, Panel, Stat } from "@/components/web/ui";
 import { Heart } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/app/profile")({
   head: () => ({
@@ -22,14 +27,51 @@ export const Route = createFileRoute("/_authenticated/app/profile")({
 
 const prefs = ["Minimal", "Neutrals", "Tailored", "Silk", "Parisian"];
 
+type Account = { name: string; avatarUrl: string | null; email: string | null };
+
 function Profile() {
   const { looks, triedProducts, removeTried } = useTryOn();
+  const nav = useNavigate();
+  const queryClient = useQueryClient();
+  const [account, setAccount] = useState<Account | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!alive || !data.user) return;
+      const meta = (data.user.user_metadata ?? {}) as Record<string, string | undefined>;
+      let name = meta.full_name || meta.name || meta.display_name || data.user.email?.split("@")[0] || "You";
+      let avatarUrl = meta.avatar_url ?? null;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name, avatar_url, email")
+        .eq("id", data.user.id)
+        .single();
+      if (profile) {
+        name = profile.display_name || name;
+        avatarUrl = profile.avatar_url || avatarUrl;
+      }
+      if (alive) setAccount({ name, avatarUrl, email: data.user.email ?? null });
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    nav({ to: "/login", replace: true });
+  }
+
+  const [firstName, ...restName] = (account?.name ?? "").split(" ");
   return (
     <div>
-      <PageHeader eyebrow="Member since Oct 2026" title="Nursultan" accent="Raimzhanov" />
+      <PageHeader eyebrow={account?.email ?? "Member"} title={firstName || "You"} accent={restName.join(" ")} />
       <div className="grid gap-6 xl:grid-cols-3">
         <Panel className="xl:col-span-1">
-          <div className="grid h-20 w-20 place-items-center rounded-full bg-gold-gradient font-serif text-3xl text-primary-foreground">NR</div>
+          {account?.avatarUrl ? <img src={account.avatarUrl} alt="" className="h-20 w-20 rounded-full object-cover" /> : <div className="grid h-20 w-20 place-items-center rounded-full bg-gold-gradient font-serif text-3xl text-primary-foreground">{(account?.name ?? "P").split(/\s+/).map((part) => part[0]?.toUpperCase() ?? "").join("").slice(0, 2) || "P"}</div>}
           <p className="mt-4 font-serif text-2xl">Style DNA</p>
           <p className="text-sm text-muted-foreground">Quiet luxury with a Parisian edge.</p>
           <div className="mt-4 flex flex-wrap gap-2">{prefs.map((p) => <span key={p} className="rounded-full bg-secondary px-3 py-1 text-sm">{p}</span>)}</div>
@@ -38,6 +80,7 @@ function Profile() {
               <label key={s} className="flex items-center justify-between">{s}<Switch defaultChecked={i < 2} /></label>
             ))}
           </div>
+          <Button variant="outline" className="mt-6 w-full rounded-full" onClick={handleSignOut}>Sign out</Button>
         </Panel>
         <div className="space-y-6 xl:col-span-2">
           <div className="grid gap-6 sm:grid-cols-3">
