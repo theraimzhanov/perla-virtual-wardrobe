@@ -1,5 +1,7 @@
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { Bell, Compass, LayoutDashboard, Sparkles, User, Wand2, Search, Smartphone } from "lucide-react";
 import logo from "@/assets/perla-emblem.svg.asset.json";
 import { Button } from "@/components/ui/button";
@@ -16,6 +18,22 @@ const nav = [
 
 function AppLayout() {
   const isDiscover = useLocation({ select: (l) => l.pathname.replace(/\/$/, "") === "/app" });
+  const [session, setSession] = useState<{ initials: string; name: string } | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!alive || !data.user) return;
+      const meta = (data.user.user_metadata ?? {}) as Record<string, string | undefined>;
+      const name = meta.full_name || meta.name || meta.display_name || data.user.email?.split("@")[0] || "You";
+      const initials = name.split(/\s+/).map((part) => part[0]?.toUpperCase() ?? "").join("").slice(0, 2) || "P";
+      setSession({ initials, name });
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   return (
     <div className="flex min-h-screen bg-background">
       <Toaster position="top-center" />
@@ -48,7 +66,11 @@ function AppLayout() {
             <input placeholder="Search pieces, brands, styles…" className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
           </div> : <div className="flex-1" />}
           <Button size="icon" variant="ghost" className="hidden h-10 w-10 shrink-0 rounded-full bg-card shadow-card sm:inline-flex" aria-label="Notifications" title="Notifications"><Bell className="h-4 w-4" /></Button>
-          <Link to="/app/profile" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold-gradient text-sm font-semibold text-primary-foreground">NR</Link>
+          {session ? (
+            <Link to="/app/profile" title={session.name} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold-gradient text-sm font-semibold text-primary-foreground">{session.initials}</Link>
+          ) : (
+            <Link to="/login" className="rounded-full bg-primary px-4 py-2 text-xs uppercase tracking-wide text-primary-foreground">Sign in</Link>
+          )}
         </header>
         <nav className="no-scrollbar flex gap-2 overflow-x-auto border-b px-6 py-3 lg:hidden">
           {nav.map((n) => (
