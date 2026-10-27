@@ -12,14 +12,14 @@ export function CompareSlider({ before, after }: { before: string; after: string
   return (
     <div
       ref={ref}
-      className="relative w-full touch-none select-none overflow-hidden rounded-2xl bg-muted"
+      className="relative aspect-[3/4] w-full touch-none select-none overflow-hidden rounded-2xl bg-muted"
       onPointerDown={(e) => {
         e.currentTarget.setPointerCapture(e.pointerId);
         move(e.clientX);
       }}
       onPointerMove={(e) => e.buttons && move(e.clientX)}
     >
-      <img src={after} alt="After" className="block h-auto w-full" draggable={false} />
+      <img src={after} alt="After" className="h-full w-full object-contain" draggable={false} />
       <div className="absolute inset-0 overflow-hidden bg-muted" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
         <img src={before} alt="Before" className="h-full w-full object-contain" draggable={false} />
       </div>
