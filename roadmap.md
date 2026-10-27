@@ -1,5 +1,9 @@
 # Perla update
 
+## Matching Try-On photo frames
+- [ ] Match input, output and comparison frame dimensions while keeping full photos visible.
+- [ ] Verify frame dimensions stay unchanged when comparison is toggled at wide and narrow widths.
+
 - [x] Redesign Discover with four product categories, product collage and star-to-Try-On selection.
 - [x] Add photo/product uploads, animated loading, photo results and three-question feedback.
 - [x] Add video preview, loading, follow-up questions, likes and downloads.
