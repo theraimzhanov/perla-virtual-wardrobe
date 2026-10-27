@@ -32,4 +32,5 @@
 - [x] Correct the existing workflow's trigger, category detection, polling and Supabase result saving.
 - [x] Validate and test both Discover and unknown-category paths without publishing or spending generation credits.
 - [x] Publish the repaired n8n workflow after user approval and point Supabase's webhook at its production address.
-- [ ] Create `generated-looks` and verify real generation — blocked by workspace policy rejecting public buckets; authenticated app testing is unavailable for external Supabase.
+- [x] Create public `generated-looks` with read-only public access and verify real generation — Supabase INSERT triggered production n8n, Perfect Corp generated Ivory Wrap Dress, n8n saved the JPEG, and the job completed; stored image loaded successfully.
+- [ ] Verify a generated result appears in the signed-in Try-On UI — authenticated testing is unavailable for external Supabase; user must run Generate in their signed-in preview.
