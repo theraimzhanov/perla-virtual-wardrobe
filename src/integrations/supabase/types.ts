@@ -71,6 +71,168 @@ export type Database = {
         }
         Relationships: []
       }
+      try_on_inputs: {
+        Row: {
+          created_at: string
+          personal_product_id: string | null
+          photo_id: string | null
+          product_mode: string
+          selected_product_ids: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          personal_product_id?: string | null
+          photo_id?: string | null
+          product_mode?: string
+          selected_product_ids?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          personal_product_id?: string | null
+          photo_id?: string | null
+          product_mode?: string
+          selected_product_ids?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "try_on_inputs_personal_product_id_user_id_fkey"
+            columns: ["personal_product_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "try_on_products"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "try_on_inputs_photo_id_user_id_fkey"
+            columns: ["photo_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "user_photos"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "try_on_inputs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      try_on_products: {
+        Row: {
+          brand: string | null
+          catalog_product_id: string | null
+          category: string
+          created_at: string
+          file_size: number | null
+          id: string
+          image_url: string | null
+          mime_type: string | null
+          name: string
+          original_filename: string | null
+          source: string
+          storage_path: string | null
+          style: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand?: string | null
+          catalog_product_id?: string | null
+          category?: string
+          created_at?: string
+          file_size?: number | null
+          id?: string
+          image_url?: string | null
+          mime_type?: string | null
+          name: string
+          original_filename?: string | null
+          source: string
+          storage_path?: string | null
+          style?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand?: string | null
+          catalog_product_id?: string | null
+          category?: string
+          created_at?: string
+          file_size?: number | null
+          id?: string
+          image_url?: string | null
+          mime_type?: string | null
+          name?: string
+          original_filename?: string | null
+          source?: string
+          storage_path?: string | null
+          style?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "try_on_products_catalog_product_id_fkey"
+            columns: ["catalog_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "try_on_products_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_photos: {
+        Row: {
+          created_at: string
+          file_size: number
+          id: string
+          mime_type: string
+          original_filename: string
+          storage_path: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_size: number
+          id?: string
+          mime_type: string
+          original_filename: string
+          storage_path: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_size?: number
+          id?: string
+          mime_type?: string
+          original_filename?: string
+          storage_path?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_photos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
