@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useOutletContext } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Sparkles, ArrowUpRight, Shirt, ShoppingBag, Footprints, Circle } from "lucide-react";
 import { useState } from "react";
 import { discoverCategories, discoverProducts, type DiscoverCategory } from "@/components/web/data";
@@ -23,8 +23,7 @@ export const Route = createFileRoute("/_authenticated/app/")({
 
 function Discover() {
   const [cat, setCat] = useState<DiscoverCategory>("Clothes");
-  const { selectedIds, selectProduct, catalog } = useTryOn();
-  const { query } = useOutletContext<{ query: string }>();
+  const { selectedIds, selectProduct, catalog, query } = useTryOn();
   const navigate = useNavigate();
   const term = query.trim().toLowerCase();
   const list = catalog.filter((product) =>

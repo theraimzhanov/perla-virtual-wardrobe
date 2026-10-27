@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Bell, Compass, LayoutDashboard, Sparkles, User, Wand2, Search, Smartphone } from "lucide-react";
 import logo from "@/assets/perla-emblem.svg.asset.json";
 import { Button } from "@/components/ui/button";
+import { useTryOn } from "@/components/web/TryOnContext";
 
 export const Route = createFileRoute("/_authenticated/app")({ component: AppLayout });
 
@@ -19,7 +20,7 @@ const nav = [
 function AppLayout() {
   const isDiscover = useLocation({ select: (l) => l.pathname.replace(/\/$/, "") === "/app" });
   const [session, setSession] = useState<{ initials: string; name: string } | null>(null);
-  const [query, setQuery] = useState("");
+  const { query, setQuery } = useTryOn();
 
   useEffect(() => {
     let alive = true;
@@ -80,7 +81,7 @@ function AppLayout() {
             </Link>
           ))}
         </nav>
-        <main className="px-6 py-10 md:px-10"><Outlet context={{ query }} /></main>
+        <main className="px-6 py-10 md:px-10"><Outlet /></main>
       </div>
     </div>
   );
