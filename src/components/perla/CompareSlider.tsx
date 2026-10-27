@@ -20,7 +20,7 @@ export function CompareSlider({ before, after }: { before: string; after: string
       onPointerMove={(e) => e.buttons && move(e.clientX)}
     >
       <img src={after} alt="After" className="block h-auto w-full" draggable={false} />
-      <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
+      <div className="absolute inset-0 overflow-hidden bg-muted" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
         <img src={before} alt="Before" className="h-full w-full object-contain" draggable={false} />
       </div>
       <span className="absolute left-3 top-3 rounded-full bg-background/85 px-3 py-1 text-[11px] uppercase tracking-widest">Before</span>
