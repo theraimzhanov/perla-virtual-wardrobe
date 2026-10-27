@@ -31,4 +31,5 @@
 ## n8n try-on repair
 - [x] Correct the existing workflow's trigger, category detection, polling and Supabase result saving.
 - [x] Validate and test both Discover and unknown-category paths without publishing or spending generation credits.
-- [ ] Enable and verify real generation — awaiting approval to publish the repaired n8n draft and create the missing `generated-looks` bucket; authenticated app testing is unavailable for external Supabase.
+- [x] Publish the repaired n8n workflow after user approval and point Supabase's webhook at its production address.
+- [ ] Create `generated-looks` and verify real generation — blocked by workspace policy rejecting public buckets; authenticated app testing is unavailable for external Supabase.
