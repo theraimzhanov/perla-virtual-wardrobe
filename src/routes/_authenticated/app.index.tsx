@@ -58,6 +58,7 @@ function Discover() {
           </article>
         ))}
       </div>
+      {list.length === 0 && <p className="mt-6 text-sm text-muted-foreground">No pieces match “{query.trim()}” in {cat} yet.</p>}
       {selectedIds.length > 0 && <div className="mt-8 flex items-center justify-between gap-3 border-t pt-5"><p className="text-sm text-muted-foreground">{selectedIds.length} in your selection</p><Button asChild className="rounded-full"><Link to="/app/try-on">See it on you <ArrowUpRight /></Link></Button></div>}
     </div>
   );
