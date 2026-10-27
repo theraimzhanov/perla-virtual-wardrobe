@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { Check, Download, Film, Heart, ImagePlus, RefreshCw, Send, Sparkles, Upload, X } from "lucide-react";
+import { Check, Download, Film, Heart, ImagePlus, LoaderCircle, RefreshCw, Send, Sparkles, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -14,6 +14,7 @@ import { ResultFeedback } from "./ResultFeedback";
 import { generationIssue, lookSource, showFeedback } from "./try-on-rules";
 import { sampleLookVideo, sourceFromFeedback, type LookSource } from "./looks";
 import { cn } from "@/lib/utils";
+import { validateImage } from "./upload-rules";
 
 type Phase = "idle" | "loading" | "done";
 
@@ -36,7 +37,7 @@ async function downloadMedia(url: string, filename: string) {
 }
 
 export function TryOnExperience({ compact = false }: { compact?: boolean }) {
-  const { photo, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource, markTried } = useTryOn();
+  const { photo, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource, markTried, savingInputs, inputError, retryInputs, signedIn } = useTryOn();
   const [lookId, setLookId] = useState(0);
   const [photoPhase, setPhotoPhase] = useState<Phase>("idle");
   const [videoPhase, setVideoPhase] = useState<Phase>("idle");
@@ -84,19 +85,17 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     if (videoPhase === "loading") videoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [photoPhase, videoPhase]);
 
-  const acceptFile = (event: ChangeEvent<HTMLInputElement>, kind: "photo" | "product") => {
+  const acceptFile = async (event: ChangeEvent<HTMLInputElement>, kind: "photo" | "product") => {
     const file = event.target.files?.[0];
     if (!file) return;
     event.target.value = "";
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      toast.error("Choose a JPG, PNG or WebP image.");
-      return;
-    }
-    if (kind === "photo") { uploadPhoto(file); setPhotoDialog(false); }
-    else uploadProduct(file);
+    try { validateImage(file); } catch (cause) { toast.error(cause instanceof Error ? cause.message : "Choose a valid image."); return; }
+    const saved = await (kind === "photo" ? uploadPhoto(file) : uploadProduct(file));
+    if (saved && kind === "photo") setPhotoDialog(false);
   };
 
   const generate = () => {
+    if (savingInputs || inputError) return;
     const issue = generationIssue(photo, selected);
     if (issue === "photo") { setPhotoDialog(true); return; }
     if (issue === "product") { toast.error("Select a product in Discover or upload your own."); return; }
@@ -118,12 +117,15 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   };
   const isShared = (id: string) => looks.some((look) => look.id === id && look.shared);
   const ShareButton = ({ id }: { id: string }) => <Button variant="outline" disabled={isShared(id)} onClick={() => { shareLook(id); toast.success("Shared to Brand Insights"); }} className="rounded-full text-xs"><Send />{isShared(id) ? "Shared" : "Share to Brand Insights"}</Button>;
-  const busy = photoPhase === "loading" || videoPhase === "loading";
+  const busy = savingInputs || photoPhase === "loading" || videoPhase === "loading";
   const hasResult = photoPhase === "done";
   return (
     <div className="min-w-0">
-      <input ref={photoInput} type="file" accept="image/jpeg,image/png,image/webp" aria-label="Upload your photo" className="hidden" onChange={(event) => acceptFile(event, "photo")} />
-      <input ref={productInput} type="file" accept="image/jpeg,image/png,image/webp" aria-label="Upload product photo" className="hidden" onChange={(event) => acceptFile(event, "product")} />
+      <input ref={photoInput} type="file" disabled={busy} accept="image/jpeg,image/png,image/webp" aria-label="Upload your photo" className="hidden" onChange={(event) => { void acceptFile(event, "photo"); }} />
+      <input ref={productInput} type="file" disabled={busy} accept="image/jpeg,image/png,image/webp" aria-label="Upload product photo" className="hidden" onChange={(event) => { void acceptFile(event, "product"); }} />
+      {savingInputs && <div role="status" className="mb-5 flex items-center gap-2 text-sm text-muted-foreground"><LoaderCircle className="h-4 w-4 motion-safe:animate-spin" />Saving your selection…</div>}
+      {inputError && <div role="alert" className="mb-5 flex flex-wrap items-center gap-3 border-l-2 border-destructive pl-4 text-sm"><p className="text-destructive">{inputError}</p>{signedIn && <Button variant="outline" size="sm" onClick={retryInputs} disabled={savingInputs}><RefreshCw />Retry</Button>}</div>}
+      {!signedIn && !savingInputs && <div className="mb-5 border-y py-3"><Button asChild variant="outline"><Link to="/login"><Upload />Sign in to save photos</Link></Button></div>}
 
       <div className={cn("grid items-start gap-7", !compact && "sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10")}>
         <section aria-label="Your photo">
@@ -138,7 +140,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
             </div>
           ) : (
             <div className="grid aspect-[3/4] place-items-center rounded-2xl border border-dashed border-gold/50 bg-secondary/60 px-6 text-center">
-              <div><div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-card"><ImagePlus className="h-7 w-7 text-gold" /></div><h3 className="mt-5 font-serif text-3xl">Start with you</h3><p className="mt-2 text-sm text-muted-foreground">Your full-body photo</p><Button onClick={() => photoInput.current?.click()} className="mt-5 rounded-full"><Upload />Upload photo</Button><div><Button variant="link" className="mt-2 text-xs text-muted-foreground" onClick={() => setPhoto(modelBefore)}>Use sample photo</Button></div></div>
+              <div><div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-card"><ImagePlus className="h-7 w-7 text-gold" /></div><h3 className="mt-5 font-serif text-3xl">Start with you</h3><p className="mt-2 text-sm text-muted-foreground">Your full-body photo</p><Button disabled={busy || !signedIn} onClick={() => photoInput.current?.click()} className="mt-5 rounded-full"><Upload />Upload photo</Button><div><Button disabled={busy} variant="link" className="mt-2 text-xs text-muted-foreground" onClick={() => setPhoto(modelBefore)}>Use sample photo</Button></div></div>
             </div>
           )}
         </section>
@@ -151,10 +153,10 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
           </div>
           <div className="space-y-3">
             {selected.map((product) => <div key={product.id} className="flex min-w-0 items-center gap-3 rounded-xl bg-card p-3 shadow-card"><img src={product.image} alt={product.name} className="h-20 w-20 shrink-0 rounded-lg object-cover" /><div className="min-w-0 flex-1"><p className="text-[10px] uppercase text-muted-foreground">{product.brand}</p><p className="break-words font-serif text-xl leading-tight">{product.name}</p><p className="mt-1 text-xs text-gold">{product.style}</p></div><Button size="icon" variant="ghost" title={`Remove ${product.name}`} aria-label={`Remove ${product.name}`} disabled={busy} className="shrink-0 rounded-full" onClick={() => mode === "personal" ? setPersonal(null) : removeProduct(product.id)}><X /></Button></div>)}
-            {selected.length === 0 && (mode === "discover" ? <div className="border-y py-8 text-center"><Sparkles className="mx-auto h-6 w-6 text-gold" /><p className="mt-3 font-serif text-xl">Something new awaits</p><Button asChild variant="link" className="mt-2"><Link to="/app">Explore Discover</Link></Button></div> : <div className="grid min-h-48 place-items-center rounded-xl border border-dashed bg-secondary/50"><Button variant="ghost" onClick={() => productInput.current?.click()}><ImagePlus />Upload product photo</Button></div>)}
+            {selected.length === 0 && (mode === "discover" ? <div className="border-y py-8 text-center"><Sparkles className="mx-auto h-6 w-6 text-gold" /><p className="mt-3 font-serif text-xl">Something new awaits</p><Button asChild variant="link" className="mt-2"><Link to="/app">Explore Discover</Link></Button></div> : <div className="grid min-h-48 place-items-center rounded-xl border border-dashed bg-secondary/50"><Button disabled={busy || !signedIn} variant="ghost" onClick={() => productInput.current?.click()}><ImagePlus />Upload product photo</Button></div>)}
           </div>
           {mode === "personal" && personal && <Button variant="outline" disabled={busy} onClick={() => productInput.current?.click()} className="mt-4 w-full rounded-full border-dashed"><Upload />Change product photo</Button>}
-          <Button disabled={busy || preparing} onClick={generate} className="mt-6 h-auto w-full whitespace-normal rounded-full px-5 py-4 shadow-soft"><Sparkles />{photoPhase === "loading" ? "Creating your look…" : hasResult ? "Generate again" : "Generate try-on"}</Button>
+          <Button disabled={busy || preparing || !!inputError} onClick={generate} className="mt-6 h-auto w-full whitespace-normal rounded-full px-5 py-4 shadow-soft"><Sparkles />{savingInputs ? "Saving inputs…" : photoPhase === "loading" ? "Creating your look…" : hasResult ? "Generate again" : "Generate try-on"}</Button>
           <div className="mt-7 flex items-center gap-3 border-t pt-5"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold-soft"><Film className="h-4 w-4 text-gold" /></div><div><p className="font-serif text-lg">Then, see it in motion</p><p className="text-xs text-muted-foreground">Photo → Video</p></div></div>
         </section>
       </div>

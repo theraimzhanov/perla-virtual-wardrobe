@@ -1,22 +1,15 @@
 import type React from "react";
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { discoverProducts, type DiscoverProduct } from "./data";
 import { listProducts } from "./products.functions";
-import { addSelection, type ProductMode } from "./try-on-rules";
 import { seedLooks, toggleLike, type Look, type LookSource } from "./looks";
+import { useSavedTryOnInputs } from "./useSavedTryOnInputs";
 
-function useTryOnState() {
-  const [photo, setPhoto] = useState<string | null>(null);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [personal, setPersonal] = useState<DiscoverProduct | null>(null);
-  const [mode, setMode] = useState<ProductMode>("discover");
+function useTryOnState(userId: string | null, authReady: boolean) {
+  const savedInputs = useSavedTryOnInputs(userId, authReady);
   const [preparing, setPreparing] = useState(false);
   const [catalog, setCatalog] = useState<DiscoverProduct[]>(discoverProducts);
   const [query, setQuery] = useState("");
-  const objectUrls = useRef<string[]>([]);
-
-  useEffect(() => () => objectUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
-
   useEffect(() => {
     let alive = true;
     listProducts()
@@ -25,24 +18,10 @@ function useTryOnState() {
     return () => { alive = false; };
   }, []);
 
-  const fileUrl = (file: File) => {
-    const url = URL.createObjectURL(file);
-    objectUrls.current.push(url);
-    return url;
-  };
-  const selectProduct = (id: string) => {
-    setSelectedIds((ids) => addSelection(ids, id));
-    setMode("discover");
+  const selectProduct = async (id: string) => {
     setPreparing(true);
+    await savedInputs.selectProduct(id);
   };
-  const uploadPhoto = (file: File) => setPhoto(fileUrl(file));
-  const uploadProduct = (file: File) => {
-    setPersonal({ id: "personal", name: file.name.replace(/\.[^.]+$/, ""), brand: "Your product", style: "Personal selection", category: "Clothes", image: fileUrl(file), source: "personal" });
-    setMode("personal");
-  };
-  const selected = mode === "personal"
-    ? personal ? [personal] : []
-    : catalog.filter((product) => selectedIds.includes(product.id));
 
   const [looks, setLooks] = useState<Look[]>(seedLooks);
   const addLook = (look: Omit<Look, "likes" | "liked" | "shared" | "mine" | "author">) => {
@@ -58,7 +37,7 @@ function useTryOnState() {
   const triedProducts = triedIds.map((id) => catalog.find((p) => p.id === id)).filter((p): p is DiscoverProduct => !!p);
   const updateLookSource = (ids: string[], source: LookSource) => setLooks((all) => all.map((look) => ids.includes(look.id) ? { ...look, source } : look));
 
-  return { photo, setPhoto, uploadPhoto, uploadProduct, personal, setPersonal, selectedIds, selectProduct, selected, mode, setMode, preparing, setPreparing, removeProduct: (id: string) => setSelectedIds((ids) => ids.filter((item) => item !== id)), looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, triedProducts, markTried, removeTried, catalog, query, setQuery };
+  return { ...savedInputs, selectProduct, preparing, setPreparing, looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, triedProducts, markTried, removeTried, catalog, query, setQuery };
 }
 
 type TryOnState = ReturnType<typeof useTryOnState>;
@@ -67,8 +46,8 @@ const store = globalThis as unknown as Record<typeof globalKey, React.Context<Tr
 // Reuse one context across hot reloads so the provider and consumers never get out of sync.
 const TryOnContext = (store[globalKey] ??= createContext<TryOnState | null>(null));
 
-export function TryOnProvider({ children }: { children: ReactNode }) {
-  const state = useTryOnState();
+export function TryOnProvider({ children, userId = null, authReady = false }: { children: ReactNode; userId?: string | null; authReady?: boolean }) {
+  const state = useTryOnState(userId, authReady);
   return <TryOnContext.Provider value={state}>{children}</TryOnContext.Provider>;
 }
 
