@@ -27,3 +27,7 @@
 - [x] Save uploads and Discover selections through the shared Try-On flow and restore saved inputs after reload.
 - [x] Verify saved-input restoration and failures with focused tests, and owner-only table/storage access with database checks.
 - [ ] Verify an actual signed-in upload and reload in the UI — blocked by unavailable authenticated testing for external Supabase.
+
+## n8n try-on repair
+- [ ] Correct the existing workflow's trigger, category detection, polling and Supabase result saving.
+- [ ] Validate and test both Discover and unknown-category paths without publishing or spending generation credits.
