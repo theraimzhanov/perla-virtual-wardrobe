@@ -1,0 +1,1 @@
+CREATE POLICY "View generated try on results" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = 'generated-looks');
