@@ -40,8 +40,8 @@ function Profile() {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!alive || !data.user) return;
       const meta = (data.user.user_metadata ?? {}) as Record<string, string | undefined>;
-      let name = meta.full_name || meta.name || meta.display_name || data.user.email?.split("@")[0] || "You";
-      let avatarUrl = meta.avatar_url ?? null;
+      let name = meta["full_name"] || meta["name"] || meta["display_name"] || data.user.email?.split("@")[0] || "You";
+      let avatarUrl = meta["avatar_url"] ?? null;
       const { data: profile } = await supabase
         .from("profiles")
         .select("display_name, avatar_url, email")

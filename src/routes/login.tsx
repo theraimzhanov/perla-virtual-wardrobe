@@ -53,7 +53,7 @@ function Login() {
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: fullName ? { full_name: fullName } : undefined,
+        ...(fullName ? { data: { full_name: fullName } } : {}),
       },
     });
     if (error) {

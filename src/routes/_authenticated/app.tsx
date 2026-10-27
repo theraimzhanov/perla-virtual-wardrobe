@@ -25,7 +25,7 @@ function AppLayout() {
     supabase.auth.getUser().then(({ data }) => {
       if (!alive || !data.user) return;
       const meta = (data.user.user_metadata ?? {}) as Record<string, string | undefined>;
-      const name = meta.full_name || meta.name || meta.display_name || data.user.email?.split("@")[0] || "You";
+      const name = meta["full_name"] || meta["name"] || meta["display_name"] || data.user.email?.split("@")[0] || "You";
       const initials = name.split(/\s+/).map((part) => part[0]?.toUpperCase() ?? "").join("").slice(0, 2) || "P";
       setSession({ initials, name });
     });
