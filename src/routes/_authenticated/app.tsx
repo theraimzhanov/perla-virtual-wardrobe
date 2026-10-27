@@ -19,6 +19,7 @@ const nav = [
 function AppLayout() {
   const isDiscover = useLocation({ select: (l) => l.pathname.replace(/\/$/, "") === "/app" });
   const [session, setSession] = useState<{ initials: string; name: string } | null>(null);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -63,7 +64,7 @@ function AppLayout() {
         <header className="sticky top-0 z-10 flex items-center gap-4 border-b bg-background/85 px-6 py-4 backdrop-blur md:px-10">
           {isDiscover ? <div className="flex flex-1 items-center gap-2 rounded-full bg-card px-4 py-2.5 shadow-card">
             <Search className="h-4 w-4 text-muted-foreground" />
-            <input placeholder="Search pieces, brands, styles…" className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+            <input aria-label="Search products" placeholder="Search pieces, brands, styles…" value={query} onChange={(event) => setQuery(event.target.value)} className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
           </div> : <div className="flex-1" />}
           <Button size="icon" variant="ghost" className="hidden h-10 w-10 shrink-0 rounded-full bg-card shadow-card sm:inline-flex" aria-label="Notifications" title="Notifications"><Bell className="h-4 w-4" /></Button>
           {session ? (
@@ -79,7 +80,7 @@ function AppLayout() {
             </Link>
           ))}
         </nav>
-        <main className="px-6 py-10 md:px-10"><Outlet /></main>
+        <main className="px-6 py-10 md:px-10"><Outlet context={{ query }} /></main>
       </div>
     </div>
   );
