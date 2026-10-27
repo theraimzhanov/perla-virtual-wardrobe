@@ -17,5 +17,6 @@
 - [x] Verify horizontal rows, shared count, footer links and existing tests.
 
 ## External database setup
-- [ ] Connect the user's separate external database; blocked because this Cloud-connected project cannot switch to external Supabase. Requires a new project without Cloud connected through Settings → General → External Supabase. Do not create tables in the existing managed backend.
-- [ ] Create and verify tables for profiles, products, media, looks, collections, likes and feedback after the external connection is established.
+- [x] Connect the user's separate external database (external Supabase connected and rebound).
+- [x] Create `products` table (45 seeded products with real photo URLs) and load Discover from it via a public server function, with a working search bar.
+- [ ] Create and verify tables for media, looks, collections, likes and feedback (profiles table already exists).

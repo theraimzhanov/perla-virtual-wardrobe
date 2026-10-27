@@ -23,9 +23,13 @@ export const Route = createFileRoute("/_authenticated/app/")({
 
 function Discover() {
   const [cat, setCat] = useState<DiscoverCategory>("Clothes");
-  const { selectedIds, selectProduct } = useTryOn();
+  const { selectedIds, selectProduct, catalog, query } = useTryOn();
   const navigate = useNavigate();
-  const list = discoverProducts.filter((product) => product.category === cat);
+  const term = query.trim().toLowerCase();
+  const list = catalog.filter((product) =>
+    product.category === cat &&
+    (!term || [product.name, product.brand, product.style].some((field) => field.toLowerCase().includes(term)))
+  );
   const icons = { Clothes: Shirt, Bag: ShoppingBag, Hat: Circle, Shoes: Footprints };
   const edit = ["g1", "g2", "g6"].map((id) => discoverProducts.find((product) => product.id === id)).filter((product) => product !== undefined);
   return (
@@ -53,6 +57,7 @@ function Discover() {
           </article>
         ))}
       </div>
+      {list.length === 0 && <p className="mt-6 text-sm text-muted-foreground">No pieces match “{query.trim()}” in {cat} yet.</p>}
       {selectedIds.length > 0 && <div className="mt-8 flex items-center justify-between gap-3 border-t pt-5"><p className="text-sm text-muted-foreground">{selectedIds.length} in your selection</p><Button asChild className="rounded-full"><Link to="/app/try-on">See it on you <ArrowUpRight /></Link></Button></div>}
     </div>
   );
