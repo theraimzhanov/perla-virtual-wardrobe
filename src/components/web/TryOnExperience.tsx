@@ -15,6 +15,9 @@ import { generationIssue, lookSource, showFeedback } from "./try-on-rules";
 import { sampleLookVideo, sourceFromFeedback, type LookSource } from "./looks";
 import { cn } from "@/lib/utils";
 import { validateImage } from "./upload-rules";
+import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+import { createGenerationJob } from "./generation.functions";
 
 type Phase = "idle" | "loading" | "done";
 
@@ -39,6 +42,9 @@ async function downloadMedia(url: string, filename: string) {
 export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   const { photo, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource, markTried, savingInputs, inputError, retryInputs, signedIn } = useTryOn();
   const [lookId, setLookId] = useState(0);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [resultImage, setResultImage] = useState<string | null>(null);
+  const startJob = useServerFn(createGenerationJob);
   const [photoPhase, setPhotoPhase] = useState<Phase>("idle");
   const [videoPhase, setVideoPhase] = useState<Phase>("idle");
   const [photoDialog, setPhotoDialog] = useState(false);
@@ -70,7 +76,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
 
   useEffect(() => {
     if (photoPhase !== "loading") return;
-    const timer = setTimeout(() => setPhotoPhase("done"), 2800);
+    const timer = setTimeout(() => { if (signedIn) toast.message("Still generating — showing a preview for now."); setPhotoPhase("done"); }, signedIn ? 90000 : 2800);
     return () => clearTimeout(timer);
   }, [photoPhase]);
 
@@ -103,10 +109,37 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     setPhotoPhase("loading");
     setLookId(Date.now());
     setVideoPhase("idle");
+    setResultImage(null);
+    setJobId(null);
+    if (!signedIn) return;
+    void (async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (!data.user) return;
+        const job = await startJob({ data: { expectedOwner: data.user.id } });
+        setJobId(job.jobId);
+      } catch (cause) {
+        toast.error(cause instanceof Error ? cause.message : "Couldn't start your try-on.");
+      }
+    })();
   };
 
+  // Listen for n8n writing the finished image back to this job.
+  useEffect(() => {
+    if (!jobId) return;
+    const channel = supabase
+      .channel(`job-${jobId}-${Math.random().toString(36).slice(2)}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "generation_jobs", filter: `id=eq.${jobId}` }, (payload) => {
+        const row = payload.new as { status: string; result_image_url: string | null; error_message: string | null };
+        if (row.status === "completed" && row.result_image_url) { setResultImage(row.result_image_url); setPhotoPhase("done"); }
+        if (row.status === "failed") toast.error(row.error_message ?? "Try-on generation failed.");
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [jobId]);
+
   const lookTitle = selected[0]?.name ?? "New look";
-  useEffect(() => { if (photoPhase === "done" && mode === "discover") markTried(selectedIds); if (photoPhase === "done") addLook({ id: `p${lookId}`, title: lookTitle, product: lookTitle, kind: "photo", image: modelAfter, source: productSource }); }, [photoPhase]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (photoPhase === "done" && mode === "discover") markTried(selectedIds); if (photoPhase === "done") addLook({ id: `p${lookId}`, title: lookTitle, product: lookTitle, kind: "photo", image: resultImage ?? modelAfter, source: productSource }); }, [photoPhase]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (videoPhase === "done") addLook({ id: `v${lookId}`, title: lookTitle, product: lookTitle, kind: "video", image: modelAfter, video: sampleLookVideo, source: productSource }); }, [videoPhase]); // eslint-disable-line react-hooks/exhaustive-deps
   const recordSource = (question: string, answer: string) => {
     if (mode !== "personal" || question !== "where") return;
@@ -165,8 +198,8 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
         <div className="mb-5 flex items-center justify-between gap-4"><h2 className="font-serif text-3xl">Your new look</h2><span className="rounded-full border px-3 py-1 text-[10px] uppercase text-muted-foreground">Sample preview</span></div>
         {preparing || photoPhase === "loading" ? <GenerationSkeleton kind={preparing ? "prepare" : "photo"} className="mx-auto max-w-md" /> : <>
           <div className={cn("grid items-start gap-7", !compact && "sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10")}>
-            <div className="min-w-0">{compare && photo ? <CompareSlider before={photo} after={modelAfter} /> : <img src={modelAfter} alt="Sample generated try-on look" className="aspect-[3/4] w-full rounded-2xl object-cover" />}
-              <div className="mt-3 flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Like picture" title="Like picture" aria-pressed={likedPhoto} onClick={() => likeLook(`p${lookId}`)} className={cn("rounded-full", likedPhoto && "border-gold text-gold")}><Heart className={likedPhoto ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download picture" title="Download picture" onClick={() => downloadMedia(modelAfter, "perla-try-on.jpg")} className="rounded-full"><Download /></Button><Button variant="outline" aria-pressed={compare} onClick={() => setCompare((value) => !value)} className="ml-auto rounded-full text-xs">{compare ? "View picture" : "Compare"}</Button></div><div className="mt-2"><ShareButton id={`p${lookId}`} /></div>
+            <div className="min-w-0">{compare && photo ? <CompareSlider before={photo} after={resultImage ?? modelAfter} /> : <img src={resultImage ?? modelAfter} alt="Sample generated try-on look" className="aspect-[3/4] w-full rounded-2xl object-cover" />}
+              <div className="mt-3 flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Like picture" title="Like picture" aria-pressed={likedPhoto} onClick={() => likeLook(`p${lookId}`)} className={cn("rounded-full", likedPhoto && "border-gold text-gold")}><Heart className={likedPhoto ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download picture" title="Download picture" onClick={() => downloadMedia(resultImage ?? modelAfter, "perla-try-on.jpg")} className="rounded-full"><Download /></Button><Button variant="outline" aria-pressed={compare} onClick={() => setCompare((value) => !value)} className="ml-auto rounded-full text-xs">{compare ? "View picture" : "Compare"}</Button></div><div className="mt-2"><ShareButton id={`p${lookId}`} /></div>
             </div>
             <div className="min-w-0"><p className="text-xs uppercase text-gold">Photo complete <Check className="ml-1 inline h-3 w-3" /></p><h3 className="mt-2 font-serif text-3xl">A different point of view.</h3>{showFeedback(mode) && <ResultFeedback key={`photo:${mode}:${selectionKey}`} kind="photo" mode={mode} onAnswer={recordSource} />}<Button disabled={videoPhase === "loading"} onClick={() => { setVideoError(false); setVideoPhase("loading"); }} className="mt-7 h-auto w-full rounded-full py-4"><Film />{videoPhase === "loading" ? "Creating your video…" : videoPhase === "done" ? "Generate video again" : "Generate video"}</Button></div>
           </div>
