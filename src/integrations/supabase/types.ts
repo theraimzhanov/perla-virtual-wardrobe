@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      generation_jobs: {
+        Row: {
+          brand_name: string | null
+          category: string
+          created_at: string
+          error_message: string | null
+          id: string
+          item_image_url: string
+          kind: string
+          person_image_url: string
+          photo_id: string | null
+          product_id: string | null
+          product_name: string | null
+          result_image_url: string | null
+          result_video_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_name?: string | null
+          category?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          item_image_url: string
+          kind?: string
+          person_image_url: string
+          photo_id?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          result_image_url?: string | null
+          result_video_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand_name?: string | null
+          category?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          item_image_url?: string
+          kind?: string
+          person_image_url?: string
+          photo_id?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          result_image_url?: string | null
+          result_video_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_jobs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand: string
