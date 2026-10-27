@@ -29,5 +29,6 @@
 - [ ] Verify an actual signed-in upload and reload in the UI — blocked by unavailable authenticated testing for external Supabase.
 
 ## n8n try-on repair
-- [ ] Correct the existing workflow's trigger, category detection, polling and Supabase result saving.
-- [ ] Validate and test both Discover and unknown-category paths without publishing or spending generation credits.
+- [x] Correct the existing workflow's trigger, category detection, polling and Supabase result saving.
+- [x] Validate and test both Discover and unknown-category paths without publishing or spending generation credits.
+- [ ] Enable and verify real generation — awaiting approval to publish the repaired n8n draft and create the missing `generated-looks` bucket; authenticated app testing is unavailable for external Supabase.
