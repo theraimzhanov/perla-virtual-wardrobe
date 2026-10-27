@@ -1,6 +1,7 @@
 import type React from "react";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { discoverProducts, type DiscoverProduct } from "./data";
+import { listProducts } from "./products.functions";
 import { addSelection, type ProductMode } from "./try-on-rules";
 import { seedLooks, toggleLike, type Look, type LookSource } from "./looks";
 
@@ -10,9 +11,18 @@ function useTryOnState() {
   const [personal, setPersonal] = useState<DiscoverProduct | null>(null);
   const [mode, setMode] = useState<ProductMode>("discover");
   const [preparing, setPreparing] = useState(false);
+  const [catalog, setCatalog] = useState<DiscoverProduct[]>(discoverProducts);
   const objectUrls = useRef<string[]>([]);
 
   useEffect(() => () => objectUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
+
+  useEffect(() => {
+    let alive = true;
+    listProducts()
+      .then((rows) => { if (alive && rows.length > 0) setCatalog(rows); })
+      .catch(() => { /* keep bundled fallback catalog */ });
+    return () => { alive = false; };
+  }, []);
 
   const fileUrl = (file: File) => {
     const url = URL.createObjectURL(file);
@@ -31,7 +41,7 @@ function useTryOnState() {
   };
   const selected = mode === "personal"
     ? personal ? [personal] : []
-    : discoverProducts.filter((product) => selectedIds.includes(product.id));
+    : catalog.filter((product) => selectedIds.includes(product.id));
 
   const [looks, setLooks] = useState<Look[]>(seedLooks);
   const addLook = (look: Omit<Look, "likes" | "liked" | "shared" | "mine" | "author">) => {
@@ -44,10 +54,10 @@ function useTryOnState() {
   const [triedIds, setTriedIds] = useState<string[]>(discoverProducts.slice(0, 2).map((p) => p.id));
   const markTried = (ids: string[]) => setTriedIds((all) => [...new Set([...ids, ...all])]);
   const removeTried = (id: string) => setTriedIds((all) => all.filter((item) => item !== id));
-  const triedProducts = triedIds.map((id) => discoverProducts.find((p) => p.id === id)).filter((p): p is DiscoverProduct => !!p);
+  const triedProducts = triedIds.map((id) => catalog.find((p) => p.id === id)).filter((p): p is DiscoverProduct => !!p);
   const updateLookSource = (ids: string[], source: LookSource) => setLooks((all) => all.map((look) => ids.includes(look.id) ? { ...look, source } : look));
 
-  return { photo, setPhoto, uploadPhoto, uploadProduct, personal, setPersonal, selectedIds, selectProduct, selected, mode, setMode, preparing, setPreparing, removeProduct: (id: string) => setSelectedIds((ids) => ids.filter((item) => item !== id)), looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, triedProducts, markTried, removeTried };
+  return { photo, setPhoto, uploadPhoto, uploadProduct, personal, setPersonal, selectedIds, selectProduct, selected, mode, setMode, preparing, setPreparing, removeProduct: (id: string) => setSelectedIds((ids) => ids.filter((item) => item !== id)), looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, triedProducts, markTried, removeTried, catalog };
 }
 
 type TryOnState = ReturnType<typeof useTryOnState>;
