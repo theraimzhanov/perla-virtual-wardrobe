@@ -1,5 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { ArrowRight, BarChart3, Sparkles, Wand2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/perla-emblem.svg.asset.json";
 import { CompareSlider } from "@/components/perla/CompareSlider";
 import { modelBefore, modelAfter } from "@/components/perla/data";
@@ -30,7 +32,15 @@ const features = [
 
 function Landing() {
   const { looks } = useTryOn();
+  const nav = useNavigate();
   const sharedCount = sharedVirtualLooks(looks).length;
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) nav({ to: "/app" });
+    });
+  }, [nav]);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">

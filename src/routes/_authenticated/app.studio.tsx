@@ -9,7 +9,7 @@ import { GenerationSkeleton } from "@/components/web/GenerationSkeleton";
 import { sampleLookVideo, type Look } from "@/components/web/looks";
 import { PageHeader, Panel, Pill, GoldButton } from "@/components/web/ui";
 
-export const Route = createFileRoute("/app/studio")({
+export const Route = createFileRoute("/_authenticated/app/studio")({
   head: () => ({
     meta: [
       { title: "AI Studio — PERLA" },

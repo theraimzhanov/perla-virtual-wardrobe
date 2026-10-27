@@ -10,23 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppRouteImport } from './routes/app'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MobileRouteImport } from './routes/mobile'
-import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as AppInsightsRouteImport } from './routes/app.insights'
-import { Route as AppProfileRouteImport } from './routes/app.profile'
-import { Route as AppStudioRouteImport } from './routes/app.studio'
-import { Route as AppTryOnRouteImport } from './routes/app.try-on'
+import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppInsightsRouteImport } from './routes/_authenticated/app.insights'
+import { Route as AuthenticatedAppProfileRouteImport } from './routes/_authenticated/app.profile'
+import { Route as AuthenticatedAppStudioRouteImport } from './routes/_authenticated/app.studio'
+import { Route as AuthenticatedAppTryOnRouteImport } from './routes/_authenticated/app.try-on'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRoute = AppRouteImport.update({
-  id: '/app',
-  path: '/app',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -39,72 +39,79 @@ const MobileRoute = MobileRouteImport.update({
   path: '/mobile',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
+const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AppInsightsRoute = AppInsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppProfileRoute = AppProfileRouteImport.update({
+const AuthenticatedAppInsightsRoute =
+  AuthenticatedAppInsightsRouteImport.update({
+    id: '/insights',
+    path: '/insights',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppProfileRoute = AuthenticatedAppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AppStudioRoute = AppStudioRouteImport.update({
+const AuthenticatedAppStudioRoute = AuthenticatedAppStudioRouteImport.update({
   id: '/studio',
   path: '/studio',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AppTryOnRoute = AppTryOnRouteImport.update({
+const AuthenticatedAppTryOnRoute = AuthenticatedAppTryOnRouteImport.update({
   id: '/try-on',
   path: '/try-on',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/mobile': typeof MobileRoute
-  '/app/insights': typeof AppInsightsRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/studio': typeof AppStudioRoute
-  '/app/try-on': typeof AppTryOnRoute
-  '/app/': typeof AppIndexRoute
+  '/app': typeof AuthenticatedAppRouteWithChildren
+  '/app/insights': typeof AuthenticatedAppInsightsRoute
+  '/app/profile': typeof AuthenticatedAppProfileRoute
+  '/app/studio': typeof AuthenticatedAppStudioRoute
+  '/app/try-on': typeof AuthenticatedAppTryOnRoute
+  '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/mobile': typeof MobileRoute
-  '/app/insights': typeof AppInsightsRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/studio': typeof AppStudioRoute
-  '/app/try-on': typeof AppTryOnRoute
-  '/app': typeof AppIndexRoute
+  '/app/insights': typeof AuthenticatedAppInsightsRoute
+  '/app/profile': typeof AuthenticatedAppProfileRoute
+  '/app/studio': typeof AuthenticatedAppStudioRoute
+  '/app/try-on': typeof AuthenticatedAppTryOnRoute
+  '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRouteWithChildren
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/mobile': typeof MobileRoute
-  '/app/insights': typeof AppInsightsRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/studio': typeof AppStudioRoute
-  '/app/try-on': typeof AppTryOnRoute
-  '/app/': typeof AppIndexRoute
+  '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/_authenticated/app/insights': typeof AuthenticatedAppInsightsRoute
+  '/_authenticated/app/profile': typeof AuthenticatedAppProfileRoute
+  '/_authenticated/app/studio': typeof AuthenticatedAppStudioRoute
+  '/_authenticated/app/try-on': typeof AuthenticatedAppTryOnRoute
+  '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/app'
     | '/login'
     | '/mobile'
+    | '/app'
     | '/app/insights'
     | '/app/profile'
     | '/app/studio'
@@ -123,19 +130,20 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/app'
+    | '/_authenticated'
     | '/login'
     | '/mobile'
-    | '/app/insights'
-    | '/app/profile'
-    | '/app/studio'
-    | '/app/try-on'
-    | '/app/'
+    | '/_authenticated/app'
+    | '/_authenticated/app/insights'
+    | '/_authenticated/app/profile'
+    | '/_authenticated/app/studio'
+    | '/_authenticated/app/try-on'
+    | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRouteWithChildren
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   MobileRoute: typeof MobileRoute
 }
@@ -149,11 +157,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -170,65 +178,84 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MobileRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/': {
-      id: '/app/'
+    '/_authenticated/app': {
+      id: '/_authenticated/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AuthenticatedAppRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/': {
+      id: '/_authenticated/app/'
       path: '/'
       fullPath: '/app/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/insights': {
-      id: '/app/insights'
+    '/_authenticated/app/insights': {
+      id: '/_authenticated/app/insights'
       path: '/insights'
       fullPath: '/app/insights'
-      preLoaderRoute: typeof AppInsightsRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppInsightsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/profile': {
-      id: '/app/profile'
+    '/_authenticated/app/profile': {
+      id: '/_authenticated/app/profile'
       path: '/profile'
       fullPath: '/app/profile'
-      preLoaderRoute: typeof AppProfileRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppProfileRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/studio': {
-      id: '/app/studio'
+    '/_authenticated/app/studio': {
+      id: '/_authenticated/app/studio'
       path: '/studio'
       fullPath: '/app/studio'
-      preLoaderRoute: typeof AppStudioRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppStudioRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/try-on': {
-      id: '/app/try-on'
+    '/_authenticated/app/try-on': {
+      id: '/_authenticated/app/try-on'
       path: '/try-on'
       fullPath: '/app/try-on'
-      preLoaderRoute: typeof AppTryOnRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppTryOnRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
   }
 }
 
-interface AppRouteChildren {
-  AppInsightsRoute: typeof AppInsightsRoute
-  AppProfileRoute: typeof AppProfileRoute
-  AppStudioRoute: typeof AppStudioRoute
-  AppTryOnRoute: typeof AppTryOnRoute
-  AppIndexRoute: typeof AppIndexRoute
+interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppInsightsRoute: typeof AuthenticatedAppInsightsRoute
+  AuthenticatedAppProfileRoute: typeof AuthenticatedAppProfileRoute
+  AuthenticatedAppStudioRoute: typeof AuthenticatedAppStudioRoute
+  AuthenticatedAppTryOnRoute: typeof AuthenticatedAppTryOnRoute
+  AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
-const AppRouteChildren: AppRouteChildren = {
-  AppInsightsRoute: AppInsightsRoute,
-  AppProfileRoute: AppProfileRoute,
-  AppStudioRoute: AppStudioRoute,
-  AppTryOnRoute: AppTryOnRoute,
-  AppIndexRoute: AppIndexRoute,
+const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppInsightsRoute: AuthenticatedAppInsightsRoute,
+  AuthenticatedAppProfileRoute: AuthenticatedAppProfileRoute,
+  AuthenticatedAppStudioRoute: AuthenticatedAppStudioRoute,
+  AuthenticatedAppTryOnRoute: AuthenticatedAppTryOnRoute,
+  AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
-const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+const AuthenticatedAppRouteWithChildren =
+  AuthenticatedAppRoute._addFileChildren(AuthenticatedAppRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRouteWithChildren,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   MobileRoute: MobileRoute,
 }

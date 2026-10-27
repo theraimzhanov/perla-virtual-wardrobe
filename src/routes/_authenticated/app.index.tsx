@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useTryOn } from "@/components/web/TryOnContext";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/app/")({
+export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({
     meta: [
       { title: "Discover — PERLA" },

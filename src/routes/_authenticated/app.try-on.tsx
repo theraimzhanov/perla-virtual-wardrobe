@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/web/ui";
 import { TryOnExperience } from "@/components/web/TryOnExperience";
 
-export const Route = createFileRoute("/app/try-on")({
+export const Route = createFileRoute("/_authenticated/app/try-on")({
   head: () => ({
     meta: [
       { title: "Virtual Try-On — PERLA" },
