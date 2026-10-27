@@ -9,7 +9,7 @@ export type DiscoverProduct = {
   brand: string;
   style: string;
   image: string;
-  category: DiscoverCategory;
+  category: DiscoverCategory | "unknown";
   source: "discover" | "personal";
 };
 
