@@ -134,7 +134,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
             <div className="relative overflow-hidden rounded-2xl bg-muted">
               <img src={photo} alt="Your uploaded photo" className="aspect-[3/4] w-full object-cover" />
               <div className="absolute inset-x-3 bottom-3 flex items-center gap-2">
-                <Button variant="secondary" disabled={busy} onClick={() => photoInput.current?.click()} className="flex-1 rounded-full bg-background/95 shadow-card"><RefreshCw />Change photo</Button>
+                <Button variant="secondary" disabled={busy || !signedIn} onClick={() => photoInput.current?.click()} className="flex-1 rounded-full bg-background/95 shadow-card"><RefreshCw />Change photo</Button>
                 <Button size="icon" variant="secondary" disabled={busy} aria-label="Remove photo" title="Remove photo" onClick={() => setPhoto(null)} className="shrink-0 rounded-full bg-background/95"><X /></Button>
               </div>
             </div>
@@ -178,7 +178,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
         <div><p className="text-xs uppercase text-gold">Video complete <Check className="ml-1 inline h-3 w-3" /></p><h3 className="mt-2 font-serif text-3xl">Every little movement.</h3>{showFeedback(mode) && <ResultFeedback key={`video:${mode}:${selectionKey}`} kind="video" mode={mode} />}</div>
       </div>}</section>}
 
-      <Dialog open={photoDialog} onOpenChange={setPhotoDialog}><DialogContent className="w-[calc(100%-2rem)] max-w-sm rounded-2xl p-7"><div className="grid h-12 w-12 place-items-center rounded-full bg-gold-soft"><ImagePlus className="h-6 w-6 text-gold" /></div><DialogTitle className="font-serif text-3xl font-normal">Let's see it on you</DialogTitle><DialogDescription>Add your photo to try on your selection.</DialogDescription><Button onClick={() => photoInput.current?.click()} className="h-auto rounded-full py-3"><Upload />Upload your photo</Button><Button variant="outline" onClick={() => { setPhoto(modelBefore); setPhotoDialog(false); }} className="rounded-full">Use sample photo</Button></DialogContent></Dialog>
+      <Dialog open={photoDialog} onOpenChange={setPhotoDialog}><DialogContent className="w-[calc(100%-2rem)] max-w-sm rounded-2xl p-7"><div className="grid h-12 w-12 place-items-center rounded-full bg-gold-soft"><ImagePlus className="h-6 w-6 text-gold" /></div><DialogTitle className="font-serif text-3xl font-normal">Let's see it on you</DialogTitle><DialogDescription>Add your photo to try on your selection.</DialogDescription>{inputError && <p role="alert" className="text-sm text-destructive">{inputError}</p>}<Button disabled={busy || !signedIn} onClick={() => photoInput.current?.click()} className="h-auto rounded-full py-3">{savingInputs ? <LoaderCircle className="motion-safe:animate-spin" /> : <Upload />}{savingInputs ? "Saving photo…" : "Upload your photo"}</Button><Button disabled={busy} variant="outline" onClick={() => { setPhoto(modelBefore); setPhotoDialog(false); }} className="rounded-full">Use sample photo</Button></DialogContent></Dialog>
     </div>
   );
 }
