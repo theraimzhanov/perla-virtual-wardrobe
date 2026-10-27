@@ -14,7 +14,7 @@
 - Derive the provider identity from the root auth subscription and remount it on identity changes; attach the browser bearer through function middleware so private inputs never cross accounts.
 - Store permanent storage paths, not signed URLs, in upload records; create renewable access links for display and commit inputs only after both storage and metadata saves succeed so upload failures cannot masquerade as saved photos.
 - Reuse TryOnExperience for both web and mobile so upload validation, photo/video stages and personal-product feedback rules cannot diverge.
-- Keep generation preview-only with bundled sample photo and video assets until real generation is explicitly requested; uploaded images must never silently be sent to third parties.
+- Photo try-on creates a generation_jobs row (signed photo + product links) that a Supabase database webhook forwards to n8n; n8n writes result_image_url back and the app listens via Realtime, falling back to the bundled sample image so the demo never hangs. Video stays a bundled sample until real video generation is requested.
 - Keep product-selection and feedback rules in a pure module with focused tests so changes to the intended flow remain verifiable.
 - Keep Discover rankings and shared-look filtering in pure rules, and store media, product/source metadata and likes in TryOnProvider so community and profile cards remain consistent with Try-On results.
 - Derive the homepage shared-look statistic from the same sharedVirtualLooks rule as Brand Insights so it updates with the shared session.
