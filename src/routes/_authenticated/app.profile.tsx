@@ -6,7 +6,7 @@ import { PageHeader, Panel, Stat } from "@/components/web/ui";
 import { Heart } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
-export const Route = createFileRoute("/app/profile")({
+export const Route = createFileRoute("/_authenticated/app/profile")({
   head: () => ({
     meta: [
       { title: "Profile — PERLA" },

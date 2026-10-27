@@ -6,7 +6,7 @@ import { useTryOn } from "@/components/web/TryOnContext";
 import { LookCard } from "@/components/web/LookCard";
 import { rankDiscoverProducts, sharedVirtualLooks } from "@/components/web/brand-insights-rules";
 
-export const Route = createFileRoute("/app/insights")({
+export const Route = createFileRoute("/_authenticated/app/insights")({
   head: () => ({
     meta: [
       { title: "Brand Insights — PERLA" },

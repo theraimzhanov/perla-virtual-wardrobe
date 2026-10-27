@@ -4,7 +4,7 @@ import { Bell, Compass, LayoutDashboard, Sparkles, User, Wand2, Search, Smartpho
 import logo from "@/assets/perla-emblem.svg.asset.json";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/app")({ component: AppLayout });
+export const Route = createFileRoute("/_authenticated/app")({ component: AppLayout });
 
 const nav = [
   { to: "/app", label: "Discover", icon: Compass, exact: true },
