@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useOutletContext } from "@tanstack/react-router";
 import { Sparkles, ArrowUpRight, Shirt, ShoppingBag, Footprints, Circle } from "lucide-react";
 import { useState } from "react";
 import { discoverCategories, discoverProducts, type DiscoverCategory } from "@/components/web/data";
@@ -23,9 +23,14 @@ export const Route = createFileRoute("/_authenticated/app/")({
 
 function Discover() {
   const [cat, setCat] = useState<DiscoverCategory>("Clothes");
-  const { selectedIds, selectProduct } = useTryOn();
+  const { selectedIds, selectProduct, catalog } = useTryOn();
+  const { query } = useOutletContext<{ query: string }>();
   const navigate = useNavigate();
-  const list = discoverProducts.filter((product) => product.category === cat);
+  const term = query.trim().toLowerCase();
+  const list = catalog.filter((product) =>
+    product.category === cat &&
+    (!term || [product.name, product.brand, product.style].some((field) => field.toLowerCase().includes(term)))
+  );
   const icons = { Clothes: Shirt, Bag: ShoppingBag, Hat: Circle, Shoes: Footprints };
   const edit = ["g1", "g2", "g6"].map((id) => discoverProducts.find((product) => product.id === id)).filter((product) => product !== undefined);
   return (
