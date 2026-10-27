@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      products: {
+        Row: {
+          brand: string
+          category: string
+          created_at: string
+          id: string
+          image_url: string
+          name: string
+          style: string
+        }
+        Insert: {
+          brand: string
+          category: string
+          created_at?: string
+          id?: string
+          image_url: string
+          name: string
+          style?: string
+        }
+        Update: {
+          brand?: string
+          category?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          name?: string
+          style?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
