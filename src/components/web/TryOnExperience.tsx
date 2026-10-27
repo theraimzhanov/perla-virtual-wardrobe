@@ -165,8 +165,10 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
           <div className="mb-3 flex items-center justify-between"><h2 className="font-serif text-2xl">Your photo</h2><span className="text-xs text-muted-foreground">01</span></div>
           {photo ? (
             <div className="relative overflow-hidden rounded-2xl bg-muted">
-              <img src={photo} alt="Your uploaded photo" className="aspect-[3/4] w-full object-cover" />
-              <div className="absolute inset-x-3 bottom-3 flex items-center gap-2">
+              <div className="aspect-[3/4] w-full">
+                <img src={photo} alt="Your uploaded photo" className="h-full w-full object-contain" />
+              </div>
+              <div className="flex items-center gap-2 p-3">
                 <Button variant="secondary" disabled={busy || !signedIn} onClick={() => photoInput.current?.click()} className="flex-1 rounded-full bg-background/95 shadow-card"><RefreshCw />Change photo</Button>
                 <Button size="icon" variant="secondary" disabled={busy} aria-label="Remove photo" title="Remove photo" onClick={() => setPhoto(null)} className="shrink-0 rounded-full bg-background/95"><X /></Button>
               </div>
