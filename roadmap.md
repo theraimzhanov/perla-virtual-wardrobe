@@ -65,3 +65,8 @@
 - [x] Publish the repaired n8n workflow after user approval and point Supabase's webhook at its production address.
 - [x] Create public `generated-looks` with read-only public access and verify real generation — Supabase INSERT triggered production n8n, Perfect Corp generated Ivory Wrap Dress, n8n saved the JPEG, and the job completed; stored image loaded successfully.
 - [ ] Verify a generated result appears in the signed-in Try-On UI — authenticated testing is unavailable for external Supabase; user must run Generate in their signed-in preview.
+## AI Studio real generation
+- [x] Base picker shows each finished try-on photo once; Model scene added and default (photo: model shoot, video: model walking).
+- [x] Short shopper prompts are wrapped in a supporting fashion prompt; empty input still works with defaults.
+- [x] Real images (AI image edit) and videos (Perfect Corp) saved to account; like, share, delete, download; shown in Profile.
+- [ ] Signed-in browser check of a studio video — needs the user to try it after publishing.

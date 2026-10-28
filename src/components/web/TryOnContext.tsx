@@ -11,7 +11,7 @@ import { listProducts } from "./products.functions";
 import { type Look, type LookSource } from "./looks";
 import { useSavedTryOnInputs } from "./useSavedTryOnInputs";
 
-export const jobLook = (job: PhotoJob): Look => ({ id: `job:${job.id}`, jobId: job.id, title: job.title, product: job.title, brand: job.brand ?? undefined, author: "You", kind: job.kind, image: job.image ?? "", ...(job.kind === "video" && job.video ? { video: { mp4: job.video } } : {}), source: job.source, likes: job.likes ?? 0, liked: job.liked, shared: job.shared, mine: true });
+export const jobLook = (job: PhotoJob): Look => ({ id: `job:${job.id}`, jobId: job.id, title: job.studioScene ? `${job.studioScene} · ${job.title}` : job.title, product: job.title, brand: job.brand ?? undefined, author: "You", kind: job.kind, image: job.image ?? "", ...(job.kind === "video" && job.video ? { video: { mp4: job.video } } : {}), source: job.source, likes: job.likes ?? 0, liked: job.liked, shared: job.shared, mine: true });
 const communityLook = (look: CommunityLook): Look => ({ id: `job:${look.jobId}`, jobId: look.jobId, title: look.product, product: look.product, brand: look.brand ?? undefined, author: look.author, kind: look.kind, image: look.image, ...(look.video ? { video: { mp4: look.video } } : {}), source: look.source, likes: look.likes, liked: look.liked, shared: true, mine: look.mine });
 
 function useTryOnState(userId: string | null, authReady: boolean) {
@@ -75,8 +75,10 @@ function useTryOnState(userId: string | null, authReady: boolean) {
     return () => clearInterval(timer);
   }, [jobs, refreshPhotoJobs]);
 
-  const photoJobs = jobs.filter((job) => job.kind === "photo");
-  const videoJobs = jobs.filter((job) => job.kind === "video");
+  // AI Studio creations live in Profile and Studio, never in the Try-On result slots.
+  const photoJobs = jobs.filter((job) => job.kind === "photo" && !job.studioScene);
+  const videoJobs = jobs.filter((job) => job.kind === "video" && !job.studioScene);
+  const studioJobs = jobs.filter((job) => Boolean(job.studioScene));
   const mineLooks = jobs.filter((job) => photoJobPhase(job) === "done").map(jobLook);
   const looks: Look[] = [...mineLooks, ...community.filter((item) => !jobs.some((job) => job.id === item.jobId)).map(communityLook), ...localLooks];
 
@@ -142,7 +144,7 @@ function useTryOnState(userId: string | null, authReady: boolean) {
   };
   const triedProducts: WardrobePiece[] = userId ? wardrobe : triedIds.map((id) => catalog.find((p) => p.id === id)).filter((p): p is DiscoverProduct => !!p).map((p) => ({ id: p.id, name: p.name, brand: p.brand, image: p.image }));
 
-  return { ...savedInputs, userId, selectProduct, preparing, setPreparing, looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, deleteJob, triedProducts, markTried, removeTried, catalog, query, setQuery, photoJobs, videoJobs, refreshPhotoJobs, generationHistoryError, patchJob };
+  return { ...savedInputs, userId, selectProduct, preparing, setPreparing, looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, deleteJob, triedProducts, markTried, removeTried, catalog, query, setQuery, photoJobs, videoJobs, studioJobs, refreshPhotoJobs, generationHistoryError, patchJob };
 }
 
 type TryOnState = ReturnType<typeof useTryOnState>;

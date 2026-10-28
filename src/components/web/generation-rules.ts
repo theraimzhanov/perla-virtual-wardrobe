@@ -32,6 +32,8 @@ export type PhotoJob = {
   feedbackSent?: boolean;
   parentJobId?: string | null;
   createdAt?: string;
+  studioScene?: string | null;
+  studioPrompt?: string | null;
   source: "discover" | "own" | "internet" | "store";
   liked: boolean;
   shared: boolean;
@@ -88,9 +90,12 @@ export type DirectAction = "none" | "wait" | "submit" | "uncertain" | "poll" | "
 export const DIRECT_STALE_MS = 90_000;
 export const directLimitMs = (kind: string) => (kind === "video" ? 30 : 10) * 60_000;
 
+export const STUDIO_RENDER_STALE_MS = 5 * 60_000;
 export function nextDirectAction(job: DirectJobState, now: number): DirectAction {
   if (["completed", "failed"].includes(job.status)) return "none";
   const stale = now - Date.parse(job.updated_at) > DIRECT_STALE_MS;
+  // An AI Studio render runs inside one request; if it never finished it is never repeated.
+  if (job.stage === "rendering") return now - Date.parse(job.updated_at) > STUDIO_RENDER_STALE_MS ? "uncertain" : "wait";
   if (!job.provider_task_id) {
     // A submission that never recorded its task ID is never repeated: the provider has no idempotency.
     if (job.stage === "submitting") return stale ? "uncertain" : "wait";

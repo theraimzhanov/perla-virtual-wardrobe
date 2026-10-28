@@ -90,6 +90,8 @@ export type Database = {
           source: string
           stage: string
           status: string
+          studio_prompt: string | null
+          studio_scene: string | null
           updated_at: string
           user_id: string
         }
@@ -120,6 +122,8 @@ export type Database = {
           source?: string
           stage?: string
           status?: string
+          studio_prompt?: string | null
+          studio_scene?: string | null
           updated_at?: string
           user_id: string
         }
@@ -150,6 +154,8 @@ export type Database = {
           source?: string
           stage?: string
           status?: string
+          studio_prompt?: string | null
+          studio_scene?: string | null
           updated_at?: string
           user_id?: string
         }

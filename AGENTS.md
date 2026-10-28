@@ -21,3 +21,4 @@
 - Derive the homepage shared-look statistic from the same sharedVirtualLooks rule as Brand Insights so it updates with the shared session.
 - Keep homepage footer navigation in SiteFooter and link only to existing pages or email contact, avoiding invented legal policies or unavailable services.
 - Server-side fetch never uses redirect "error" (Cloudflare Workers reject it before sending); use "manual" plus the isRedirect guard so provider calls fail clearly instead of looking uncertain.
+- AI Studio creations are generation_jobs rows marked by studio_scene (built prompt in studio_prompt, no parent link) so they appear in Profile/collections but never in Try-On result slots; studio images render once through the AI gateway image-edit endpoint (stage "rendering", never repeated) and studio videos reuse the Perfect Corp video path with the enriched prompt. Prompt enrichment and scene defaults live in pure studio-rules with tests.
