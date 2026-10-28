@@ -5,6 +5,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { uploadBucket } from "./upload-rules";
 import { directGenerationEnabled, generationRequestSchema, videoRequestSchema, type PhotoJob } from "./generation-rules";
+import { buildStudioPrompt, studioRequestSchema } from "./studio-rules";
 
 const LINK_SECONDS = 60 * 60 * 24;
 
@@ -102,9 +103,38 @@ export const createVideoJob = createServerFn({ method: "POST" })
     return { jobId: job.id };
   });
 
+// AI Studio restyles a finished try-on photo into a new image or video with an enriched prompt.
+export const createStudioJob = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => studioRequestSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    if (data.expectedOwner !== context.userId) throw new Error("Your account changed. Please try again.");
+    const { directConfig, advanceDirectJob } = await import("./generation-direct.server");
+    directConfig();
+    const existing = await context.supabase.from("generation_jobs").select("id,status").eq("user_id", context.userId).eq("request_id", data.requestId).maybeSingle();
+    if (existing.error) throw new Error("Couldn't check this request.");
+    if (existing.data) {
+      if (["pending", "processing"].includes(existing.data.status)) await advanceDirectJob(existing.data.id);
+      return { jobId: existing.data.id };
+    }
+    const { data: base, error } = await context.supabase.from("generation_jobs").select("*").eq("id", data.baseJobId).eq("user_id", context.userId).eq("kind", "photo").eq("status", "completed").is("studio_scene", null).single();
+    if (error || !base?.result_image_url) throw new Error("Choose one of your finished try-on photos first.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: job, error: jobError } = await supabaseAdmin.from("generation_jobs").insert({
+      user_id: context.userId, engine: "direct", request_id: data.requestId, kind: data.kind, status: "pending",
+      studio_scene: data.scene, studio_prompt: buildStudioPrompt(data.kind, data.scene, data.prompt),
+      source: base.source, category: base.category, photo_id: base.photo_id, product_id: base.product_id,
+      person_image_url: base.result_image_url, item_image_url: base.result_image_url,
+      product_name: base.product_name, brand_name: base.brand_name,
+    }).select("id").single();
+    if (jobError || !job) throw new Error("Couldn't start your creation. Please retry.");
+    await advanceDirectJob(job.id);
+    return { jobId: job.id };
+  });
+
 type JobRow = import("@/integrations/supabase/types").Tables<"generation_jobs">;
 function jobDto(row: JobRow, extra: { likes?: number; liked?: boolean; feedbackSent?: boolean } = {}): PhotoJob {
-  return { id: row.id, kind: row.kind === "video" ? "video" : "photo", status: row.status, stage: row.stage, image: row.result_image_url, video: row.result_video_url, error: row.error_message, title: row.product_name ?? "New look", brand: row.brand_name, source: row.source === "own" || row.source === "internet" || row.source === "store" ? row.source : "discover", liked: extra.liked ?? false, likes: extra.likes ?? 0, feedbackSent: extra.feedbackSent ?? false, shared: row.shared, photoId: row.photo_id, productId: row.product_id, parentJobId: row.parent_job_id, createdAt: row.created_at };
+  return { id: row.id, kind: row.kind === "video" ? "video" : "photo", status: row.status, stage: row.stage, image: row.result_image_url, video: row.result_video_url, error: row.error_message, title: row.product_name ?? "New look", brand: row.brand_name, source: row.source === "own" || row.source === "internet" || row.source === "store" ? row.source : "discover", liked: extra.liked ?? false, likes: extra.likes ?? 0, feedbackSent: extra.feedbackSent ?? false, shared: row.shared, photoId: row.photo_id, productId: row.product_id, parentJobId: row.parent_job_id, createdAt: row.created_at, studioScene: row.studio_scene };
 }
 
 // Like counts span all users, so they are read with the admin client after the owner-scoped job read.
