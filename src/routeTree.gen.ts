@@ -22,6 +22,7 @@ import { Route as AuthenticatedAppStudioRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppTryOnRouteImport } from './routes/_authenticated/app.try-on'
 import { Route as ApiPublicGenerationPhotoRouteImport } from './routes/api/public/generation/photo'
 import { Route as ApiPublicGenerationVideoRouteImport } from './routes/api/public/generation/video'
+import { Route as ApiPublicInsightsWeeklyRouteImport } from './routes/api/public/insights/weekly'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -90,6 +91,11 @@ const ApiPublicGenerationVideoRoute =
     path: '/api/public/generation/video',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicInsightsWeeklyRoute = ApiPublicInsightsWeeklyRouteImport.update({
+  id: '/api/public/insights/weekly',
+  path: '/api/public/insights/weekly',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/generation/photo': typeof ApiPublicGenerationPhotoRoute
   '/api/public/generation/video': typeof ApiPublicGenerationVideoRoute
+  '/api/public/insights/weekly': typeof ApiPublicInsightsWeeklyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/generation/photo': typeof ApiPublicGenerationPhotoRoute
   '/api/public/generation/video': typeof ApiPublicGenerationVideoRoute
+  '/api/public/insights/weekly': typeof ApiPublicInsightsWeeklyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/generation/photo': typeof ApiPublicGenerationPhotoRoute
   '/api/public/generation/video': typeof ApiPublicGenerationVideoRoute
+  '/api/public/insights/weekly': typeof ApiPublicInsightsWeeklyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/public/generation/photo'
     | '/api/public/generation/video'
+    | '/api/public/insights/weekly'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/public/generation/photo'
     | '/api/public/generation/video'
+    | '/api/public/insights/weekly'
   id:
     | '__root__'
     | '/'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/'
     | '/api/public/generation/photo'
     | '/api/public/generation/video'
+    | '/api/public/insights/weekly'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -187,6 +199,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicGenerationPhotoRoute: typeof ApiPublicGenerationPhotoRoute
   ApiPublicGenerationVideoRoute: typeof ApiPublicGenerationVideoRoute
+  ApiPublicInsightsWeeklyRoute: typeof ApiPublicInsightsWeeklyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -282,6 +295,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicGenerationVideoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/insights/weekly': {
+      id: '/api/public/insights/weekly'
+      path: '/api/public/insights/weekly'
+      fullPath: '/api/public/insights/weekly'
+      preLoaderRoute: typeof ApiPublicInsightsWeeklyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -323,6 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicGenerationPhotoRoute: ApiPublicGenerationPhotoRoute,
   ApiPublicGenerationVideoRoute: ApiPublicGenerationVideoRoute,
+  ApiPublicInsightsWeeklyRoute: ApiPublicInsightsWeeklyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

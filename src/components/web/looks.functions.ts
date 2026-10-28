@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { uploadBucket } from "./upload-rules";
 import { feedbackSchema } from "./generation-rules";
 import { tallyGeneratedMedia, type GeneratedMedia } from "./brand-insights-rules";
+import type { WeeklyReport } from "./weekly-insights-rules";
 
 export type CommunityLook = { jobId: string; kind: "photo" | "video"; image: string; video: string | null; product: string; brand: string | null; author: string; source: "discover" | "own" | "internet" | "store"; likes: number; liked: boolean; mine: boolean };
 export type ProductSignal = { id: string; tryOns: number; likes: number };
@@ -130,3 +131,18 @@ export const countGeneratedMedia = createServerFn({ method: "POST" }).handler(as
   if (error) throw new Error("Couldn't load creation totals.");
   return tallyGeneratedMedia(data ?? []);
 });
+
+// Latest weekly report written by the n8n job (aggregate numbers + AI text only).
+export const getWeeklyReport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<WeeklyReport | null> => {
+    const { data } = await context.supabase.from("insight_reports").select("payload").order("week_start", { ascending: false }).limit(1).maybeSingle();
+    return (data?.payload as unknown as WeeklyReport) ?? null;
+  });
+
+export const getStyleDna = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase.from("style_dna").select("headline,tags,updated_at").eq("user_id", context.userId).maybeSingle();
+    return data ? { headline: data.headline, tags: data.tags, updatedAt: data.updated_at } : null;
+  });
