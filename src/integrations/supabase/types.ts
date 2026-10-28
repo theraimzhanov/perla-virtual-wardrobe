@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      feedback_answers: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          job_id: string
+          kind: string
+          question_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          job_id: string
+          kind: string
+          question_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          job_id?: string
+          kind?: string
+          question_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_answers_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "generation_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_answers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generation_jobs: {
         Row: {
           accessory_fit: string | null
@@ -27,6 +75,7 @@ export type Database = {
           item_image_url: string
           kind: string
           liked: boolean
+          parent_job_id: string | null
           person_image_url: string
           photo_id: string | null
           product_id: string | null
@@ -56,6 +105,7 @@ export type Database = {
           item_image_url: string
           kind?: string
           liked?: boolean
+          parent_job_id?: string | null
           person_image_url: string
           photo_id?: string | null
           product_id?: string | null
@@ -85,6 +135,7 @@ export type Database = {
           item_image_url?: string
           kind?: string
           liked?: boolean
+          parent_job_id?: string | null
           person_image_url?: string
           photo_id?: string | null
           product_id?: string | null
@@ -104,7 +155,47 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "generation_jobs_parent_job_id_fkey"
+            columns: ["parent_job_id"]
+            isOneToOne: false
+            referencedRelation: "generation_jobs"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "generation_jobs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      look_likes: {
+        Row: {
+          created_at: string
+          job_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          job_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          job_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "look_likes_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "generation_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "look_likes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -238,6 +329,7 @@ export type Database = {
           style: string | null
           updated_at: string
           user_id: string
+          wardrobe_hidden: boolean
         }
         Insert: {
           brand?: string | null
@@ -255,6 +347,7 @@ export type Database = {
           style?: string | null
           updated_at?: string
           user_id: string
+          wardrobe_hidden?: boolean
         }
         Update: {
           brand?: string | null
@@ -272,6 +365,7 @@ export type Database = {
           style?: string | null
           updated_at?: string
           user_id?: string
+          wardrobe_hidden?: boolean
         }
         Relationships: [
           {
