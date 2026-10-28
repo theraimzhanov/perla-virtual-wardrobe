@@ -12,12 +12,13 @@ export const createGenerationJob = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => generationRequestSchema.parse(input))
   .handler(async ({ data, context }) => {
     if (data.expectedOwner !== context.userId) throw new Error("Your account changed. Please try again.");
-    // Stay on the working legacy processor until the signed callback is published and verified.
+    // The legacy n8n processor stays available behind the activation flag.
     const direct = directGenerationEnabled(process.env['PERLA_DIRECT_GENERATION_ENABLED']);
-    const { generationConfig, enqueuePhoto } = await import("./generation-workflow.server");
-    if (direct) generationConfig();
+    const { directConfig, advanceDirectJob } = await import("./generation-direct.server");
+    if (direct) directConfig();
+    // Direct jobs are prepared and submitted here; later status checks poll and save the result.
     const dispatch = async (id: string, engine: string) => {
-      if (engine === "direct") await enqueuePhoto(id);
+      if (engine === "direct") await advanceDirectJob(id);
     };
     const existing = await context.supabase.from("generation_jobs").select("id,engine,status").eq("user_id", context.userId).eq("request_id", data.requestId).maybeSingle();
     if (existing.error) throw new Error("Couldn't check this request.");
@@ -65,8 +66,7 @@ export const createGenerationJob = createServerFn({ method: "POST" })
       return { jobId: duplicate.data.id };
     }
     if (jobError || !job) throw new Error("Couldn't start your try-on. Please retry.");
-    try { await dispatch(job.id, direct ? "direct" : "n8n"); }
-    catch { throw new Error("Your request is saved, but delivery couldn't start. Retry to resume the same request."); }
+    await dispatch(job.id, direct ? "direct" : "n8n");
     return { jobId: job.id };
   });
 
@@ -76,12 +76,12 @@ export const createVideoJob = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => videoRequestSchema.parse(input))
   .handler(async ({ data, context }) => {
     if (data.expectedOwner !== context.userId) throw new Error("Your account changed. Please try again.");
-    const { generationConfig, enqueueVideo } = await import("./generation-workflow.server");
-    generationConfig();
+    const { directConfig, advanceDirectJob } = await import("./generation-direct.server");
+    directConfig();
     const existing = await context.supabase.from("generation_jobs").select("id,status").eq("user_id", context.userId).eq("request_id", data.requestId).maybeSingle();
     if (existing.error) throw new Error("Couldn't check this request.");
     if (existing.data) {
-      if (["pending", "processing"].includes(existing.data.status)) await enqueueVideo(existing.data.id);
+      if (["pending", "processing"].includes(existing.data.status)) await advanceDirectJob(existing.data.id);
       return { jobId: existing.data.id };
     }
     const { data: photo, error } = await context.supabase.from("generation_jobs").select("*").eq("id", data.photoJobId).eq("user_id", context.userId).eq("kind", "photo").eq("status", "completed").is("deleted_at", null).single();
@@ -94,8 +94,7 @@ export const createVideoJob = createServerFn({ method: "POST" })
       product_name: photo.product_name, brand_name: photo.brand_name,
     }).select("id").single();
     if (jobError || !job) throw new Error("Couldn't start your video. Please retry.");
-    try { await enqueueVideo(job.id); }
-    catch { throw new Error("Your video request is saved, but delivery couldn't start. Retry to resume the same request."); }
+    await advanceDirectJob(job.id);
     return { jobId: job.id };
   });
 
@@ -115,8 +114,16 @@ export const getPhotoJob = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { data: row, error } = await context.supabase.from("generation_jobs").select("*").eq("id", data.id).eq("user_id", context.userId).is("deleted_at", null).single();
+    const read = () => context.supabase.from("generation_jobs").select("*").eq("id", data.id).eq("user_id", context.userId).is("deleted_at", null).single();
+    let { data: row, error } = await read();
     if (error || !row) throw new Error("Couldn't find this generation request.");
+    // Each owner status check advances an unfinished direct job by one step (poll, then save).
+    if (row.engine === "direct" && ["pending", "processing"].includes(row.status)) {
+      const { advanceDirectJob } = await import("./generation-direct.server");
+      await advanceDirectJob(row.id);
+      ({ data: row, error } = await read());
+      if (error || !row) throw new Error("Couldn't find this generation request.");
+    }
     return jobDto(row);
   });
 
