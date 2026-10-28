@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MobileRouteImport } from './routes/mobile'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppInsightsRouteImport } from './routes/_authenticated/app.insights'
@@ -39,6 +40,11 @@ const LoginRoute = LoginRouteImport.update({
 const MobileRoute = MobileRouteImport.update({
   id: '/mobile',
   path: '/mobile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/mobile': typeof MobileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/insights': typeof AuthenticatedAppInsightsRoute
   '/app/profile': typeof AuthenticatedAppProfileRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/mobile': typeof MobileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/app/insights': typeof AuthenticatedAppInsightsRoute
   '/app/profile': typeof AuthenticatedAppProfileRoute
   '/app/studio': typeof AuthenticatedAppStudioRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/mobile': typeof MobileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/app/insights': typeof AuthenticatedAppInsightsRoute
   '/_authenticated/app/profile': typeof AuthenticatedAppProfileRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/mobile'
+    | '/reset-password'
     | '/app'
     | '/app/insights'
     | '/app/profile'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/mobile'
+    | '/reset-password'
     | '/app/insights'
     | '/app/profile'
     | '/app/studio'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/mobile'
+    | '/reset-password'
     | '/_authenticated/app'
     | '/_authenticated/app/insights'
     | '/_authenticated/app/profile'
@@ -172,6 +184,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   MobileRoute: typeof MobileRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicGenerationPhotoRoute: typeof ApiPublicGenerationPhotoRoute
   ApiPublicGenerationVideoRoute: typeof ApiPublicGenerationVideoRoute
 }
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       path: '/mobile'
       fullPath: '/mobile'
       preLoaderRoute: typeof MobileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app': {
@@ -300,6 +320,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   MobileRoute: MobileRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicGenerationPhotoRoute: ApiPublicGenerationPhotoRoute,
   ApiPublicGenerationVideoRoute: ApiPublicGenerationVideoRoute,
 }
