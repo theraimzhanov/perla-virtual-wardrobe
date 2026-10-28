@@ -63,7 +63,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   const photoLookId = generation.job ? `job:${generation.job.id}` : `p${lookId}`;
   const likedPhoto = looks.some((look) => look.id === photoLookId && look.liked);
   const realVideo = useVideoGeneration(userId, signedIn && generation.job?.status === "completed" ? generation.job.id : null);
-  const videoPhase: Phase | "failed" = signedIn ? realVideo.phase : demoVideoPhase;
+  const videoPhase = (signedIn ? realVideo.phase : demoVideoPhase) as Phase | "failed";
   const videoSrc = signedIn ? realVideo.video : null;
   const startVideo = () => { setVideoError(false); if (signedIn) void realVideo.start(); else setVideoPhase("loading"); };
 
@@ -127,7 +127,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     if (signedIn) { if (resultImage && generation.job) void refreshPhotoJobs(); }
     else addLook({ id: `p${lookId}`, title: lookTitle, product: lookTitle, kind: "photo", image: modelAfter, source: productSource });
   }, [photoPhase, resultImage]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (videoPhase === "done") addLook({ id: `v${lookId}`, title: lookTitle, product: lookTitle, kind: "video", image: signedIn ? resultImage ?? modelAfter : modelAfter, video: videoSrc ?? sampleLookVideo, source: productSource }); }, [videoPhase, videoSrc]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (videoPhase === "done") addLook({ id: `v${lookId}`, title: lookTitle, product: lookTitle, kind: "video", image: signedIn ? resultImage ?? modelAfter : modelAfter, video: videoSrc ? { mp4: videoSrc } : sampleLookVideo, source: productSource }); }, [videoPhase, videoSrc]); // eslint-disable-line react-hooks/exhaustive-deps
   const recordSource = (question: string, answer: string) => {
     if (mode !== "personal" || question !== "where") return;
     const source = sourceFromFeedback(answer);
