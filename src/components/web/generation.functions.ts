@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { uploadBucket } from "./upload-rules";
 import { directGenerationEnabled, generationRequestSchema, videoRequestSchema, type PhotoJob } from "./generation-rules";
@@ -104,7 +106,7 @@ function jobDto(row: JobRow, extra: { likes?: number; liked?: boolean; feedbackS
 }
 
 // Like counts span all users, so they are read with the admin client after the owner-scoped job read.
-async function decorate(rows: JobRow[], userId: string, supabase: { from: (t: "feedback_answers") => any }) {
+async function decorate(rows: JobRow[], userId: string, supabase: SupabaseClient<Database>) {
   if (rows.length === 0) return [];
   const ids = rows.map((row) => row.id);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -112,8 +114,8 @@ async function decorate(rows: JobRow[], userId: string, supabase: { from: (t: "f
     supabaseAdmin.from("look_likes").select("job_id,user_id").in("job_id", ids),
     supabase.from("feedback_answers").select("job_id").eq("user_id", userId).in("job_id", ids),
   ]);
-  const likeRows = (likes.data ?? []) as { job_id: string; user_id: string }[];
-  const sent = new Set(((feedback.data ?? []) as { job_id: string }[]).map((row) => row.job_id));
+  const likeRows = likes.data ?? [];
+  const sent = new Set((feedback.data ?? []).map((row) => row.job_id));
   return rows.map((row) => jobDto(row, { likes: likeRows.filter((like) => like.job_id === row.id).length, liked: likeRows.some((like) => like.job_id === row.id && like.user_id === userId), feedbackSent: sent.has(row.id) }));
 }
 
