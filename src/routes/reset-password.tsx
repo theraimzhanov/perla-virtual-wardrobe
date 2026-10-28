@@ -8,6 +8,7 @@ export const Route = createFileRoute("/reset-password")({
     meta: [
       { title: "Reset password — PERLA" },
       { name: "description", content: "Choose a new password for your PERLA account." },
+      { name: "robots", content: "noindex" },
       { property: "og:title", content: "Reset password — PERLA" },
       { property: "og:description", content: "Choose a new password for your PERLA account." },
       { property: "og:type", content: "website" },
