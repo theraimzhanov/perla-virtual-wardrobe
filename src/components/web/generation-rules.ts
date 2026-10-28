@@ -5,6 +5,11 @@ export const generationRequestSchema = z.object({
   requestId: z.string().uuid(),
   accessoryFit: z.enum(["female", "male"]).nullable().default(null),
 });
+export const videoRequestSchema = z.object({
+  expectedOwner: z.string().uuid(),
+  requestId: z.string().uuid(),
+  photoJobId: z.string().uuid(),
+});
 export const generationPayloadSchema = z.object({ jobId: z.string().uuid() });
 export const classificationSchema = z.object({ category: z.enum(["Clothes", "Bag", "Hat", "Shoes", "unsupported"]) });
 export type AccessoryFit = "female" | "male";
@@ -13,7 +18,9 @@ export type PhotoJob = {
   id: string;
   status: string;
   stage: string;
+  kind: "photo" | "video";
   image: string | null;
+  video: string | null;
   error: string | null;
   title: string;
   source: "discover" | "own" | "internet" | "store";
@@ -44,9 +51,9 @@ export function providerBody(category: string, person: string, item: string, fit
   return images;
 }
 
-export function photoJobPhase(job: Pick<PhotoJob, "status" | "image">): "loading" | "done" | "failed" {
+export function photoJobPhase(job: Pick<PhotoJob, "status" | "image"> & { kind?: "photo" | "video"; video?: string | null }): "loading" | "done" | "failed" {
   if (job.status === "failed") return "failed";
-  if (job.status === "completed") return job.image ? "done" : "failed";
+  if (job.status === "completed") return (job.kind === "video" ? job.video : job.image) ? "done" : "failed";
   return "loading";
 }
 
