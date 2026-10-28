@@ -40,7 +40,7 @@ async function downloadMedia(url: string, filename: string) {
 }
 
 export function TryOnExperience({ compact = false }: { compact?: boolean }) {
-  const { photo, photoId, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource, markTried, savingInputs, inputError, retryInputs, signedIn, photoJobs, refreshPhotoJobs, generationHistoryError } = useTryOn();
+  const { userId, selectedInputProductId, photo, photoId, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource, markTried, savingInputs, inputError, retryInputs, signedIn, photoJobs, refreshPhotoJobs, generationHistoryError } = useTryOn();
   const [lookId, setLookId] = useState(0);
   const [demoPhotoPhase, setDemoPhotoPhase] = useState<Phase>("idle");
   const [accessoryFit, setAccessoryFit] = useState<AccessoryFit | null>(null);
@@ -55,8 +55,8 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   const resultRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLElement>(null);
   const selectionKey = selected.map((item) => `${item.id}:${item.image}`).join("|");
-  const restored = signedIn ? photoJobs.find((job) => job.photoId === photoId && job.title === selected[0]?.name) : undefined;
-  const generation = usePhotoGeneration(signedIn, `${photoId}:${selectionKey}:${mode}`, restored);
+  const restored = signedIn && photoId && selectedInputProductId ? photoJobs.find((job) => job.photoId === photoId && job.productId === selectedInputProductId && (mode === "discover" ? job.source === "discover" : job.source !== "discover")) : undefined;
+  const generation = usePhotoGeneration(userId, `${photoId}:${selectedInputProductId}:${mode}`, restored);
   const photoPhase = signedIn ? generation.phase : demoPhotoPhase;
   const resultImage = generation.job?.image ?? null;
   const photoLookId = generation.job ? `job:${generation.job.id}` : `p${lookId}`;

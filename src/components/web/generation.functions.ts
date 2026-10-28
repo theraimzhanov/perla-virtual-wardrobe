@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { uploadBucket } from "./upload-rules";
-import { generationRequestSchema, type PhotoJob } from "./generation-rules";
+import { directGenerationEnabled, generationRequestSchema, type PhotoJob } from "./generation-rules";
 
 const LINK_SECONDS = 60 * 60 * 24;
 
@@ -13,7 +13,7 @@ export const createGenerationJob = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     if (data.expectedOwner !== context.userId) throw new Error("Your account changed. Please try again.");
     // Stay on the working legacy processor until the signed callback is published and verified.
-    const direct = process.env['PERLA_DIRECT_GENERATION_ENABLED'] === "true";
+    const direct = directGenerationEnabled(process.env['PERLA_DIRECT_GENERATION_ENABLED']);
     const { generationConfig, enqueuePhoto } = await import("./generation-workflow.server");
     if (direct) generationConfig();
     const dispatch = async (id: string, engine: string) => {

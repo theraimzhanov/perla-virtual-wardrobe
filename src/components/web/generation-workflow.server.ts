@@ -22,6 +22,8 @@ export function generationConfig() {
 
 export async function enqueuePhoto(jobId: string) {
   const config = generationConfig();
+  const online = await fetch(config.url, { signal: AbortSignal.timeout(10000), redirect: "error" });
+  if (!online.ok || (await online.json() as { processor?: string }).processor !== "perla-photo-v1") throw new Error("The photo processor is not published yet.");
   const client = new WorkflowClient({ token: config.token });
   await client.trigger({ url: config.url, body: { jobId }, workflowRunId: `photo-${jobId}`, retries: 3 });
 }
@@ -64,7 +66,7 @@ async function safeStep<T>(operation: () => Promise<T>): Promise<T> {
 
 export async function runPhotoWorkflow(context: WorkflowContext<{ jobId: string }>) {
   const { jobId } = generationPayloadSchema.parse(context.requestPayload);
-  const initial = await context.run("load-job", () => loadJob(jobId));
+  const initial = await context.run("load-job", async () => ({ status: (await loadJob(jobId)).status }));
   if (["completed", "failed"].includes(initial.status)) return;
   const category = await context.run("classify-product", () => safeStep(async () => {
     const job = await loadJob(jobId);
@@ -92,9 +94,10 @@ export async function runPhotoWorkflow(context: WorkflowContext<{ jobId: string 
     catch (cause) {
       throw new WorkflowNonRetryableError(cause instanceof GenerationProviderError ? cause.message : "Submission status is uncertain. Check Perfect Corp before trying again.");
     }
-    await updateJob(jobId, { provider_task_id: submitted.taskId, provider_endpoint: submitted.endpoint, stage: "polling" });
     return submitted;
   });
+  // Checkpoint the returned task ID before retryable persistence, never repeating the provider POST.
+  await context.run("persist-provider-task", () => updateJob(jobId, { provider_task_id: task.taskId, provider_endpoint: task.endpoint, stage: "polling" }));
   for (let attempt = 0; attempt < 60; attempt++) {
     await context.sleep(`wait-${attempt}`, 10);
     const result = await context.run(`poll-${attempt}`, () => safeStep(() => pollPhoto(task.endpoint, task.taskId, generationConfig().perfectKey)));

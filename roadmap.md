@@ -1,10 +1,12 @@
 # Perla update
 
 ## Direct photo try-on migration
-- [ ] Replace n8n photo processing with authenticated app-owned generation and durable asynchronous processing.
-- [ ] Configure Perfect Corp, Gemini and delayed-delivery credentials; retain existing n8n until the replacement is verified.
-- [ ] Persist task progress and finished media, restore results across reloads, and show real failures instead of sample success.
-- [ ] Test ownership, retry/idempotency behavior and photo-generation flow; document dashboard steps and remaining verification blockers.
+- [x] Build app-owned photo processing with authenticated server functions, category-specific Perfect Corp adapters and durable Upstash Workflow steps.
+- [x] Save Perfect Corp, Gemini and QStash credentials securely; retain n8n behind a default-off direct activation flag and protect its trigger from direct jobs.
+- [x] Add durable task progress/result paths, owner-scoped history restoration, real-photo like/share/delete persistence and no sample success for signed-in photo failures.
+- [x] Pass 62 focused tests and current build; verify unsigned/invalid callbacks return 401 and public photo UI has no browser errors. Add simple activation instructions in PHOTO_GENERATION_SETUP.md.
+- [ ] Publish and activate direct processing — blocked by publication permission; callback is not yet reachable publicly. QStash access checks returned 404, so delivery credentials remain unverified.
+- [ ] Verify a real direct generation and reload in the signed-in UI — blocked by unavailable authenticated testing for external Supabase and the unpublished callback. Video/AI Studio remain outside this photo-only phase.
 
 ## Matching Try-On photo frames
 - [x] Match input, output and comparison frame dimensions while keeping full photos visible.
