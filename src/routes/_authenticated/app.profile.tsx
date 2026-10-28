@@ -72,8 +72,8 @@ function Profile() {
   return (
     <div>
       <PageHeader eyebrow={account?.email ?? "Member"} title={firstName || "You"} accent={restName.join(" ")} />
-      <div className="grid gap-6 xl:grid-cols-3">
-        <Panel className="xl:col-span-1">
+      <div className="space-y-6">
+        <Panel>
           {account?.avatarUrl ? <img src={account.avatarUrl} alt="" className="h-20 w-20 rounded-full object-cover" /> : <div className="grid h-20 w-20 place-items-center rounded-full bg-gold-gradient font-serif text-3xl text-primary-foreground">{(account?.name ?? "P").split(/\s+/).map((part) => part[0]?.toUpperCase() ?? "").join("").slice(0, 2) || "P"}</div>}
           <p className="mt-4 font-serif text-2xl">Style DNA</p>
           <p className="text-sm text-muted-foreground">Quiet luxury with a Parisian edge.</p>
@@ -85,13 +85,13 @@ function Profile() {
           </div>
           <Button variant="outline" className="mt-6 w-full rounded-full" onClick={handleSignOut}>Sign out</Button>
         </Panel>
-        <div className="space-y-6 xl:col-span-2">
-          <div className="grid gap-6 sm:grid-cols-3">
+        <div className="space-y-6">
+          <div className="grid grid-cols-3 gap-3 sm:gap-6">
             <Stat label="Try-ons" value={String(tryOns)} /><Stat label="Studio shots" value={String(studioShots)} /><Stat label="Saved pieces" value={String(triedProducts.length)} />
           </div>
           <Panel>
             <div className="mb-4 flex items-end justify-between gap-3"><h2 className="font-serif text-2xl">My looks & videos</h2><span className="text-xs text-muted-foreground">Sorted by likes</span></div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
               {myLooks.map((look) => <LookCard key={look.id} look={look} showShare showDelete />)}
             </div>
             {myLooks.length === 0 && <p className="text-sm text-muted-foreground">Your virtual try-on photos and videos will appear here.</p>}
@@ -99,7 +99,7 @@ function Profile() {
           <Panel>
             <div className="mb-4 flex items-end justify-between gap-3"><h2 className="font-serif text-2xl">Wardrobe</h2><span className="text-xs text-muted-foreground">Pieces you tried on</span></div>
             {triedProducts.length === 0 ? <p className="text-sm text-muted-foreground">Pieces you try on will appear here.</p> : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
                 {triedProducts.map((p) => (
                   <article key={p.id} aria-label={p.name} className="relative overflow-hidden rounded-lg bg-card shadow-card">
                     <img src={p.image} alt={p.name} className="aspect-square w-full object-cover" />

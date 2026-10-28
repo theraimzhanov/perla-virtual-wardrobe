@@ -56,7 +56,7 @@ function AppLayout() {
             </Link>
           ))}
         </nav>
-        <div className="border-t px-2 pt-5"><p className="font-serif text-lg">Made for your next look.</p><p className="mt-1 text-[10px] uppercase text-gold">PERLA · Hackathon edition</p></div>
+        <div className="border-t px-2 pt-5"><p className="font-serif text-lg">Made for your next look.</p><p className="mt-1 text-[10px] uppercase text-gold">PERLA · Version 1</p></div>
         <Link to="/mobile" className="mt-4 flex items-center gap-2 px-2 text-xs text-muted-foreground hover:text-foreground">
           <Smartphone className="h-3.5 w-3.5" /> Open mobile version
         </Link>
