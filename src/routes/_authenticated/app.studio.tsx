@@ -2,13 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, Film, Image as ImageIcon, Sparkles } from "lucide-react";
+import { Check, Film, Image as ImageIcon, Sparkles, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { jobLook, useTryOn } from "@/components/web/TryOnContext";
 import { GenerationSkeleton } from "@/components/web/GenerationSkeleton";
 import { LookCard } from "@/components/web/LookCard";
-import { createStudioJob, getPhotoJob } from "@/components/web/generation.functions";
+import { changeGeneratedLook, createStudioJob, getPhotoJob } from "@/components/web/generation.functions";
 import { photoJobPhase } from "@/components/web/generation-rules";
 import { DEFAULT_STUDIO_SCENE, STUDIO_PROMPT_LIMIT, studioSceneNames, type StudioScene } from "@/components/web/studio-rules";
 import { PageHeader, Panel, Pill, GoldButton } from "@/components/web/ui";
@@ -31,6 +32,7 @@ function Studio() {
   const { userId, photoJobs, studioJobs, refreshPhotoJobs } = useTryOn();
   const create = useServerFn(createStudioJob);
   const read = useServerFn(getPhotoJob);
+  const remove = useServerFn(changeGeneratedLook);
   // Only finished try-on photos are base looks, each shown once.
   const bases = photoJobs.filter((job) => photoJobPhase(job) === "done");
   const [baseId, setBaseId] = useState<string | null>(null);
@@ -76,6 +78,20 @@ function Studio() {
     } finally { lock.current = false; setStarting(false); }
   };
 
+  // Stop removes the unfinished creation; a video already sent to the provider can't be recalled, so its result is discarded.
+  const [stopping, setStopping] = useState(false);
+  const stop = async () => {
+    const targets = pending.map((job) => job.id);
+    if (!targets.length || stopping) return;
+    setStopping(true);
+    try {
+      await Promise.all(targets.map((id) => remove({ data: { id, deleted: true } })));
+      setCurrentId(null);
+      toast("Creation stopped");
+    } catch { toast.error("Couldn't stop it. Please try again."); }
+    finally { await refreshPhotoJobs(); setStopping(false); }
+  };
+
   const busy = starting || pending.length > 0;
 
   return (
@@ -102,7 +118,10 @@ function Studio() {
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <Pill active={output === "photo"} onClick={() => setOutput("photo")}><ImageIcon className="mr-1 inline h-4 w-4" />Image</Pill>
           <Pill active={output === "video"} onClick={() => setOutput("video")}><Film className="mr-1 inline h-4 w-4" />Video</Pill>
-          <GoldButton className="ml-auto" onClick={() => void generate()} disabled={!base || busy}><Sparkles className="h-4 w-4" /> {busy ? "Creating…" : `Create ${output === "photo" ? "image" : "video"}`}</GoldButton>
+          <div className="ml-auto flex items-center gap-2">
+            {pending.length > 0 && <Button variant="outline" className="rounded-full" onClick={() => void stop()} disabled={stopping}><Square className="h-3.5 w-3.5 fill-current" /> {stopping ? "Stopping…" : "Stop"}</Button>}
+            <GoldButton onClick={() => void generate()} disabled={!base || busy}><Sparkles className="h-4 w-4" /> {busy ? "Creating…" : `Create ${output === "photo" ? "image" : "video"}`}</GoldButton>
+          </div>
         </div>
       </Panel>
       {(starting || current) && (
