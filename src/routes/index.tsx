@@ -68,7 +68,7 @@ function Landing() {
           </div>
           <div className="mt-10 grid grid-cols-3 gap-4 sm:gap-10">
             {[["120k", "try-ons"], ["340", "brands"], [(created?.total ?? 0).toLocaleString(), "generated images & videos"]].map(([v, l]) => (
-              <div key={l} className="min-w-0"><p className="font-serif text-3xl sm:text-4xl">{v}</p><p className="mt-1 max-w-32 text-xs uppercase text-muted-foreground">{l}</p></div>
+              <div key={l} className="min-w-0"><p className="font-serif text-3xl sm:text-4xl">{v}</p><p className="mt-1 max-w-48 text-xs uppercase text-muted-foreground">{l}</p></div>
             ))}
           </div>
         </div>
