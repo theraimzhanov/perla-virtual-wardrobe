@@ -1,5 +1,5 @@
 import { Client as WorkflowClient, WorkflowNonRetryableError, type WorkflowContext } from "@upstash/workflow";
-import { Receiver } from "@upstash/qstash";
+import { Receiver, Client as QStashClient } from "@upstash/qstash";
 import { serve } from "@upstash/workflow/tanstack";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { generationPayloadSchema, providerEndpoint, providerBody, resultObjectPath, trustedMediaUrl, type AccessoryFit } from "./generation-rules";
@@ -129,7 +129,7 @@ export async function handlePhotoWorkflow(request: Request) {
     if (!await receiver.verify({ signature, body, url: config.url })) return new Response("Unauthorized", { status: 401 });
   } catch { return new Response("Unauthorized", { status: 401 }); }
   const handler = serve(runPhotoWorkflow, {
-    url: config.url, receiver, qstashClient: new WorkflowClient({ token: config.token }), disableTelemetry: true,
+    url: config.url, receiver, qstashClient: new QStashClient({ token: config.token, devMode: false }), disableTelemetry: true,
     initialPayloadParser: (payload) => generationPayloadSchema.parse(JSON.parse(payload)),
     failureFunction: async ({ context, failStatus }) => {
       const parsed = generationPayloadSchema.safeParse(context.requestPayload);
