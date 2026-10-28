@@ -16,55 +16,88 @@ export type Database = {
     Tables: {
       generation_jobs: {
         Row: {
+          accessory_fit: string | null
           brand_name: string | null
           category: string
           created_at: string
+          deleted_at: string | null
+          engine: string
           error_message: string | null
           id: string
           item_image_url: string
           kind: string
+          liked: boolean
           person_image_url: string
           photo_id: string | null
           product_id: string | null
           product_name: string | null
+          provider_endpoint: string | null
+          provider_task_id: string | null
+          request_id: string | null
           result_image_url: string | null
+          result_storage_path: string | null
           result_video_url: string | null
+          shared: boolean
+          source: string
+          stage: string
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          accessory_fit?: string | null
           brand_name?: string | null
           category?: string
           created_at?: string
+          deleted_at?: string | null
+          engine?: string
           error_message?: string | null
           id?: string
           item_image_url: string
           kind?: string
+          liked?: boolean
           person_image_url: string
           photo_id?: string | null
           product_id?: string | null
           product_name?: string | null
+          provider_endpoint?: string | null
+          provider_task_id?: string | null
+          request_id?: string | null
           result_image_url?: string | null
+          result_storage_path?: string | null
           result_video_url?: string | null
+          shared?: boolean
+          source?: string
+          stage?: string
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          accessory_fit?: string | null
           brand_name?: string | null
           category?: string
           created_at?: string
+          deleted_at?: string | null
+          engine?: string
           error_message?: string | null
           id?: string
           item_image_url?: string
           kind?: string
+          liked?: boolean
           person_image_url?: string
           photo_id?: string | null
           product_id?: string | null
           product_name?: string | null
+          provider_endpoint?: string | null
+          provider_task_id?: string | null
+          request_id?: string | null
           result_image_url?: string | null
+          result_storage_path?: string | null
           result_video_url?: string | null
+          shared?: boolean
+          source?: string
+          stage?: string
           status?: string
           updated_at?: string
           user_id?: string
