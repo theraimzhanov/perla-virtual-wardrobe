@@ -10,6 +10,8 @@ The new processor is **not activated**. New requests continue using the existing
 
 The secure form saved `PERFECT_CORP_API_KEY`, `GEMINI_API_KEY`, `QSTASH_TOKEN`, `QSTASH_CURRENT_SIGNING_KEY`, and `QSTASH_NEXT_SIGNING_KEY`.
 
+Gemini model listing succeeded, and Perfect Corp returned its expected `InvalidTaskId` response for a harmless non-existent task. QStash read probes returned 404; QStash access/signing-key validity is not yet verified and must be checked before activation. These checks created no paid generations.
+
 - Perfect Corp: https://yce.perfectcorp.com/ai-api → API Console → API key. Enable the relevant APIs and maintain sufficient provider credits.
 - Gemini: https://aistudio.google.com → Get API key. Use a project with Gemini API enabled and available quota.
 - Upstash: https://console.upstash.com → QStash → copy the Token and both Signing keys into Lovable's secure form. Provider delivery/AI usage may incur charges.
