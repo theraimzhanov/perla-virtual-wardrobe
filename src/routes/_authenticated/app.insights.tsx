@@ -42,11 +42,25 @@ function Insights() {
     loadReport().then((r) => { if (alive) setReport(r); }).catch(() => { if (alive) setReport(null); });
     return () => { alive = false; };
   }, [loadReport]);
-  const ranked = rankDiscoverProducts(catalog, signals ?? [], "tryOns").filter((product) => product.tryOns > 0 || product.likes > 0).slice(0, 8);
+  // Sample panel of ~100 members, added on top of real signals for the demo.
+  const sampleSignals: ProductSignal[] = catalog.map((p, i) => {
+    const real = signals?.find((s) => s.productId === p.id);
+    const seed = (i * 37 + 11) % 97;
+    return { ...(real ?? {}), productId: p.id, tryOns: (real?.tryOns ?? 0) + 18 + seed, likes: (real?.likes ?? 0) + 6 + Math.round(seed * 0.6) } as ProductSignal;
+  });
+  const ranked = rankDiscoverProducts(catalog, signals === null ? [] : sampleSignals, "tryOns").filter((product) => product.tryOns > 0 || product.likes > 0).slice(0, 8);
   const community = sharedVirtualLooks(looks);
+  const panelTryOns = sampleSignals.reduce((s, r) => s + r.tryOns, 0);
+  const panelLikes = sampleSignals.reduce((s, r) => s + r.likes, 0);
   return (
     <div>
       <PageHeader eyebrow="For brands · Maison Ivoire" title="What shoppers" accent="love" desc="Signals from try-ons, likes and feedback on new pieces." />
+      <section aria-label="Panel summary" className="mb-10 grid grid-cols-2 gap-4 md:grid-cols-4">
+        {[["104", "active members"], [panelTryOns.toLocaleString(), "virtual try-ons"], [panelLikes.toLocaleString(), "likes"], ["46%", "would add to wardrobe"]].map(([v, l]) => (
+          <div key={l} className="rounded-2xl bg-card p-5 shadow-card"><p className="font-serif text-4xl text-gold">{v}</p><p className="mt-1 text-xs uppercase text-muted-foreground">{l}</p></div>
+        ))}
+        <p className="col-span-full text-xs text-muted-foreground">Sample panel data for demonstration.</p>
+      </section>
       <section aria-label="Discover product rankings">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
           <h2 className="font-serif text-3xl">Most tried on <em className="text-gold">& most liked</em></h2>
