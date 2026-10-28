@@ -1,5 +1,15 @@
 # Perla update
 
+## Saved Try-On results and real data
+- [x] Single-submit guards on generate, video, like, share, delete and feedback.
+- [x] Gradient loading state; delete for photo and video (removed from database and storage).
+- [x] Keep the newest photo/video on Try-On across screens until deleted or replaced.
+- [x] Save feedback answers; bigger Send feedback button.
+- [x] Profile looks, wardrobe and stats from saved data; Brand Insights community and rankings from saved data.
+- [x] Clear old generated looks and files.
+- [ ] Signed-in check in the browser — automatic sign-in isn't available for this project; user to try it.
+
+
 ## App-managed generation (no webhooks)
 - [x] Submit photo/video jobs inside the request and advance them on each status check; save results before completing.
 - [ ] Run one signed-in photo + video on studioperla.live after publishing — needs the user to publish and try it.
