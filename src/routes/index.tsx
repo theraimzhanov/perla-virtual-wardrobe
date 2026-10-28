@@ -43,20 +43,20 @@ function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-3">
-          <img src={logo.url} alt="" className="h-11 w-auto" /><span className="font-serif text-2xl tracking-[0.28em]">PERLA</span>
+      <header className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-5 sm:flex sm:justify-between sm:px-6 sm:py-6">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <img src={logo.url} alt="" className="h-9 w-auto shrink-0 sm:h-11" /><span className="truncate font-serif text-xl tracking-[0.2em] sm:text-2xl sm:tracking-[0.28em]">PERLA</span>
         </div>
-        <nav className="flex items-center gap-6 text-sm">
+        <nav className="flex shrink-0 items-center gap-3 text-sm sm:gap-6">
           <Link to="/app/insights" className="hidden text-muted-foreground hover:text-foreground sm:inline">For brands</Link>
-          <Link to="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
-          <Link to="/app" className="rounded-full bg-primary px-5 py-2.5 text-primary-foreground">Open app</Link>
+          <Link to="/login" className="whitespace-nowrap rounded-full border border-border px-4 py-2 text-foreground hover:bg-secondary sm:border-0 sm:px-0 sm:py-0 sm:text-muted-foreground">Sign in</Link>
+          <Link to="/app" className="hidden whitespace-nowrap rounded-full bg-primary px-5 py-2.5 text-primary-foreground sm:inline-block">Open app</Link>
         </nav>
       </header>
-      <section className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-12 md:grid-cols-2 md:py-20">
+      <section className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-8 sm:px-6 sm:py-12 md:grid-cols-2 md:py-20">
         <div>
           <Eyebrow>AI fashion discovery</Eyebrow>
-          <h1 className="mt-4 font-serif text-6xl leading-[1.02] md:text-7xl">Wear it <em className="text-gold">before</em> anyone.</h1>
+          <h1 className="mt-4 font-serif text-5xl leading-[1.02] sm:text-6xl md:text-7xl">Wear it <em className="text-gold">before</em> anyone.</h1>
           <p className="mt-6 max-w-md text-lg text-muted-foreground">PERLA dresses you in any piece with virtual try-on, and tells brands exactly what you'd love to own.</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/app/try-on" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-primary-foreground shadow-soft">Try it on <ArrowRight className="h-4 w-4" /></Link>
@@ -64,13 +64,13 @@ function Landing() {
           </div>
           <div className="mt-10 grid grid-cols-3 gap-4 sm:gap-10">
             {[["120k", "try-ons"], ["340", "brands"], [sharedCount.toLocaleString(), "shared virtual try-ons"]].map(([v, l]) => (
-              <div key={l} className="min-w-0"><p className="font-serif text-4xl">{v}</p><p className="mt-1 max-w-32 text-xs uppercase text-muted-foreground">{l}</p></div>
+              <div key={l} className="min-w-0"><p className="font-serif text-3xl sm:text-4xl">{v}</p><p className="mt-1 max-w-32 text-xs uppercase text-muted-foreground">{l}</p></div>
             ))}
           </div>
         </div>
         <div className="mx-auto w-full max-w-md rounded-[2rem] bg-card p-4 shadow-soft"><CompareSlider before={modelBefore} after={modelAfter} /></div>
       </section>
-      <section className="mx-auto grid max-w-6xl gap-6 px-6 pb-24 md:grid-cols-3">
+      <section className="mx-auto grid max-w-6xl gap-6 px-4 pb-24 sm:px-6 md:grid-cols-3">
         {features.map((f) => (
           <div key={f.title} className="rounded-[1.75rem] bg-card p-8 shadow-card">
             <f.icon className="h-6 w-6 text-gold" />

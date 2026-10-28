@@ -39,11 +39,12 @@ function Studio() {
   const [prompt, setPrompt] = useState("");
   const [output, setOutput] = useState<"photo" | "video">("photo");
   const [starting, setStarting] = useState(false);
+  // Only the creation made in this visit is shown here; everything is kept in Profile collections.
+  const [currentId, setCurrentId] = useState<string | null>(null);
   const lock = useRef(false);
 
   const pending = studioJobs.filter((job) => photoJobPhase(job) === "loading");
-  const done = studioJobs.filter((job) => photoJobPhase(job) === "done");
-  const failed = studioJobs.filter((job) => job.status === "failed").slice(0, 1);
+  const current = studioJobs.find((job) => job.id === currentId);
 
   // Each status check advances an unfinished creation one step (videos poll the provider).
   const pendingKey = pending.map((job) => job.id).join(",");
@@ -65,9 +66,10 @@ function Studio() {
     try {
       const { data } = await supabase.auth.getUser();
       if (!data.user || data.user.id !== userId) throw new Error("Your account changed. Please sign in again.");
-      await create({ data: { expectedOwner: data.user.id, requestId: crypto.randomUUID(), baseJobId: base.id, kind: output, scene, prompt } });
+      const made = await create({ data: { expectedOwner: data.user.id, requestId: crypto.randomUUID(), baseJobId: base.id, kind: output, scene, prompt } });
+      setCurrentId(made.jobId);
       await refreshPhotoJobs();
-      toast.success(output === "photo" ? "New image ready — saved to your collection" : "Video started — it will appear here when ready");
+      toast.success(output === "photo" ? "New image ready — saved to your collections" : "Video started — it will appear here when ready");
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : "Couldn't start your creation.");
       await refreshPhotoJobs();
@@ -103,14 +105,15 @@ function Studio() {
           <GoldButton className="ml-auto" onClick={() => void generate()} disabled={!base || busy}><Sparkles className="h-4 w-4" /> {busy ? "Creating…" : `Create ${output === "photo" ? "image" : "video"}`}</GoldButton>
         </div>
       </Panel>
-      <h2 className="mb-4 font-serif text-3xl">Your creations</h2>
-      {failed.map((job) => <p key={job.id} role="alert" className="mb-4 text-sm text-destructive">Last creation failed: {job.error ?? "please try again."}</p>)}
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        {starting && pending.length === 0 && <GenerationSkeleton kind={output} />}
-        {pending.map((job) => <GenerationSkeleton key={job.id} kind={job.kind} />)}
-        {done.map((job) => <LookCard key={job.id} look={jobLook(job)} showShare showDelete showDownload />)}
-        {!busy && done.length === 0 && <p className="text-sm text-muted-foreground">New images and videos will appear here and in your Profile.</p>}
-      </div>
+      {(starting || current) && (
+        <section aria-label="Just created" className="mx-auto w-full max-w-xl">
+          <h2 className="mb-4 font-serif text-3xl">Just created</h2>
+          {current?.status === "failed" ? <p role="alert" className="text-sm text-destructive">This creation failed: {current.error ?? "please try again."}</p>
+            : !current || photoJobPhase(current) === "loading" ? <GenerationSkeleton kind={current?.kind ?? output} />
+            : <LookCard look={jobLook(current)} showShare showDelete showDownload />}
+          <p className="mt-3 text-xs text-muted-foreground">All your creations are saved in Profile → My looks & videos.</p>
+        </section>
+      )}
     </div>
   );
 }
