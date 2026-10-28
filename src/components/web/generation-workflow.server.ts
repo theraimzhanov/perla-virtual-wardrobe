@@ -92,9 +92,10 @@ export async function runPhotoWorkflow(context: WorkflowContext<{ jobId: string 
     catch (cause) {
       throw new WorkflowNonRetryableError(cause instanceof GenerationProviderError ? cause.message : "Submission status is uncertain. Check Perfect Corp before trying again.");
     }
-    await updateJob(jobId, { provider_task_id: submitted.taskId, provider_endpoint: submitted.endpoint, stage: "polling" });
     return submitted;
   });
+  // Checkpoint the returned task ID before retryable persistence, never repeating the provider POST.
+  await context.run("persist-provider-task", () => updateJob(jobId, { provider_task_id: task.taskId, provider_endpoint: task.endpoint, stage: "polling" }));
   for (let attempt = 0; attempt < 60; attempt++) {
     await context.sleep(`wait-${attempt}`, 10);
     const result = await context.run(`poll-${attempt}`, () => safeStep(() => pollPhoto(task.endpoint, task.taskId, generationConfig().perfectKey)));

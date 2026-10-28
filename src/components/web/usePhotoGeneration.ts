@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { createGenerationJob, getPhotoJob } from "./generation.functions";
 import { photoJobPhase, type AccessoryFit, type PhotoJob } from "./generation-rules";
 
-export function usePhotoGeneration(signedIn: boolean, selectionKey: string, restored: PhotoJob | undefined) {
+export function usePhotoGeneration(userId: string | null, selectionKey: string, restored: PhotoJob | undefined) {
+  const signedIn = Boolean(userId);
   const create = useServerFn(createGenerationJob);
   const read = useServerFn(getPhotoJob);
   const [job, setJob] = useState<PhotoJob | null>(null);
@@ -22,11 +23,11 @@ export function usePhotoGeneration(signedIn: boolean, selectionKey: string, rest
     touched.current = false;
     lock.current = false;
     setJob(null); setStarting(false); setStartError(null);
-  }, [selectionKey, signedIn]);
+  }, [selectionKey, userId]);
 
   useEffect(() => {
     if (!touched.current && restored) setJob(restored);
-  }, [restored, selectionKey]);
+  }, [restored, selectionKey, userId]);
 
   const refresh = useCallback(async (id: string, epoch: number) => {
     try {
@@ -62,12 +63,12 @@ export function usePhotoGeneration(signedIn: boolean, selectionKey: string, rest
     if (!signedIn || lock.current) return;
     lock.current = true;
     touched.current = true;
+    const epoch = ++version.current;
     setStarting(true); setStartError(null); setJob(null);
-    const epoch = version.current;
     request.current ??= crypto.randomUUID();
     try {
       const { data } = await supabase.auth.getUser();
-      if (!data.user) throw new Error("Sign in to generate your photo.");
+      if (!data.user || data.user.id !== userId) throw new Error("Your account changed. Please sign in again.");
       const created = await create({ data: { expectedOwner: data.user.id, requestId: request.current, accessoryFit: fit } });
       if (epoch !== version.current) return;
       const row = await read({ data: { id: created.jobId } });

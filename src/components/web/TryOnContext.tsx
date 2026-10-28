@@ -35,6 +35,10 @@ function useTryOnState(userId: string | null, authReady: boolean) {
   const changeSavedLook = useServerFn(changeGeneratedLook);
   const owner = useRef(userId);
   owner.current = userId;
+  useEffect(() => {
+    setPhotoJobs([]); setGenerationHistoryError(null);
+    setLooks(seedLooks);
+  }, [userId]);
   const refreshPhotoJobs = useCallback(async () => {
     if (!userId) return;
     try {
@@ -86,7 +90,7 @@ function useTryOnState(userId: string | null, authReady: boolean) {
   const triedProducts = triedIds.map((id) => catalog.find((p) => p.id === id)).filter((p): p is DiscoverProduct => !!p);
   const updateLookSource = (ids: string[], source: LookSource) => { if (source !== "discover") for (const id of ids) void changeLook(id, { source }); };
 
-  return { ...savedInputs, selectProduct, preparing, setPreparing, looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, triedProducts, markTried, removeTried, catalog, query, setQuery, photoJobs, refreshPhotoJobs, generationHistoryError };
+  return { ...savedInputs, userId, selectProduct, preparing, setPreparing, looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, triedProducts, markTried, removeTried, catalog, query, setQuery, photoJobs, refreshPhotoJobs, generationHistoryError };
 }
 
 type TryOnState = ReturnType<typeof useTryOnState>;
