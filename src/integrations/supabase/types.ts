@@ -176,6 +176,27 @@ export type Database = {
           },
         ]
       }
+      insight_reports: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          week_start?: string
+        }
+        Relationships: []
+      }
       look_likes: {
         Row: {
           created_at: string
@@ -265,6 +286,35 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      style_dna: {
+        Row: {
+          headline: string
+          tags: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          headline: string
+          tags?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          headline?: string
+          tags?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "style_dna_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       try_on_inputs: {
         Row: {
