@@ -51,6 +51,7 @@ function Login() {
     if (mode === "signup") {
       if (password.length < 8) { setError("Password must be at least 8 characters."); setBusy(false); return; }
       if (password !== confirm) { setError("Passwords do not match."); setBusy(false); return; }
+      if (!agreed) { setError("Please agree to the Terms to create an account."); setBusy(false); return; }
     }
     if (mode === "signin") {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -84,6 +85,7 @@ function Login() {
   }
 
   async function handleGoogle() {
+    if (mode === "signup" && !agreed) { setError("Please agree to the Terms to create an account."); return; }
     setBusy(true);
     setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
