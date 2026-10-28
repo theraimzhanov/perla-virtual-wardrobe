@@ -68,6 +68,8 @@ export const createGenerationJob = createServerFn({ method: "POST" })
       return { jobId: duplicate.data.id };
     }
     if (jobError || !job) throw new Error("Couldn't start your try-on. Please retry.");
+    // Trying a piece again brings it back to the wardrobe.
+    await supabaseAdmin.from("try_on_products").update({ wardrobe_hidden: false }).eq("id", product.id).eq("user_id", context.userId);
     await dispatch(job.id, direct ? "direct" : "n8n");
     return { jobId: job.id };
   });

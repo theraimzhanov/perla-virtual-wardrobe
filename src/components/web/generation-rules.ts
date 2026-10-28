@@ -10,6 +10,10 @@ export const videoRequestSchema = z.object({
   requestId: z.string().uuid(),
   photoJobId: z.string().uuid(),
 });
+const answerKey = z.enum(["style", "fit", "wear", "movement", "confidence", "favorite", "category", "where", "similar", "occasion"]);
+// Exactly the three answers of one feedback card, tied to one saved look.
+export const feedbackSchema = z.object({ jobId: z.string().uuid(), answers: z.record(answerKey, z.string().min(1).max(40)) })
+  .refine((value) => Object.keys(value.answers).length === 3, "Answer all three questions.");
 export const generationPayloadSchema = z.object({ jobId: z.string().uuid() });
 export const classificationSchema = z.object({ category: z.enum(["Clothes", "Bag", "Hat", "Shoes", "unsupported"]) });
 export type AccessoryFit = "female" | "male";
