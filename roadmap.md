@@ -1,7 +1,7 @@
 # Perla update
 
 ## Public sitemap
-- [ ] Create and verify `public/sitemap.xml` for indexable public pages on studioperla.live, excluding private app pages, account recovery and API endpoints.
+- [x] Create and verify `public/sitemap.xml` for indexable public pages on studioperla.live, excluding private app pages, account recovery and API endpoints; local URL returns 200 XML, 4 focused tests pass, build OK.
 
 ## Saved Try-On results and real data
 - [x] Single-submit guards on generate, video, like, share, delete and feedback.
