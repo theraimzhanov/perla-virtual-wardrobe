@@ -22,6 +22,7 @@ function Login() {
   const nav = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [confirm, setConfirm] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const switchMode = (m: "signin" | "signup" | "forgot") => { setMode(m); setError(null); setResetSent(false); };
   const [email, setEmail] = useState("");
@@ -50,6 +51,7 @@ function Login() {
     if (mode === "signup") {
       if (password.length < 8) { setError("Password must be at least 8 characters."); setBusy(false); return; }
       if (password !== confirm) { setError("Passwords do not match."); setBusy(false); return; }
+      if (!agreed) { setError("Please agree to the Terms to create an account."); setBusy(false); return; }
     }
     if (mode === "signin") {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -83,6 +85,7 @@ function Login() {
   }
 
   async function handleGoogle() {
+    if (mode === "signup" && !agreed) { setError("Please agree to the Terms to create an account."); return; }
     setBusy(true);
     setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
@@ -136,6 +139,12 @@ function Login() {
                 )}
                 {mode === "signup" && (
                   <input type="password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Confirm password" autoComplete="new-password" className="w-full rounded-full bg-card px-5 py-3.5 shadow-card outline-none" aria-label="Confirm password" />
+                )}
+                {mode === "signup" && (
+                  <label className="flex items-start gap-3 px-4 pt-1 text-left text-xs leading-relaxed text-muted-foreground">
+                    <input type="checkbox" required checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-primary" />
+                    <span>I agree to the PERLA Terms. My data is used only to make the product better and always stays private.</span>
+                  </label>
                 )}
                 {mode === "signin" && (
                   <div className="text-right"><button type="button" onClick={() => switchMode("forgot")} className="px-4 text-sm text-muted-foreground underline">Forgot password?</button></div>

@@ -65,7 +65,7 @@ function Profile() {
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    nav({ to: "/login", replace: true });
+    nav({ to: "/", replace: true });
   }
 
   const [firstName, ...restName] = (account?.name ?? "").split(" ");
