@@ -13,7 +13,9 @@ export const Route = createFileRoute("/login")({
       { property: "og:description", content: "Welcome back to PERLA." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://studioperla.live/login" },
     ],
+    links: [{ rel: "canonical", href: "https://studioperla.live/login" }],
   }),
   component: Login,
 });
