@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { discoverProducts } from "@/components/web/data";
-import { rankDiscoverProducts, sharedVirtualLooks } from "@/components/web/brand-insights-rules";
+import { rankDiscoverProducts, sharedVirtualLooks, tallyGeneratedMedia } from "@/components/web/brand-insights-rules";
 import { seedLooks, sourceFromFeedback, toggleLike, type Look } from "@/components/web/looks";
 
 describe("Brand Insights rules", () => {
@@ -37,10 +37,19 @@ describe("Brand Insights rules", () => {
     const looks: Look[] = [{ ...base, id: "own", source: "own", shared: true }, { ...base, id: "internet", source: "internet", shared: true }];
     expect(sharedVirtualLooks(looks).map((look) => look.source)).toEqual(["own", "internet"]);
   });
-  it("counts shared virtual try-ons for the homepage, updating when a look is shared", () => {
+  it("counts shared virtual try-ons, updating when a look is shared", () => {
     expect(sharedVirtualLooks(seedLooks)).toHaveLength(6);
     const afterShare = seedLooks.map((look) => look.id === "l2" ? { ...look, shared: true } : look);
     expect(sharedVirtualLooks(afterShare)).toHaveLength(7);
+  });
+  it("counts each saved generated image and video once for the homepage", () => {
+    expect(tallyGeneratedMedia([
+      { kind: "photo", result_image_url: "a.jpg", result_video_url: null },
+      { kind: "photo", result_image_url: "b.jpg", result_video_url: null },
+      { kind: "video", result_image_url: "source.jpg", result_video_url: "c.mp4" },
+      { kind: "video", result_image_url: "source.jpg", result_video_url: null },
+      { kind: "photo", result_image_url: null, result_video_url: null },
+    ])).toEqual({ images: 2, videos: 1, total: 3 });
   });
   it("uses the user's source answer rather than assuming internet origin", () => {
     expect(sourceFromFeedback("Internet")).toBe("internet");

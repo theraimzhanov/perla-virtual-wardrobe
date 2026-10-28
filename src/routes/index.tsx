@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, BarChart3, Sparkles, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/perla-emblem.svg.asset.json";
@@ -7,8 +7,7 @@ import { CompareSlider } from "@/components/perla/CompareSlider";
 import { modelBefore, modelAfter } from "@/components/perla/data";
 import { Eyebrow } from "@/components/web/ui";
 import { SiteFooter } from "@/components/web/SiteFooter";
-import { useTryOn } from "@/components/web/TryOnContext";
-import { sharedVirtualLooks } from "@/components/web/brand-insights-rules";
+import { countGeneratedMedia, type GeneratedMedia } from "@/components/web/looks.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,15 +30,20 @@ const features = [
 ];
 
 function Landing() {
-  const { looks } = useTryOn();
   const nav = useNavigate();
-  const sharedCount = sharedVirtualLooks(looks).length;
+  const [created, setCreated] = useState<GeneratedMedia | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) nav({ to: "/app" });
     });
   }, [nav]);
+
+  useEffect(() => {
+    let alive = true;
+    countGeneratedMedia().then((total) => { if (alive) setCreated(total); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -63,8 +67,8 @@ function Landing() {
             <Link to="/mobile" className="rounded-full bg-card px-7 py-3.5 shadow-card">See mobile app</Link>
           </div>
           <div className="mt-10 grid grid-cols-3 gap-4 sm:gap-10">
-            {[["120k", "try-ons"], ["340", "brands"], [sharedCount.toLocaleString(), "shared virtual try-ons"]].map(([v, l]) => (
-              <div key={l} className="min-w-0"><p className="font-serif text-3xl sm:text-4xl">{v}</p><p className="mt-1 max-w-32 text-xs uppercase text-muted-foreground">{l}</p></div>
+            {[["120k", "try-ons"], ["340", "brands"], [(created?.total ?? 0).toLocaleString(), "images & videos"]].map(([v, l]) => (
+              <div key={l} className="min-w-0"><p className="font-serif text-3xl sm:text-4xl">{v}</p><p className="mt-1 max-w-48 text-xs uppercase text-muted-foreground">{l}</p></div>
             ))}
           </div>
         </div>
