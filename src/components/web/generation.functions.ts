@@ -88,7 +88,7 @@ export const createVideoJob = createServerFn({ method: "POST" })
     if (error || !photo?.result_image_url) throw new Error("Generate a try-on photo before making a video.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: job, error: jobError } = await supabaseAdmin.from("generation_jobs").insert({
-      user_id: context.userId, engine: "direct", request_id: data.requestId, kind: "video", status: "pending",
+      user_id: context.userId, engine: "direct", request_id: data.requestId, kind: "video", status: "pending", parent_job_id: photo.id,
       source: photo.source, category: photo.category, photo_id: photo.photo_id, product_id: photo.product_id,
       person_image_url: photo.result_image_url, item_image_url: photo.result_image_url,
       product_name: photo.product_name, brand_name: photo.brand_name,
@@ -98,16 +98,31 @@ export const createVideoJob = createServerFn({ method: "POST" })
     return { jobId: job.id };
   });
 
-function jobDto(row: import("@/integrations/supabase/types").Tables<"generation_jobs">): PhotoJob {
-  return { id: row.id, kind: row.kind === "video" ? "video" : "photo", status: row.status, stage: row.stage, image: row.result_image_url, video: row.result_video_url, error: row.error_message, title: row.product_name ?? "New look", source: row.source === "own" || row.source === "internet" || row.source === "store" ? row.source : "discover", liked: row.liked, shared: row.shared, photoId: row.photo_id, productId: row.product_id };
+type JobRow = import("@/integrations/supabase/types").Tables<"generation_jobs">;
+function jobDto(row: JobRow, extra: { likes?: number; liked?: boolean; feedbackSent?: boolean } = {}): PhotoJob {
+  return { id: row.id, kind: row.kind === "video" ? "video" : "photo", status: row.status, stage: row.stage, image: row.result_image_url, video: row.result_video_url, error: row.error_message, title: row.product_name ?? "New look", brand: row.brand_name, source: row.source === "own" || row.source === "internet" || row.source === "store" ? row.source : "discover", liked: extra.liked ?? false, likes: extra.likes ?? 0, feedbackSent: extra.feedbackSent ?? false, shared: row.shared, photoId: row.photo_id, productId: row.product_id, parentJobId: row.parent_job_id, createdAt: row.created_at };
+}
+
+// Like counts span all users, so they are read with the admin client after the owner-scoped job read.
+async function decorate(rows: JobRow[], userId: string, supabase: { from: (t: "feedback_answers") => any }) {
+  if (rows.length === 0) return [];
+  const ids = rows.map((row) => row.id);
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const [likes, feedback] = await Promise.all([
+    supabaseAdmin.from("look_likes").select("job_id,user_id").in("job_id", ids),
+    supabase.from("feedback_answers").select("job_id").eq("user_id", userId).in("job_id", ids),
+  ]);
+  const likeRows = (likes.data ?? []) as { job_id: string; user_id: string }[];
+  const sent = new Set(((feedback.data ?? []) as { job_id: string }[]).map((row) => row.job_id));
+  return rows.map((row) => jobDto(row, { likes: likeRows.filter((like) => like.job_id === row.id).length, liked: likeRows.some((like) => like.job_id === row.id && like.user_id === userId), feedbackSent: sent.has(row.id) }));
 }
 
 export const listPhotoJobs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.from("generation_jobs").select("*").eq("user_id", context.userId).eq("kind", "photo").is("deleted_at", null).order("created_at", { ascending: false }).limit(100);
-    if (error) throw new Error("Couldn't load your generated photos.");
-    return (data ?? []).map(jobDto);
+    const { data, error } = await context.supabase.from("generation_jobs").select("*").eq("user_id", context.userId).is("deleted_at", null).order("created_at", { ascending: false }).limit(200);
+    if (error) throw new Error("Couldn't load your generated looks.");
+    return decorate(data ?? [], context.userId, context.supabase);
   });
 
 export const getPhotoJob = createServerFn({ method: "POST" })
@@ -124,21 +139,30 @@ export const getPhotoJob = createServerFn({ method: "POST" })
       ({ data: row, error } = await read());
       if (error || !row) throw new Error("Couldn't find this generation request.");
     }
-    return jobDto(row);
+    return (await decorate([row], context.userId, context.supabase))[0]!;
   });
 
 export const changeGeneratedLook = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid(), liked: z.boolean().optional(), shared: z.boolean().optional(), deleted: z.literal(true).optional(), source: z.enum(["own", "internet", "store"]).optional() }).parse(input))
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid(), shared: z.boolean().optional(), deleted: z.literal(true).optional(), source: z.enum(["own", "internet", "store"]).optional() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { data: owned, error } = await context.supabase.from("generation_jobs").select("id,status,source").eq("id", data.id).eq("user_id", context.userId).is("deleted_at", null).single();
-    if (error || !owned || owned.status !== "completed") throw new Error("This saved photo is unavailable.");
-    if (data.source && owned.source === "discover") throw new Error("Discover product origins cannot change.");
+    const { data: owned, error } = await context.supabase.from("generation_jobs").select("id,status,source").eq("id", data.id).eq("user_id", context.userId).single();
+    if (error || !owned) throw new Error("This saved look is unavailable.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.deleted) {
+      // Deleting a photo also removes the videos made from it; stored files go first so nothing is orphaned.
+      const { data: family } = await supabaseAdmin.from("generation_jobs").select("id,result_storage_path").eq("user_id", context.userId).or(`id.eq.${data.id},parent_job_id.eq.${data.id}`);
+      const paths = (family ?? []).map((row) => row.result_storage_path).filter((path): path is string => Boolean(path));
+      if (paths.length) await supabaseAdmin.storage.from("generated-looks").remove(paths);
+      const { error: deleteError } = await supabaseAdmin.from("generation_jobs").delete().eq("user_id", context.userId).or(`id.eq.${data.id},parent_job_id.eq.${data.id}`);
+      if (deleteError) throw new Error("Couldn't delete this look.");
+      return { saved: true };
+    }
+    if (owned.status !== "completed") throw new Error("This look isn't finished yet.");
+    if (data.source && owned.source === "discover") throw new Error("Discover product origins cannot change.");
     const { error: updateError } = await supabaseAdmin.from("generation_jobs").update({
-      ...(data.liked !== undefined ? { liked: data.liked } : {}), ...(data.shared !== undefined ? { shared: data.shared } : {}),
-      ...(data.source ? { source: data.source } : {}), ...(data.deleted ? { deleted_at: new Date().toISOString(), shared: false } : {}),
-    }).eq("id", data.id).eq("user_id", context.userId).eq("status", "completed");
-    if (updateError) throw new Error("Couldn't save your photo change.");
+      ...(data.shared !== undefined ? { shared: data.shared } : {}), ...(data.source ? { source: data.source } : {}),
+    }).eq("id", data.id).eq("user_id", context.userId);
+    if (updateError) throw new Error("Couldn't save your change.");
     return { saved: true };
   });

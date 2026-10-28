@@ -23,6 +23,11 @@ export type PhotoJob = {
   video: string | null;
   error: string | null;
   title: string;
+  brand?: string | null;
+  likes?: number;
+  feedbackSent?: boolean;
+  parentJobId?: string | null;
+  createdAt?: string;
   source: "discover" | "own" | "internet" | "store";
   liked: boolean;
   shared: boolean;
