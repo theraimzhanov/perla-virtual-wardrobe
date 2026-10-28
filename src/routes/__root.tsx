@@ -84,13 +84,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Virtually try on clothes and build outfits with AI." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-          ],
+      { property: "og:site_name", content: "PERLA" },
+      { property: "og:locale", content: "en_US" },
+      { name: "theme-color", content: "#f4efe4" },
+    ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Karla:wght@400;500;600&display=swap" },
     ],
