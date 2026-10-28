@@ -3,6 +3,7 @@ import type { Tables, TablesUpdate } from "@/integrations/supabase/types";
 import { DIRECT_STALE_MS, nextDirectAction, providerBody, providerEndpoint, resultObjectPath, trustedMediaUrl, type AccessoryFit } from "./generation-rules";
 import { boundedImage, boundedVideo, classifyProduct, describeLookForVideo, GenerationProviderError, pollPhoto, pollVideo, submitPhoto, submitVideo } from "./generation-provider.server";
 import { uploadBucket } from "./upload-rules";
+import { renderStudioImage } from "./studio-provider.server";
 
 type Job = Tables<"generation_jobs">;
 const VIDEO_ENDPOINT = "image-to-video/youcam";
@@ -53,7 +54,27 @@ async function claim(id: string, from: string, to: string, extra: TablesUpdate<"
   return Boolean(data);
 }
 
+// AI Studio photo: one claimed render through the AI gateway; an interrupted render is never repeated.
+async function renderStudio(job: Job) {
+  const config = directConfig();
+  if (!await claim(job.id, "stage.in.(queued,ready)", "rendering", { provider_endpoint: "studio-image" })) return;
+  let bytes: Uint8Array;
+  try {
+    const source = await boundedImage(trustedMediaUrl(job.item_image_url, "input", config.supabaseOrigin), 20 * 1024 * 1024);
+    bytes = await renderStudioImage(source, job.studio_prompt ?? "");
+  } catch (cause) {
+    console.error("Studio render failed", cause instanceof Error ? cause.message : "unknown");
+    return fail(job.id, cause instanceof GenerationProviderError ? cause.message : "AI Studio couldn't create this image. Please try again.");
+  }
+  const path = `${job.user_id}/studio/${job.id}.png`;
+  const storage = supabaseAdmin.storage.from("generated-looks");
+  const { error } = await storage.upload(path, bytes, { contentType: "image/png", upsert: true });
+  if (error) return fail(job.id, "Couldn't save the new image. Please try again.");
+  await updateJob(job.id, { status: "completed", stage: "completed", result_storage_path: path, result_image_url: storage.getPublicUrl(path).data.publicUrl, error_message: null });
+}
+
 async function submit(job: Job) {
+  if (job.kind === "photo" && job.studio_scene) return renderStudio(job);
   const config = directConfig();
   // Prepare (classify / write motion prompt) under a claim; a stale claim can be retaken because nothing was sent yet.
   if (!await claim(job.id, "stage.in.(queued,ready),and(stage.eq.classifying,updated_at.lt.$STALE)", "classifying")) return;
@@ -62,7 +83,7 @@ async function submit(job: Job) {
   try {
     if (job.kind === "video") {
       const image = trustedMediaUrl(job.item_image_url, "input", config.supabaseOrigin);
-      const prompt = await describeLookForVideo(image, config.geminiKey, config.supabaseOrigin);
+      const prompt = job.studio_prompt ?? await describeLookForVideo(image, config.geminiKey, config.supabaseOrigin);
       endpoint = VIDEO_ENDPOINT;
       send = () => submitVideo(image, prompt, config.perfectKey);
     } else {
