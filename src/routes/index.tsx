@@ -24,7 +24,10 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Wear it before anyone. Virtual try-on for shoppers, demand intelligence for brands." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://studioperla.live/" },
     ],
+    links: [{ rel: "canonical", href: "https://studioperla.live/" }],
+    scripts: [{ type: "application/ld+json", children: JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"PERLA","url":"https://studioperla.live/","logo":"https://studioperla.live/favicon.svg","email":"raimjanovnursultan@gmail.com"},{"@type":"WebApplication","name":"PERLA","url":"https://studioperla.live/","applicationCategory":"LifestyleApplication","operatingSystem":"Web","description":"Virtual try-on, AI fashion photos and videos, and demand insights for brands.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}]}) }],
   }),
   component: Landing,
 });
