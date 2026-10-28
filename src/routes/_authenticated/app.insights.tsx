@@ -44,9 +44,9 @@ function Insights() {
   }, [loadReport]);
   // Sample panel of ~100 members, added on top of real signals for the demo.
   const sampleSignals: ProductSignal[] = catalog.map((p, i) => {
-    const real = signals?.find((s) => s.productId === p.id);
+    const real = signals?.find((s) => s.id === p.id);
     const seed = (i * 37 + 11) % 97;
-    return { ...(real ?? {}), productId: p.id, tryOns: (real?.tryOns ?? 0) + 18 + seed, likes: (real?.likes ?? 0) + 6 + Math.round(seed * 0.6) } as ProductSignal;
+    return { id: p.id, tryOns: (real?.tryOns ?? 0) + 18 + seed, likes: (real?.likes ?? 0) + 6 + Math.round(seed * 0.6) };
   });
   const ranked = rankDiscoverProducts(catalog, signals === null ? [] : sampleSignals, "tryOns").filter((product) => product.tryOns > 0 || product.likes > 0).slice(0, 8);
   const community = sharedVirtualLooks(looks);
