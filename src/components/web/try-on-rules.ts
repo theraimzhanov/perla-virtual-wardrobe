@@ -1,10 +1,13 @@
 import type { DiscoverProduct } from "./data";
 
 export type ProductMode = "discover" | "personal";
+// Five one-tap business questions: fit, occasion, color, price perception, purchase intent.
 export const photoQuestions = [
-  { id: "style", text: "Does this style feel like you?", options: ["Yes", "Maybe", "Not quite"] },
-  { id: "fit", text: "How does the fit look?", options: ["Just right", "Too loose", "Too fitted"] },
-  { id: "wear", text: "Would you wear this?", options: ["Definitely", "Maybe", "No"] },
+  { id: "fit", text: "How does the silhouette look on you?", options: ["Just right", "Too fitted", "Too loose"] },
+  { id: "occasion", text: "Where would you wear this?", options: ["Everyday", "Work & dinner", "Special event"] },
+  { id: "color", text: "What do you think of this colorway?", options: ["Perfect as is", "Prefer neutrals", "Want bolder"] },
+  { id: "price", text: "How does it feel for its quality?", options: ["Luxury value", "Fair price", "Feels overpriced"] },
+  { id: "intent", text: "Would you add this to your wardrobe?", options: ["Definitely", "If on sale", "Pass for now"] },
 ] as const;
 export const videoQuestions = [
   { id: "movement", text: "Does it move naturally?", options: ["Yes", "Mostly", "Not yet"] },
@@ -25,7 +28,9 @@ export function generationIssue(photo: string | null, products: DiscoverProduct[
 export const personalPhotoQuestions = [
   { id: "category", text: "What kind of piece is this?", options: ["Clothes", "Bag", "Hat", "Shoes"] },
   { id: "where", text: "Where did you find it?", options: ["Own closet", "Internet", "Store"] },
-  { id: "wear", text: "Would you wear this look?", options: ["Definitely", "Maybe", "No"] },
+  { id: "fit", text: "How does the silhouette look on you?", options: ["Just right", "Too fitted", "Too loose"] },
+  { id: "occasion", text: "Where would you wear this?", options: ["Everyday", "Work & dinner", "Special event"] },
+  { id: "similar", text: "Want similar new pieces on PERLA?", options: ["Yes", "Maybe", "No"] },
 ] as const;
 export const personalVideoQuestions = [
   { id: "movement", text: "Does it move naturally?", options: ["Yes", "Mostly", "Not yet"] },

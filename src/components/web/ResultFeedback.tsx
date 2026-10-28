@@ -16,7 +16,7 @@ export function ResultFeedback({ kind, mode = "discover", jobId, alreadySent = f
   const [sending, setSending] = useState(false);
   const lock = useRef(false);
   const submit = async () => {
-    if (lock.current || submitted || Object.keys(answers).length !== 3) return;
+    if (lock.current || submitted || Object.keys(answers).length !== questions.length) return;
     lock.current = true; setSending(true);
     try {
       if (jobId) await send({ data: { jobId, answers } });
@@ -27,7 +27,7 @@ export function ResultFeedback({ kind, mode = "discover", jobId, alreadySent = f
   };
   return (
     <section aria-label={`${kind === "photo" ? "Photo" : "Video"} feedback`} className="mt-6 border-t pt-5">
-      <div className="mb-4 flex items-center justify-between gap-3"><h3 className="font-serif text-2xl">Your first impression</h3><span className="text-xs text-muted-foreground">{submitted ? "3" : Object.keys(answers).length}/3</span></div>
+      <div className="mb-4 flex items-center justify-between gap-3"><h3 className="font-serif text-2xl">Your first impression</h3><span className="text-xs text-muted-foreground">{submitted ? questions.length : Object.keys(answers).length}/{questions.length}</span></div>
       {submitted && alreadySent ? <p className="text-sm text-muted-foreground">You already shared feedback on this look.</p> : <div className="space-y-4">
         {questions.map((question, index) => (
           <fieldset key={question.id} disabled={submitted || sending}>
@@ -36,7 +36,7 @@ export function ResultFeedback({ kind, mode = "discover", jobId, alreadySent = f
           </fieldset>
         ))}
       </div>}
-      <Button size="lg" className="mt-5 h-12 w-full rounded-full text-base [&_svg]:size-5" disabled={Object.keys(answers).length !== 3 || submitted || sending} onClick={() => { void submit(); }}>{sending ? <LoaderCircle className="motion-safe:animate-spin" /> : submitted ? <Check /> : <Send />}{sending ? "Sending…" : submitted ? "Feedback sent" : "Send feedback"}</Button>
+      <Button size="lg" className="mt-5 h-12 w-full rounded-full text-base [&_svg]:size-5" disabled={Object.keys(answers).length !== questions.length || submitted || sending} onClick={() => { void submit(); }}>{sending ? <LoaderCircle className="motion-safe:animate-spin" /> : submitted ? <Check /> : <Send />}{sending ? "Sending…" : submitted ? "Feedback sent" : "Send feedback"}</Button>
     </section>
   );
 }

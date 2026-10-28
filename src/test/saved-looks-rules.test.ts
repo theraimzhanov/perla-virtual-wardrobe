@@ -13,5 +13,7 @@ describe("saved Try-On result", () => {
 describe("feedback answers", () => {
   it("accepts exactly three answers", () => { expect(feedbackSchema.safeParse({ jobId, answers: { style: "Yes", fit: "Just right", wear: "Maybe" } }).success).toBe(true); });
   it("rejects incomplete feedback", () => { expect(feedbackSchema.safeParse({ jobId, answers: { style: "Yes" } }).success).toBe(false); });
-  it("rejects unknown questions", () => { expect(feedbackSchema.safeParse({ jobId, answers: { style: "Yes", fit: "Ok", price: "$1" } }).success).toBe(false); });
+  it("rejects unknown questions", () => { expect(feedbackSchema.safeParse({ jobId, answers: { style: "Yes", fit: "Ok", budget: "$1" } }).success).toBe(false); });
+  it("accepts five photo answers", () => { expect(feedbackSchema.safeParse({ jobId, answers: { fit: "Just right", occasion: "Everyday", color: "Perfect as is", price: "Fair price", intent: "Definitely" } }).success).toBe(true); });
+  it("rejects four answers", () => { expect(feedbackSchema.safeParse({ jobId, answers: { fit: "Just right", occasion: "Everyday", color: "Perfect as is", price: "Fair price" } }).success).toBe(false); });
 });

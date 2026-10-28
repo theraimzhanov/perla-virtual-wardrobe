@@ -22,14 +22,14 @@ describe("Discover and Try-On rules", () => {
   });
   it("has exactly three photo questions for discovered products", () => {
     expect(showFeedback("discover")).toBe(true);
-    expect(photoQuestions).toHaveLength(3);
+    expect(photoQuestions).toHaveLength(5);
   });
   it("has exactly three video questions for discovered products", () => {
     expect(videoQuestions).toHaveLength(3);
   });
   it("asks three photo and three video questions for own uploads", () => {
     expect(showFeedback("personal")).toBe(true);
-    expect(questionsFor("photo", "personal")).toHaveLength(3);
+    expect(questionsFor("photo", "personal")).toHaveLength(5);
     expect(questionsFor("video", "personal")).toHaveLength(3);
   });
   it("labels looks from own uploads as own, not Discover", () => {
