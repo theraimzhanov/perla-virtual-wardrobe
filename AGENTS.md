@@ -20,3 +20,4 @@
 - Keep Discover rankings and shared-look filtering in pure rules, and store media, product/source metadata and likes in TryOnProvider so community and profile cards remain consistent with Try-On results.
 - Derive the homepage shared-look statistic from the same sharedVirtualLooks rule as Brand Insights so it updates with the shared session.
 - Keep homepage footer navigation in SiteFooter and link only to existing pages or email contact, avoiding invented legal policies or unavailable services.
+- Server-side fetch never uses redirect "error" (Cloudflare Workers reject it before sending); use "manual" plus the isRedirect guard so provider calls fail clearly instead of looking uncertain.
