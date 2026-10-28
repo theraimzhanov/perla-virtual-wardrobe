@@ -20,6 +20,7 @@ import { Route as AuthenticatedAppProfileRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppStudioRouteImport } from './routes/_authenticated/app.studio'
 import { Route as AuthenticatedAppTryOnRouteImport } from './routes/_authenticated/app.try-on'
 import { Route as ApiPublicGenerationPhotoRouteImport } from './routes/api/public/generation/photo'
+import { Route as ApiPublicGenerationVideoRouteImport } from './routes/api/public/generation/video'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -77,6 +78,12 @@ const ApiPublicGenerationPhotoRoute =
     path: '/api/public/generation/photo',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicGenerationVideoRoute =
+  ApiPublicGenerationVideoRouteImport.update({
+    id: '/api/public/generation/video',
+    path: '/api/public/generation/video',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/app/try-on': typeof AuthenticatedAppTryOnRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/generation/photo': typeof ApiPublicGenerationPhotoRoute
+  '/api/public/generation/video': typeof ApiPublicGenerationVideoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -100,6 +108,7 @@ export interface FileRoutesByTo {
   '/app/try-on': typeof AuthenticatedAppTryOnRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/generation/photo': typeof ApiPublicGenerationPhotoRoute
+  '/api/public/generation/video': typeof ApiPublicGenerationVideoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,6 +123,7 @@ export interface FileRoutesById {
   '/_authenticated/app/try-on': typeof AuthenticatedAppTryOnRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/generation/photo': typeof ApiPublicGenerationPhotoRoute
+  '/api/public/generation/video': typeof ApiPublicGenerationVideoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/app/try-on'
     | '/app/'
     | '/api/public/generation/photo'
+    | '/api/public/generation/video'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/app/try-on'
     | '/app'
     | '/api/public/generation/photo'
+    | '/api/public/generation/video'
   id:
     | '__root__'
     | '/'
@@ -152,6 +164,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/try-on'
     | '/_authenticated/app/'
     | '/api/public/generation/photo'
+    | '/api/public/generation/video'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -160,6 +173,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MobileRoute: typeof MobileRoute
   ApiPublicGenerationPhotoRoute: typeof ApiPublicGenerationPhotoRoute
+  ApiPublicGenerationVideoRoute: typeof ApiPublicGenerationVideoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -241,6 +255,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicGenerationPhotoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/generation/video': {
+      id: '/api/public/generation/video'
+      path: '/api/public/generation/video'
+      fullPath: '/api/public/generation/video'
+      preLoaderRoute: typeof ApiPublicGenerationVideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -280,6 +301,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MobileRoute: MobileRoute,
   ApiPublicGenerationPhotoRoute: ApiPublicGenerationPhotoRoute,
+  ApiPublicGenerationVideoRoute: ApiPublicGenerationVideoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

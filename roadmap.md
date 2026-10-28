@@ -1,5 +1,10 @@
 # Perla update
 
+## Move photo + video generation to app server
+- [x] Point processors at studioperla.live, fix regional QStash address, enable direct photo processing.
+- [x] Add real video generation (Perfect Corp image-to-video, Gemini motion prompt, saved to Supabase) wired to Generate video.
+- [ ] Publish and run one signed-in photo + video on studioperla.live — needs the user to publish.
+
 ## Direct photo try-on migration
 - [x] Build app-owned photo processing with authenticated server functions, category-specific Perfect Corp adapters and durable Upstash Workflow steps.
 - [x] Save Perfect Corp, Gemini and QStash credentials securely; retain n8n behind a default-off direct activation flag and protect its trigger from direct jobs.

@@ -16,6 +16,7 @@ import { sampleLookVideo, sourceFromFeedback, type LookSource } from "./looks";
 import { cn } from "@/lib/utils";
 import { validateImage } from "./upload-rules";
 import { usePhotoGeneration } from "./usePhotoGeneration";
+import { useVideoGeneration } from "./useVideoGeneration";
 import type { AccessoryFit } from "./generation-rules";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -44,7 +45,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   const [lookId, setLookId] = useState(0);
   const [demoPhotoPhase, setDemoPhotoPhase] = useState<Phase>("idle");
   const [accessoryFit, setAccessoryFit] = useState<AccessoryFit | null>(null);
-  const [videoPhase, setVideoPhase] = useState<Phase>("idle");
+  const [demoVideoPhase, setVideoPhase] = useState<Phase>("idle");
   const [photoDialog, setPhotoDialog] = useState(false);
   const [productSource, setProductSource] = useState<LookSource>(lookSource(mode));
   const likedVideo = looks.some((look) => look.id === `v${lookId}` && look.liked);
@@ -61,6 +62,10 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   const resultImage = generation.job?.image ?? null;
   const photoLookId = generation.job ? `job:${generation.job.id}` : `p${lookId}`;
   const likedPhoto = looks.some((look) => look.id === photoLookId && look.liked);
+  const realVideo = useVideoGeneration(userId, signedIn && generation.job?.status === "completed" ? generation.job.id : null);
+  const videoPhase = (signedIn ? realVideo.phase : demoVideoPhase) as Phase | "failed";
+  const videoSrc = signedIn ? realVideo.video : null;
+  const startVideo = () => { setVideoError(false); if (signedIn) void realVideo.start(); else setVideoPhase("loading"); };
 
   useEffect(() => {
     setDemoPhotoPhase("idle");
@@ -84,10 +89,10 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   }, [signedIn, demoPhotoPhase]);
 
   useEffect(() => {
-    if (videoPhase !== "loading") return;
+    if (signedIn || demoVideoPhase !== "loading") return;
     const timer = setTimeout(() => setVideoPhase("done"), 3200);
     return () => clearTimeout(timer);
-  }, [videoPhase]);
+  }, [signedIn, demoVideoPhase]);
 
   useEffect(() => {
     if (photoPhase === "loading") resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -122,7 +127,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     if (signedIn) { if (resultImage && generation.job) void refreshPhotoJobs(); }
     else addLook({ id: `p${lookId}`, title: lookTitle, product: lookTitle, kind: "photo", image: modelAfter, source: productSource });
   }, [photoPhase, resultImage]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (videoPhase === "done") addLook({ id: `v${lookId}`, title: lookTitle, product: lookTitle, kind: "video", image: modelAfter, video: sampleLookVideo, source: productSource }); }, [videoPhase]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (videoPhase === "done") addLook({ id: `v${lookId}`, title: lookTitle, product: lookTitle, kind: "video", image: signedIn ? resultImage ?? modelAfter : modelAfter, video: videoSrc ? { mp4: videoSrc } : sampleLookVideo, source: productSource }); }, [videoPhase, videoSrc]); // eslint-disable-line react-hooks/exhaustive-deps
   const recordSource = (question: string, answer: string) => {
     if (mode !== "personal" || question !== "where") return;
     const source = sourceFromFeedback(answer);
@@ -188,13 +193,13 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
             <div className="min-w-0">{compare && photo ? <CompareSlider before={photo} after={signedIn ? resultImage ?? "" : modelAfter} /> : <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl bg-muted"><img src={signedIn ? resultImage ?? "" : modelAfter} alt={signedIn ? "Your generated try-on look" : "Sample generated try-on look"} className="h-full w-full object-contain" /></div>}
               <div className="mt-3 flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Like picture" title="Like picture" aria-pressed={likedPhoto} onClick={() => likeLook(photoLookId)} className={cn("rounded-full", likedPhoto && "border-gold text-gold")}><Heart className={likedPhoto ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download picture" title="Download picture" onClick={() => { if (!signedIn || resultImage) void downloadMedia(resultImage ?? modelAfter, "perla-try-on.jpg"); }} className="rounded-full"><Download /></Button><Button variant="outline" aria-pressed={compare} onClick={() => setCompare((value) => !value)} className="ml-auto rounded-full text-xs">{compare ? "View picture" : "Compare"}</Button></div><div className="mt-2"><ShareButton id={photoLookId} /></div>
             </div>
-            <div className="min-w-0"><p className="text-xs uppercase text-gold">Photo complete <Check className="ml-1 inline h-3 w-3" /></p><h3 className="mt-2 font-serif text-3xl">A different point of view.</h3>{showFeedback(mode) && <ResultFeedback key={`photo:${mode}:${selectionKey}`} kind="photo" mode={mode} onAnswer={recordSource} />}<Button disabled={videoPhase === "loading"} onClick={() => { setVideoError(false); setVideoPhase("loading"); }} className="mt-7 h-auto w-full rounded-full py-4"><Film />{videoPhase === "loading" ? "Creating your video…" : videoPhase === "done" ? "Generate video again" : "Generate video"}</Button></div>
+            <div className="min-w-0"><p className="text-xs uppercase text-gold">Photo complete <Check className="ml-1 inline h-3 w-3" /></p><h3 className="mt-2 font-serif text-3xl">A different point of view.</h3>{showFeedback(mode) && <ResultFeedback key={`photo:${mode}:${selectionKey}`} kind="photo" mode={mode} onAnswer={recordSource} />}<Button disabled={videoPhase === "loading"} onClick={startVideo} className="mt-7 h-auto w-full rounded-full py-4"><Film />{videoPhase === "loading" ? "Creating your video…" : videoPhase === "done" ? "Generate video again" : "Generate video"}</Button></div>
           </div>
         </>}
       </section>}
 
-      {videoPhase !== "idle" && <section ref={videoRef} aria-label="Video result" className="mt-12 scroll-mt-24 border-t pt-7"><div className="mb-5 flex items-center justify-between gap-4"><h2 className="font-serif text-3xl">Your look, in motion</h2><span className="rounded-full border px-3 py-1 text-[10px] uppercase text-muted-foreground">Sample preview</span></div>{videoPhase === "loading" ? <GenerationSkeleton kind="video" className="mx-auto max-w-md" /> : <div className={cn("grid items-start gap-7", !compact && "sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10")}>
-        <div><div className="overflow-hidden rounded-2xl bg-secondary">{videoError ? <div className="grid aspect-[3/4] place-items-center p-6 text-center"><div><p className="text-sm">Video couldn't load.</p><Button variant="outline" className="mt-3" onClick={() => setVideoError(false)}><RefreshCw />Retry video</Button></div></div> : <video poster={modelAfter} controls playsInline loop preload="auto" onError={() => setVideoError(true)} className="aspect-[3/4] w-full object-contain" aria-label="Generated sample try-on video"><source src={demoVideoWebm.url} type="video/webm" /><source src={demoVideo.url} type="video/mp4" /></video>}</div><div className="mt-3 flex flex-wrap gap-2"><Button size="icon" variant="outline" aria-label="Like video" title="Like video" aria-pressed={likedVideo} onClick={() => likeLook(`v${lookId}`)} className={cn("rounded-full", likedVideo && "border-gold text-gold")}><Heart className={likedVideo ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download video" title="Download video" onClick={() => downloadMedia(demoVideo.url, "perla-try-on.mp4")} className="rounded-full"><Download /></Button><ShareButton id={`v${lookId}`} /></div></div>
+      {videoPhase !== "idle" && <section ref={videoRef} aria-label="Video result" className="mt-12 scroll-mt-24 border-t pt-7"><div className="mb-5 flex items-center justify-between gap-4"><h2 className="font-serif text-3xl">Your look, in motion</h2>{!signedIn && <span className="rounded-full border px-3 py-1 text-[10px] uppercase text-muted-foreground">Sample preview</span>}</div>{videoPhase === "loading" ? <GenerationSkeleton kind="video" className="mx-auto max-w-md" /> : videoPhase === "failed" ? <div role="alert" className="border-y py-6 text-sm text-destructive">{realVideo.error ?? "No video was returned. Please try again."}</div> : <div className={cn("grid items-start gap-7", !compact && "sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10")}>
+        <div><div className="overflow-hidden rounded-2xl bg-secondary">{videoError ? <div className="grid aspect-[3/4] place-items-center p-6 text-center"><div><p className="text-sm">Video couldn't load.</p><Button variant="outline" className="mt-3" onClick={() => setVideoError(false)}><RefreshCw />Retry video</Button></div></div> : videoSrc ? <video key={videoSrc} poster={resultImage ?? undefined} controls playsInline loop autoPlay muted preload="auto" onError={() => setVideoError(true)} className="aspect-[3/4] w-full object-contain" aria-label="Your generated try-on video" src={videoSrc} /> : <video poster={modelAfter} controls playsInline loop preload="auto" onError={() => setVideoError(true)} className="aspect-[3/4] w-full object-contain" aria-label="Generated sample try-on video"><source src={demoVideoWebm.url} type="video/webm" /><source src={demoVideo.url} type="video/mp4" /></video>}</div><div className="mt-3 flex flex-wrap gap-2"><Button size="icon" variant="outline" aria-label="Like video" title="Like video" aria-pressed={likedVideo} onClick={() => likeLook(`v${lookId}`)} className={cn("rounded-full", likedVideo && "border-gold text-gold")}><Heart className={likedVideo ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download video" title="Download video" onClick={() => downloadMedia(videoSrc ?? demoVideo.url, "perla-try-on.mp4")} className="rounded-full"><Download /></Button><ShareButton id={`v${lookId}`} /></div></div>
         <div><p className="text-xs uppercase text-gold">Video complete <Check className="ml-1 inline h-3 w-3" /></p><h3 className="mt-2 font-serif text-3xl">Every little movement.</h3>{showFeedback(mode) && <ResultFeedback key={`video:${mode}:${selectionKey}`} kind="video" mode={mode} />}</div>
       </div>}</section>}
 
