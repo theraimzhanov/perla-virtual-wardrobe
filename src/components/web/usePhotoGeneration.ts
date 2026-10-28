@@ -3,9 +3,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { createGenerationJob, getPhotoJob } from "./generation.functions";
-import { photoJobPhase, type AccessoryFit, type PhotoJob } from "./generation-rules";
+import { photoJobPhase, pickShownJob, type AccessoryFit, type PhotoJob } from "./generation-rules";
 
-export function usePhotoGeneration(userId: string | null, selectionKey: string, restored: PhotoJob | undefined) {
+// The latest saved try-on stays on screen across navigation and selection changes
+// until the member deletes it or generates a new one.
+export function usePhotoGeneration(userId: string | null, _selectionKey: string, restored: PhotoJob | undefined) {
   const signedIn = Boolean(userId);
   const create = useServerFn(createGenerationJob);
   const read = useServerFn(getPhotoJob);
@@ -15,19 +17,20 @@ export function usePhotoGeneration(userId: string | null, selectionKey: string, 
   const request = useRef<string | null>(null);
   const version = useRef(0);
   const lock = useRef(false);
-  const touched = useRef(false);
+  const dismissed = useRef<string | null>(null);
 
   useEffect(() => {
     version.current++;
     request.current = null;
-    touched.current = false;
     lock.current = false;
+    dismissed.current = null;
     setJob(null); setStarting(false); setStartError(null);
-  }, [selectionKey, userId]);
+  }, [userId]);
 
   useEffect(() => {
-    if (!touched.current && restored) setJob(restored);
-  }, [restored, selectionKey, userId]);
+    if (lock.current || !restored || restored.id === dismissed.current) return;
+    setJob((current) => pickShownJob(current, restored));
+  }, [restored, userId]);
 
   const refresh = useCallback(async (id: string, epoch: number) => {
     try {
@@ -62,9 +65,8 @@ export function usePhotoGeneration(userId: string | null, selectionKey: string, 
   const start = async (fit: AccessoryFit | null) => {
     if (!signedIn || lock.current) return;
     lock.current = true;
-    touched.current = true;
     const epoch = ++version.current;
-    setStarting(true); setStartError(null); setJob(null);
+    setStarting(true); setStartError(null);
     request.current ??= crypto.randomUUID();
     try {
       const { data } = await supabase.auth.getUser();
@@ -82,7 +84,8 @@ export function usePhotoGeneration(userId: string | null, selectionKey: string, 
       if (epoch === version.current) { lock.current = false; setStarting(false); }
     }
   };
+  const clear = () => { version.current++; dismissed.current = job?.id ?? null; setJob(null); setStartError(null); };
   useEffect(() => { if (job && ["completed", "failed"].includes(job.status)) request.current = null; }, [job?.status]);
   const phase = starting ? "loading" : job ? photoJobPhase(job) : "idle";
-  return { job, phase, start, error: startError ?? (job?.status === "failed" ? job.error ?? "Photo generation failed." : null), retryStatus: () => { if (job) void refresh(job.id, version.current); } };
+  return { job, phase, start, clear, error: startError ?? (job?.status === "failed" ? job.error ?? "Photo generation failed." : null), retryStatus: () => { if (job) void refresh(job.id, version.current); } };
 }

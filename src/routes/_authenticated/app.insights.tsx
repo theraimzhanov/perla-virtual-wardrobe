@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Heart, Sparkles, Wand2 } from "lucide-react";
-import { discoverProducts, products } from "@/components/web/data";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { listProductSignals, type ProductSignal } from "@/components/web/looks.functions";
 import { PageHeader, Panel, Eyebrow } from "@/components/web/ui";
 import { useTryOn } from "@/components/web/TryOnContext";
 import { LookCard } from "@/components/web/LookCard";
@@ -20,8 +22,6 @@ export const Route = createFileRoute("/_authenticated/app/insights")({
   component: Insights,
 });
 
-const likesFor = [1240, 860, 1510, 1980, 540, 1120];
-const productSignals = [...products.map((p, i) => ({ id: p.id, tryOns: p.tryOns, likes: likesFor[i] ?? 500 })), { id: "g7", tryOns: 760, likes: 420 }];
 
 const trends = [
   { label: "Soft neutral tones", share: 78, note: "Cream, sand and camel lead feedback" },
@@ -37,8 +37,17 @@ const aiInsights = [
 ];
 
 function Insights() {
-  const { looks } = useTryOn();
-  const ranked = rankDiscoverProducts(discoverProducts, productSignals, "tryOns").slice(0, 4);
+  const { looks, catalog, photoJobs } = useTryOn();
+  const loadSignals = useServerFn(listProductSignals);
+  const [signals, setSignals] = useState<ProductSignal[] | null>(null);
+  const finished = photoJobs.filter((job) => job.status === "completed").length;
+  const likeTotal = looks.reduce((sum, look) => sum + look.likes, 0);
+  useEffect(() => {
+    let alive = true;
+    loadSignals().then((rows) => { if (alive) setSignals(rows); }).catch(() => { if (alive) setSignals([]); });
+    return () => { alive = false; };
+  }, [loadSignals, finished, likeTotal]);
+  const ranked = rankDiscoverProducts(catalog, signals ?? [], "tryOns").filter((product) => product.tryOns > 0 || product.likes > 0).slice(0, 8);
   const community = sharedVirtualLooks(looks);
   return (
     <div>
@@ -47,6 +56,7 @@ function Insights() {
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
           <h2 className="font-serif text-3xl">Most tried on <em className="text-gold">& most liked</em></h2>
         </div>
+        {signals !== null && ranked.length === 0 && <p className="border-y py-8 text-center text-sm text-muted-foreground">No try-ons on Discover pieces yet. Rankings appear after the first saved try-on.</p>}
         <ol tabIndex={0} aria-label="Most tried on and most liked products" className="grid snap-x snap-mandatory auto-cols-[min(15rem,80%)] grid-flow-col gap-4 overflow-x-auto pb-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring xl:auto-cols-[calc((100%_-_3rem)/4)]">
           {ranked.map((product) => <li key={product.id} aria-label={product.name} className="min-w-0 snap-start overflow-hidden rounded-lg bg-card shadow-card">
             <img src={product.image} alt={product.name} loading="lazy" className="aspect-[3/5] w-full object-cover" />
@@ -65,6 +75,7 @@ function Insights() {
       <section aria-label="Community looks" className="mt-10">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><h2 className="font-serif text-3xl">Best looks <em className="text-gold">from the community</em></h2><span className="text-xs text-muted-foreground">{community.length} shared · most liked first</span></div>
         <div tabIndex={0} role="group" aria-label="Shared community photos and videos" className="grid snap-x snap-mandatory auto-cols-[min(15rem,80%)] grid-flow-col gap-4 overflow-x-auto pb-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring xl:auto-cols-[calc((100%_-_3rem)/4)]">{community.map((look) => <div key={look.id} className="min-w-0 snap-start"><LookCard look={look} /></div>)}</div>
+        {community.length === 0 && <p className="border-y py-8 text-center text-sm text-muted-foreground">No shared looks yet. Share a try-on photo or video to feature it here.</p>}
       </section>
 
       <Panel className="mt-10">

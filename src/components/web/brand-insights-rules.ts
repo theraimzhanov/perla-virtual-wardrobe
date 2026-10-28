@@ -12,7 +12,7 @@ export function rankDiscoverProducts(products: DiscoverProduct[], signals: Produ
       const signal = signals.find((item) => item.id === product.id);
       return { ...product, tryOns: signal?.tryOns ?? 0, likes: signal?.likes ?? 0 };
     })
-    .sort((a, b) => b[metric] - a[metric]);
+    .sort((a, b) => b[metric] - a[metric] || b[metric === "tryOns" ? "likes" : "tryOns"] - a[metric === "tryOns" ? "likes" : "tryOns"]);
 }
 
 export function sharedVirtualLooks(looks: Look[]) {

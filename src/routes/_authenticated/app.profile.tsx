@@ -30,7 +30,10 @@ const prefs = ["Minimal", "Neutrals", "Tailored", "Silk", "Parisian"];
 type Account = { name: string; avatarUrl: string | null; email: string | null };
 
 function Profile() {
-  const { looks, triedProducts, removeTried } = useTryOn();
+  const { looks, triedProducts, removeTried, photoJobs } = useTryOn();
+  const myLooks = byLikes(looks.filter((look) => look.mine));
+  const tryOns = photoJobs.filter((job) => job.status === "completed").length;
+  const studioShots = looks.filter((look) => look.mine && !look.jobId).length;
   const nav = useNavigate();
   const queryClient = useQueryClient();
   const [account, setAccount] = useState<Account | null>(null);
@@ -84,13 +87,14 @@ function Profile() {
         </Panel>
         <div className="space-y-6 xl:col-span-2">
           <div className="grid gap-6 sm:grid-cols-3">
-            <Stat label="Try-ons" value="48" /><Stat label="Studio shots" value="17" /><Stat label="Saved pieces" value="36" />
+            <Stat label="Try-ons" value={String(tryOns)} /><Stat label="Studio shots" value={String(studioShots)} /><Stat label="Saved pieces" value={String(triedProducts.length)} />
           </div>
           <Panel>
             <div className="mb-4 flex items-end justify-between gap-3"><h2 className="font-serif text-2xl">My looks & videos</h2><span className="text-xs text-muted-foreground">Sorted by likes</span></div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {byLikes(looks.filter((look) => look.mine)).map((look) => <LookCard key={look.id} look={look} showShare showDelete />)}
+              {myLooks.map((look) => <LookCard key={look.id} look={look} showShare showDelete />)}
             </div>
+            {myLooks.length === 0 && <p className="text-sm text-muted-foreground">Your virtual try-on photos and videos will appear here.</p>}
           </Panel>
           <Panel>
             <div className="mb-4 flex items-end justify-between gap-3"><h2 className="font-serif text-2xl">Wardrobe</h2><span className="text-xs text-muted-foreground">Pieces you tried on</span></div>
@@ -100,7 +104,7 @@ function Profile() {
                   <article key={p.id} aria-label={p.name} className="relative overflow-hidden rounded-lg bg-card shadow-card">
                     <img src={p.image} alt={p.name} className="aspect-square w-full object-cover" />
                     <button aria-label={`Remove ${p.name} from wardrobe`} title="Remove from wardrobe" onClick={() => removeTried(p.id)} className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-background/90 text-gold"><Heart className="h-4 w-4 fill-current" /></button>
-                    <div className="p-3"><p className="text-[10px] uppercase tracking-widest text-muted-foreground">{p.brand}</p><p className="font-serif text-lg leading-tight">{p.name}</p></div>
+                    <div className="p-3">{p.brand && <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{p.brand}</p>}<p className="font-serif text-lg leading-tight">{p.name}</p></div>
                   </article>
                 ))}
               </div>

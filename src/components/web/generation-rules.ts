@@ -10,6 +10,10 @@ export const videoRequestSchema = z.object({
   requestId: z.string().uuid(),
   photoJobId: z.string().uuid(),
 });
+const answerKey = z.enum(["style", "fit", "wear", "movement", "confidence", "favorite", "category", "where", "similar", "occasion"]);
+// Exactly the three answers of one feedback card, tied to one saved look.
+export const feedbackSchema = z.object({ jobId: z.string().uuid(), answers: z.record(answerKey, z.string().min(1).max(40)) })
+  .refine((value) => Object.keys(value.answers).length === 3, "Answer all three questions.");
 export const generationPayloadSchema = z.object({ jobId: z.string().uuid() });
 export const classificationSchema = z.object({ category: z.enum(["Clothes", "Bag", "Hat", "Shoes", "unsupported"]) });
 export type AccessoryFit = "female" | "male";
@@ -23,6 +27,11 @@ export type PhotoJob = {
   video: string | null;
   error: string | null;
   title: string;
+  brand?: string | null;
+  likes?: number;
+  feedbackSent?: boolean;
+  parentJobId?: string | null;
+  createdAt?: string;
   source: "discover" | "own" | "internet" | "store";
   liked: boolean;
   shared: boolean;
@@ -91,4 +100,13 @@ export function nextDirectAction(job: DirectJobState, now: number): DirectAction
   if (now - Date.parse(job.created_at) > directLimitMs(job.kind)) return "expired";
   if (job.stage === "saving" && !stale) return "wait";
   return "poll";
+}
+
+const finished = (status: string) => status === "completed" || status === "failed";
+// Which saved job the Try-On screen shows: a newer local job wins, and a stale list row never rolls back a finished one.
+export function pickShownJob<T extends Pick<PhotoJob, "id" | "status"> & { createdAt?: string }>(current: T | null, restored: T): T {
+  if (!current) return restored;
+  if (current.id !== restored.id) return Date.parse(current.createdAt ?? "") > Date.parse(restored.createdAt ?? "") ? current : restored;
+  if (finished(current.status) && !finished(restored.status)) return current;
+  return { ...current, ...restored };
 }
