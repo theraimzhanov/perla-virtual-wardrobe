@@ -9,6 +9,7 @@ export const sampleLookVideo = { webm: demoVideoWebm.url, mp4: demoVideo.url };
 
 export type Look = {
   id: string;
+  jobId?: string;
   title: string;
   author: string;
   kind: "photo" | "video";
