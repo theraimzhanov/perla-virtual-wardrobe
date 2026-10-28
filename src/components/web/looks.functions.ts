@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { uploadBucket } from "./upload-rules";
 import { feedbackSchema } from "./generation-rules";
+import { tallyGeneratedMedia, type GeneratedMedia } from "./brand-insights-rules";
 
 export type CommunityLook = { jobId: string; kind: "photo" | "video"; image: string; video: string | null; product: string; brand: string | null; author: string; source: "discover" | "own" | "internet" | "store"; likes: number; liked: boolean; mine: boolean };
 export type ProductSignal = { id: string; tryOns: number; likes: number };
@@ -114,3 +115,17 @@ export const hideWardrobePiece = createServerFn({ method: "POST" })
     if (error) throw new Error("Couldn't update your wardrobe.");
     return { saved: true };
   });
+
+// Public landing-page total: how many finished images and videos members have created in total.
+// Only aggregate counts leave this handler — never a row, name, or file.
+export const countGeneratedMedia = createServerFn({ method: "POST" }).handler(async (): Promise<GeneratedMedia> => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("generation_jobs")
+    .select("kind,result_image_url,result_video_url")
+    .eq("status", "completed")
+    .is("deleted_at", null)
+    .limit(5000);
+  if (error) throw new Error("Couldn't load creation totals.");
+  return tallyGeneratedMedia(data ?? []);
+});

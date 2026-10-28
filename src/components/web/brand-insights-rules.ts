@@ -18,3 +18,14 @@ export function rankDiscoverProducts(products: DiscoverProduct[], signals: Produ
 export function sharedVirtualLooks(looks: Look[]) {
   return byLikes(looks.filter((look) => look.shared && (look.kind === "photo" || Boolean(look.video?.webm || look.video?.mp4))));
 }
+
+// A saved job counts once for the image it made (photo jobs) or the video it made
+// (video jobs); a video's stored source photo is not a second generated image.
+export type GeneratedMediaRow = { kind: string; result_image_url: string | null; result_video_url: string | null };
+export type GeneratedMedia = { images: number; videos: number; total: number };
+
+export function tallyGeneratedMedia(rows: GeneratedMediaRow[]): GeneratedMedia {
+  const images = rows.filter((row) => row.kind === "photo" && Boolean(row.result_image_url)).length;
+  const videos = rows.filter((row) => row.kind === "video" && Boolean(row.result_video_url)).length;
+  return { images, videos, total: images + videos };
+}
