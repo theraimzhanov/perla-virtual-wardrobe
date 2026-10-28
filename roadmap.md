@@ -1,5 +1,11 @@
 # Perla update
 
+## Direct photo try-on migration
+- [ ] Replace n8n photo processing with authenticated app-owned generation and durable asynchronous processing.
+- [ ] Configure Perfect Corp, Gemini and delayed-delivery credentials; retain existing n8n until the replacement is verified.
+- [ ] Persist task progress and finished media, restore results across reloads, and show real failures instead of sample success.
+- [ ] Test ownership, retry/idempotency behavior and photo-generation flow; document dashboard steps and remaining verification blockers.
+
 ## Matching Try-On photo frames
 - [x] Match input, output and comparison frame dimensions while keeping full photos visible.
 - [x] Verify unchanged frame dimensions and working comparison slider at 1280px, 681px and 390px widths; no browser errors or horizontal overflow. Used local photo fixtures because external Supabase authenticated checks remain unavailable.
