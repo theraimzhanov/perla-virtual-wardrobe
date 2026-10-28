@@ -157,7 +157,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     updateLookSource([photoLookId, videoLookId], source);
   };
   const isShared = (id: string) => looks.some((look) => look.id === id && look.shared);
-  const ShareButton = ({ id }: { id: string }) => <Button variant="outline" disabled={isShared(id)} onClick={() => { shareLook(id); toast.success("Shared to Brand Insights"); }} className="rounded-full text-xs"><Send />{isShared(id) ? "Shared" : "Share to Brand Insights"}</Button>;
+  const ShareButton = ({ id }: { id: string }) => <Button variant="outline" disabled={isShared(id)} onClick={() => shareLook(id)} className="rounded-full text-xs"><Send />{isShared(id) ? "Shared" : "Share to Brand Insights"}</Button>;
   const busy = savingInputs || photoPhase === "loading" || videoPhase === "loading" || deleting !== null;
   const hasResult = photoPhase === "done";
   return (

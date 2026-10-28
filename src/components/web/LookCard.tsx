@@ -1,5 +1,4 @@
 import { Film, Heart, Image, Send, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTryOn } from "./TryOnContext";
@@ -21,14 +20,15 @@ export function LookCard({ look, showShare = false, showDelete = false }: { look
         <span className="pointer-events-none absolute left-3 top-3 flex items-center gap-1 rounded-full bg-background/90 px-2.5 py-1 text-[10px] uppercase">{look.kind === "video" ? <Film className="h-3 w-3" /> : <Image className="h-3 w-3" />}{look.kind === "video" ? "Video" : "Photo"}</span>
       </div>
       <div className="p-3 sm:p-4">
+        {look.brand && <p className="mb-1 break-words text-[10px] uppercase text-muted-foreground">{look.brand}</p>}
         {label && <p className="mb-2 break-words text-[10px] uppercase text-gold">{label}</p>}
         <p className="break-words font-serif text-xl leading-tight">{productName}</p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <p className="min-w-0 flex-1 break-words text-xs text-muted-foreground">{look.author}</p>
           <Button size="sm" variant="ghost" aria-pressed={look.liked} aria-label={`Like ${look.title}`} title={`Like ${look.title}`} onClick={() => likeLook(look.id)} className={cn("shrink-0 rounded-full px-2 tabular-nums", look.liked && "text-gold")}><Heart className={look.liked ? "fill-current" : ""} />{look.likes.toLocaleString()}</Button>
-          {showShare && !look.shared && <Button size="icon" variant="outline" aria-label={`Share ${look.title} to Brand Insights`} title="Share to Brand Insights" onClick={() => { shareLook(look.id); toast.success("Shared to Brand Insights"); }} className="h-8 w-8 shrink-0 rounded-full"><Send /></Button>}
-          {showShare && look.shared && <Button size="icon" variant="default" aria-label={`Unshare ${look.title} from Brand Insights`} title="Shared — click to remove from Brand Insights" onClick={() => { unshareLook(look.id); toast("Removed from Brand Insights"); }} className="h-8 w-8 shrink-0 rounded-full"><Send /></Button>}
-          {showDelete && <Button size="icon" variant="outline" aria-label={`Delete ${look.title}`} title="Delete" onClick={() => { deleteLook(look.id); toast("Look deleted"); }} className="h-8 w-8 shrink-0 rounded-full text-destructive"><Trash2 /></Button>}
+          {showShare && !look.shared && <Button size="icon" variant="outline" aria-label={`Share ${look.title} to Brand Insights`} title="Share to Brand Insights" onClick={() => shareLook(look.id)} className="h-8 w-8 shrink-0 rounded-full"><Send /></Button>}
+          {showShare && look.shared && <Button size="icon" variant="default" aria-label={`Unshare ${look.title} from Brand Insights`} title="Shared — click to remove from Brand Insights" onClick={() => unshareLook(look.id)} className="h-8 w-8 shrink-0 rounded-full"><Send /></Button>}
+          {showDelete && <Button size="icon" variant="outline" aria-label={`Delete ${look.title}`} title="Delete" onClick={() => deleteLook(look.id)} className="h-8 w-8 shrink-0 rounded-full text-destructive"><Trash2 /></Button>}
         </div>
       </div>
     </article>
