@@ -20,9 +20,11 @@ export type Look = {
   mine: boolean;
   source?: LookSource;
   product?: string;
+  brand?: string;
   video?: { webm?: string; mp4?: string };
 };
 
+// Fixture looks for rule tests; the app itself shows only saved looks.
 export const seedLooks: Look[] = [
   { id: "l1", title: "Parisian Neutrals", author: "You", kind: "photo", image: after, likes: 24, liked: false, shared: true, mine: true, source: "discover", product: "Classic Trench" },
   { id: "l2", title: "Trench in Motion", author: "You", kind: "video", image: after, video: sampleLookVideo, likes: 41, liked: false, shared: false, mine: true, source: "discover", product: "Classic Trench" },

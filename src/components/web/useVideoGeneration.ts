@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { createVideoJob, getPhotoJob } from "./generation.functions";
 import { photoJobPhase, type PhotoJob } from "./generation-rules";
 
-// Real video generation for a finished, saved try-on photo. Resets whenever the photo changes.
-export function useVideoGeneration(userId: string | null, photoJobId: string | null) {
+// Real video generation for a finished, saved try-on photo; restores the photo's latest saved video.
+export function useVideoGeneration(userId: string | null, photoJobId: string | null, restored?: PhotoJob) {
   const create = useServerFn(createVideoJob);
   const read = useServerFn(getPhotoJob);
   const [job, setJob] = useState<PhotoJob | null>(null);
@@ -14,8 +14,14 @@ export function useVideoGeneration(userId: string | null, photoJobId: string | n
   const [startError, setStartError] = useState<string | null>(null);
   const request = useRef<string | null>(null);
   const version = useRef(0);
+  const lock = useRef(false);
+  const dismissed = useRef<string | null>(null);
 
-  useEffect(() => { version.current++; request.current = null; setJob(null); setStarting(false); setStartError(null); }, [photoJobId, userId]);
+  useEffect(() => { version.current++; request.current = null; lock.current = false; dismissed.current = null; setJob(null); setStarting(false); setStartError(null); }, [photoJobId, userId]);
+  useEffect(() => {
+    if (lock.current || !restored || restored.id === dismissed.current || restored.parentJobId !== photoJobId) return;
+    setJob((current) => current && current.id !== restored.id && Date.parse(current.createdAt ?? "") > Date.parse(restored.createdAt ?? "") ? current : { ...current, ...restored });
+  }, [restored, photoJobId]);
 
   const refresh = useCallback(async (id: string, epoch: number) => {
     try { const row = await read({ data: { id } }); if (epoch === version.current) setJob(row); }
@@ -25,17 +31,21 @@ export function useVideoGeneration(userId: string | null, photoJobId: string | n
   useEffect(() => {
     if (!job || ["completed", "failed"].includes(job.status)) return;
     const id = job.id; const epoch = version.current;
+    let checking = false;
+    const check = async () => { if (checking) return; checking = true; await refresh(id, epoch); checking = false; };
     const channel = supabase.channel(`video-${id}-${crypto.randomUUID()}`)
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "generation_jobs", filter: `id=eq.${id}` }, () => { void refresh(id, epoch); })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "generation_jobs", filter: `id=eq.${id}` }, () => { void check(); })
       .subscribe();
-    const timer = setInterval(() => { void refresh(id, epoch); }, 6000);
+    void check();
+    const timer = setInterval(() => { void check(); }, 6000);
     return () => { clearInterval(timer); void supabase.removeChannel(channel); };
   }, [job?.id, job?.status, refresh]);
 
   const start = async () => {
-    if (!userId || !photoJobId || starting) return;
+    if (!userId || !photoJobId || lock.current) return;
+    lock.current = true;
     const epoch = ++version.current;
-    setStarting(true); setStartError(null); setJob(null);
+    setStarting(true); setStartError(null);
     request.current ??= crypto.randomUUID();
     try {
       const { data } = await supabase.auth.getUser();
@@ -45,9 +55,10 @@ export function useVideoGeneration(userId: string | null, photoJobId: string | n
       if (epoch === version.current) setJob(row);
     } catch (cause) {
       if (epoch === version.current) { const message = cause instanceof Error ? cause.message : "Couldn't start your video."; setStartError(message); toast.error(message); }
-    } finally { if (epoch === version.current) setStarting(false); }
+    } finally { if (epoch === version.current) { lock.current = false; setStarting(false); } }
   };
+  const clear = () => { version.current++; dismissed.current = job?.id ?? null; setJob(null); setStartError(null); };
   useEffect(() => { if (job && ["completed", "failed"].includes(job.status)) request.current = null; }, [job?.status]);
   const phase = starting ? "loading" : job ? photoJobPhase(job) : "idle";
-  return { job, phase, start, video: job?.video ?? null, error: startError ?? (job?.status === "failed" ? job.error ?? "Video generation failed." : null) };
+  return { job, phase, start, clear, video: job?.video ?? null, error: startError ?? (job?.status === "failed" ? job.error ?? "Video generation failed." : null) };
 }
