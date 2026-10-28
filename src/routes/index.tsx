@@ -141,7 +141,7 @@ function Landing() {
             <figcaption className="p-5"><p className="text-[10px] uppercase text-gold">AI Studio photo</p><p className="mt-1 font-serif text-xl">Editorial & runway scenes</p></figcaption>
           </figure>
           <figure className="overflow-hidden rounded-[1.75rem] bg-card shadow-card">
-            <video src={demoVideo.url} autoPlay muted loop playsInline className="aspect-[3/2.02] w-full bg-muted object-cover" />
+            <video src={demoVideo.url} poster={modelAfter} autoPlay muted loop playsInline className="aspect-[352/232] w-full bg-muted object-cover" />
             <figcaption className="p-5"><p className="text-[10px] uppercase text-gold">AI Studio video</p><p className="mt-1 font-serif text-xl">Your look, walking</p></figcaption>
           </figure>
         </div>
