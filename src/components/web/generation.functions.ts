@@ -12,12 +12,17 @@ export const createGenerationJob = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => generationRequestSchema.parse(input))
   .handler(async ({ data, context }) => {
     if (data.expectedOwner !== context.userId) throw new Error("Your account changed. Please try again.");
+    // Stay on the working legacy processor until the signed callback is published and verified.
+    const direct = process.env['PERLA_DIRECT_GENERATION_ENABLED'] === "true";
     const { generationConfig, enqueuePhoto } = await import("./generation-workflow.server");
-    generationConfig();
-    const existing = await context.supabase.from("generation_jobs").select("id").eq("user_id", context.userId).eq("request_id", data.requestId).maybeSingle();
+    if (direct) generationConfig();
+    const dispatch = async (id: string, engine: string) => {
+      if (engine === "direct") await enqueuePhoto(id);
+    };
+    const existing = await context.supabase.from("generation_jobs").select("id,engine,status").eq("user_id", context.userId).eq("request_id", data.requestId).maybeSingle();
     if (existing.error) throw new Error("Couldn't check this request.");
     if (existing.data) {
-      await enqueuePhoto(existing.data.id);
+      if (["pending", "processing"].includes(existing.data.status)) await dispatch(existing.data.id, existing.data.engine);
       return { jobId: existing.data.id };
     }
     const { data: inputs, error } = await context.supabase.from("try_on_inputs").select("*").eq("user_id", context.userId).maybeSingle();
@@ -39,7 +44,7 @@ export const createGenerationJob = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: job, error: jobError } = await supabaseAdmin.from("generation_jobs").insert({
       user_id: context.userId,
-      engine: "direct",
+      engine: direct ? "direct" : "n8n",
       request_id: data.requestId,
       source: inputs.product_mode === "personal" ? "own" : "discover",
       accessory_fit: data.accessoryFit,
@@ -54,13 +59,13 @@ export const createGenerationJob = createServerFn({ method: "POST" })
       brand_name: product.brand,
     }).select("id").single();
     if (jobError?.code === "23505") {
-      const duplicate = await context.supabase.from("generation_jobs").select("id").eq("user_id", context.userId).eq("request_id", data.requestId).single();
+      const duplicate = await context.supabase.from("generation_jobs").select("id,engine,status").eq("user_id", context.userId).eq("request_id", data.requestId).single();
       if (!duplicate.data) throw new Error("Couldn't restore this request.");
-      await enqueuePhoto(duplicate.data.id);
+      if (["pending", "processing"].includes(duplicate.data.status)) await dispatch(duplicate.data.id, duplicate.data.engine);
       return { jobId: duplicate.data.id };
     }
     if (jobError || !job) throw new Error("Couldn't start your try-on. Please retry.");
-    try { await enqueuePhoto(job.id); }
+    try { await dispatch(job.id, direct ? "direct" : "n8n"); }
     catch { throw new Error("Your request is saved, but delivery couldn't start. Retry to resume the same request."); }
     return { jobId: job.id };
   });

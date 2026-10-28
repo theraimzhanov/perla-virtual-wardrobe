@@ -26,7 +26,7 @@ export function usePhotoGeneration(signedIn: boolean, selectionKey: string, rest
 
   useEffect(() => {
     if (!touched.current && restored) setJob(restored);
-  }, [restored]);
+  }, [restored, selectionKey]);
 
   const refresh = useCallback(async (id: string, epoch: number) => {
     try {
@@ -41,9 +41,10 @@ export function usePhotoGeneration(signedIn: boolean, selectionKey: string, rest
     if (!job || !signedIn || ["completed", "failed"].includes(job.status)) return;
     const id = job.id;
     const epoch = version.current;
+    let active = true;
     let checking = false;
     const check = async () => {
-      if (checking) return;
+      if (checking || !active) return;
       checking = true;
       await refresh(id, epoch);
       checking = false;
@@ -54,7 +55,7 @@ export function usePhotoGeneration(signedIn: boolean, selectionKey: string, rest
     // Read immediately and after subscribing: a fast completion cannot be missed.
     void check();
     const timer = setInterval(() => { void check(); }, 5000);
-    return () => { clearInterval(timer); void supabase.removeChannel(channel); };
+    return () => { active = false; clearInterval(timer); void supabase.removeChannel(channel); };
   }, [job?.id, job?.status, signedIn, refresh]);
 
   const start = async (fit: AccessoryFit | null) => {
@@ -70,7 +71,7 @@ export function usePhotoGeneration(signedIn: boolean, selectionKey: string, rest
       const created = await create({ data: { expectedOwner: data.user.id, requestId: request.current, accessoryFit: fit } });
       if (epoch !== version.current) return;
       const row = await read({ data: { id: created.jobId } });
-      if (epoch === version.current) { setJob(row); request.current = null; }
+      if (epoch === version.current) setJob(row);
     } catch (cause) {
       if (epoch === version.current) {
         const message = cause instanceof Error ? cause.message : "Couldn't start your photo.";
@@ -80,6 +81,7 @@ export function usePhotoGeneration(signedIn: boolean, selectionKey: string, rest
       if (epoch === version.current) { lock.current = false; setStarting(false); }
     }
   };
+  useEffect(() => { if (job && ["completed", "failed"].includes(job.status)) request.current = null; }, [job?.status]);
   const phase = starting ? "loading" : job ? photoJobPhase(job) : "idle";
   return { job, phase, start, error: startError ?? (job?.status === "failed" ? job.error ?? "Photo generation failed." : null), retryStatus: () => { if (job) void refresh(job.id, version.current); } };
 }
