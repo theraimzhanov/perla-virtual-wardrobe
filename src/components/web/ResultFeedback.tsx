@@ -8,7 +8,7 @@ import { saveFeedback } from "./looks.functions";
 import { cn } from "@/lib/utils";
 
 // Saved looks send their three answers to the database; sample previews keep them on screen only.
-export function ResultFeedback({ kind, mode = "discover", jobId, alreadySent = false, onAnswer, onSent }: { kind: "photo" | "video"; mode?: ProductMode; jobId?: string; alreadySent?: boolean; onAnswer?: (question: string, answer: string) => void; onSent?: () => void }) {
+export function ResultFeedback({ kind, mode = "discover", jobId, alreadySent = false, onAnswer, onSent }: { kind: "photo" | "video"; mode?: ProductMode; jobId?: string | undefined; alreadySent?: boolean; onAnswer?: (question: string, answer: string) => void; onSent?: () => void }) {
   const questions = questionsFor(kind, mode);
   const send = useServerFn(saveFeedback);
   const [answers, setAnswers] = useState<Record<string, string>>({});

@@ -20,7 +20,7 @@ export type Look = {
   mine: boolean;
   source?: LookSource;
   product?: string;
-  brand?: string;
+  brand?: string | undefined;
   video?: { webm?: string; mp4?: string };
 };
 
