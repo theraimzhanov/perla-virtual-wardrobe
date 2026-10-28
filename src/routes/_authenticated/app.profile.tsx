@@ -30,10 +30,10 @@ const prefs = ["Minimal", "Neutrals", "Tailored", "Silk", "Parisian"];
 type Account = { name: string; avatarUrl: string | null; email: string | null };
 
 function Profile() {
-  const { looks, triedProducts, removeTried, photoJobs } = useTryOn();
+  const { looks, triedProducts, removeTried, photoJobs, studioJobs } = useTryOn();
   const myLooks = byLikes(looks.filter((look) => look.mine));
   const tryOns = photoJobs.filter((job) => job.status === "completed").length;
-  const studioShots = looks.filter((look) => look.mine && !look.jobId).length;
+  const studioShots = studioJobs.filter((job) => job.status === "completed").length;
   const nav = useNavigate();
   const queryClient = useQueryClient();
   const [account, setAccount] = useState<Account | null>(null);
