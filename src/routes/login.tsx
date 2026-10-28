@@ -20,7 +20,10 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   const nav = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
+  const [confirm, setConfirm] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+  const switchMode = (m: "signin" | "signup" | "forgot") => { setMode(m); setError(null); setResetSent(false); };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -38,6 +41,16 @@ function Login() {
     event.preventDefault();
     setBusy(true);
     setError(null);
+    if (mode === "forgot") {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
+      setBusy(false);
+      if (error) setError(error.message); else setResetSent(true);
+      return;
+    }
+    if (mode === "signup") {
+      if (password.length < 8) { setError("Password must be at least 8 characters."); setBusy(false); return; }
+      if (password !== confirm) { setError("Passwords do not match."); setBusy(false); return; }
+    }
     if (mode === "signin") {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
@@ -95,22 +108,46 @@ function Login() {
             </div>
           ) : (
             <>
-              <h1 className="mt-4 text-center font-serif text-4xl">
-                {mode === "signin" ? <>Welcome <em className="text-gold">back</em></> : <>Create your <em className="text-gold">account</em></>}
+              {mode !== "forgot" && (
+                <div role="tablist" className="mt-6 grid grid-cols-2 rounded-full bg-card p-1 shadow-card">
+                  {(["signin", "signup"] as const).map((m) => (
+                    <button key={m} type="button" role="tab" aria-selected={mode === m} onClick={() => switchMode(m)} className={`rounded-full py-2.5 text-sm transition ${mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+                      {m === "signin" ? "Sign in" : "Create account"}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <h1 className="mt-6 text-center font-serif text-4xl">
+                {mode === "signin" ? <>Welcome <em className="text-gold">back</em></> : mode === "signup" ? <>Create your <em className="text-gold">account</em></> : <>Reset your <em className="text-gold">password</em></>}
               </h1>
+              {mode === "forgot" && resetSent ? (
+                <div className="mt-8 rounded-[1.75rem] bg-card p-6 text-center text-sm text-muted-foreground shadow-card">
+                  If an account exists for {email}, a reset link is on its way. Check your inbox.
+                  <button type="button" onClick={() => switchMode("signin")} className="mt-5 w-full rounded-full bg-primary py-3.5 text-primary-foreground shadow-soft">Back to sign in</button>
+                </div>
+              ) : (
               <form className="mt-8 space-y-3" onSubmit={handleSubmit}>
                 {mode === "signup" && (
                   <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name" autoComplete="name" className="w-full rounded-full bg-card px-5 py-3.5 shadow-card outline-none" aria-label="Full name" />
                 )}
                 <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" autoComplete="email" className="w-full rounded-full bg-card px-5 py-3.5 shadow-card outline-none" aria-label="Email" />
-                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" autoComplete={mode === "signin" ? "current-password" : "new-password"} className="w-full rounded-full bg-card px-5 py-3.5 shadow-card outline-none" aria-label="Password" />
+                {mode !== "forgot" && (
+                  <input type="password" required minLength={mode === "signup" ? 8 : undefined} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === "signup" ? "Password (8+ characters)" : "Password"} autoComplete={mode === "signin" ? "current-password" : "new-password"} className="w-full rounded-full bg-card px-5 py-3.5 shadow-card outline-none" aria-label="Password" />
+                )}
+                {mode === "signup" && (
+                  <input type="password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Confirm password" autoComplete="new-password" className="w-full rounded-full bg-card px-5 py-3.5 shadow-card outline-none" aria-label="Confirm password" />
+                )}
+                {mode === "signin" && (
+                  <div className="text-right"><button type="button" onClick={() => switchMode("forgot")} className="px-4 text-sm text-muted-foreground underline">Forgot password?</button></div>
+                )}
                 {error && <p className="px-4 text-center text-sm text-destructive">{error}</p>}
-                <button type="submit" disabled={busy} className="w-full rounded-full bg-primary py-3.5 text-primary-foreground shadow-soft disabled:opacity-60">{busy ? "One moment…" : mode === "signin" ? "Sign in" : "Create account"}</button>
-                <button type="button" onClick={handleGoogle} disabled={busy} className="w-full rounded-full bg-card py-3.5 shadow-card disabled:opacity-60">Continue with Google</button>
+                <button type="submit" disabled={busy} className="w-full rounded-full bg-primary py-3.5 text-primary-foreground shadow-soft disabled:opacity-60">{busy ? "One moment…" : mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}</button>
+                {mode !== "forgot" && <button type="button" onClick={handleGoogle} disabled={busy} className="w-full rounded-full bg-card py-3.5 shadow-card disabled:opacity-60">Continue with Google</button>}
               </form>
-              <p className="mt-6 text-center text-sm text-muted-foreground">
-                {mode === "signin" ? <>New here? <button type="button" onClick={() => { setMode("signup"); setError(null); }} className="text-foreground underline">Create an account</button></> : <>Already a member? <button type="button" onClick={() => { setMode("signin"); setError(null); }} className="text-foreground underline">Sign in</button></>}
-              </p>
+              )}
+              {mode === "forgot" && !resetSent && (
+                <p className="mt-6 text-center text-sm"><button type="button" onClick={() => switchMode("signin")} className="text-muted-foreground underline">Back to sign in</button></p>
+              )}
             </>
           )}
         </div>
