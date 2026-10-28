@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "View generated try on results" ON storage.objects;
