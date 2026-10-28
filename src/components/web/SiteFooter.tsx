@@ -8,7 +8,6 @@ const productLinks = [
   { to: "/app/try-on", label: "Try-On" },
   { to: "/app/studio", label: "AI Studio" },
   { to: "/app/insights", label: "Brand Insights" },
-  { to: "/mobile", label: "Mobile app" },
 ] as const;
 const accountLinks = [
   { to: "/login", label: "Sign in" },
