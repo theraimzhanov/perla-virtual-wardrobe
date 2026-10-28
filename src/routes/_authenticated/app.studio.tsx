@@ -106,12 +106,23 @@ function Studio() {
         </div>
       </Panel>
       {(starting || current) && (
-        <section aria-label="Just created" className="mx-auto w-full max-w-xl">
-          <h2 className="mb-4 font-serif text-3xl">Just created</h2>
-          {current?.status === "failed" ? <p role="alert" className="text-sm text-destructive">This creation failed: {current.error ?? "please try again."}</p>
-            : !current || photoJobPhase(current) === "loading" ? <GenerationSkeleton kind={current?.kind ?? output} />
-            : <LookCard look={jobLook(current)} showShare showDelete showDownload />}
-          <p className="mt-3 text-xs text-muted-foreground">All your creations are saved in Profile → My looks & videos.</p>
+        <section aria-label="Just created" className="mt-12 border-t pt-7">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <h2 className="font-serif text-3xl">Just created</h2>
+            <span className="rounded-full border px-3 py-1 text-[10px] uppercase text-muted-foreground">{current?.status === "failed" ? "Not completed" : !current || photoJobPhase(current) === "loading" ? "Generating" : "Saved"}</span>
+          </div>
+          {current?.status === "failed" ? <p role="alert" className="text-sm text-destructive">This creation failed: {current.error ?? "please try again."}</p> : (
+            <div className="grid items-start gap-7 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10">
+              <div className="min-w-0">
+                {!current || photoJobPhase(current) === "loading" ? <GenerationSkeleton kind={current?.kind ?? output} className="mx-auto max-w-md" /> : <LookCard look={jobLook(current)} showShare showDelete showDownload />}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs uppercase text-gold">{(current?.kind ?? output) === "video" ? "Video created" : "Image created"}</p>
+                <h3 className="mt-2 font-serif text-3xl">A new take on your look.</h3>
+                <p className="mt-3 text-sm text-muted-foreground">All your creations are saved in Profile → My looks & videos.</p>
+              </div>
+            </div>
+          )}
         </section>
       )}
     </div>
