@@ -12,7 +12,8 @@ export function generationConfig() {
   const nextSigningKey = process.env['QSTASH_NEXT_SIGNING_KEY'];
   const perfectKey = process.env['PERFECT_CORP_API_KEY'];
   const geminiKey = process.env['GEMINI_API_KEY'];
-  const url = process.env['PERLA_GENERATION_URL'];
+  // The custom domain is primary; the older lovable.app address only redirects there.
+  const url = process.env['PERLA_CALLBACK_URL'] || process.env['PERLA_GENERATION_URL'];
   const supabaseOrigin = process.env['SUPABASE_URL'];
   if (!token || !currentSigningKey || !nextSigningKey || !perfectKey || !geminiKey || !url || !supabaseOrigin) throw new Error("Photo generation setup is not complete yet.");
   const callback = new URL(url);
