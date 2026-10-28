@@ -8,7 +8,7 @@ vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
 vi.mock("@/components/web/generation.functions", () => ({ createGenerationJob: mocks.create, getPhotoJob: mocks.read }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { getUser: mocks.getUser }, removeChannel: mocks.remove, channel: () => ({ on() { return this; }, subscribe() { return this; } }) } }));
 const owner = "11111111-1111-4111-8111-111111111111";
-const job: PhotoJob = { id: "22222222-2222-4222-8222-222222222222", status: "completed", stage: "completed", image: "https://storage.example/real.jpg", error: null, title: "Bag", source: "discover", liked: false, shared: false, photoId: "photo", productId: "product" };
+const job: PhotoJob = { id: "22222222-2222-4222-8222-222222222222", kind: "photo", video: null, status: "completed", stage: "completed", image: "https://storage.example/real.jpg", error: null, title: "Bag", source: "discover", liked: false, shared: false, photoId: "photo", productId: "product" };
 
 describe("Account-scoped photo generation", () => {
   beforeEach(() => { vi.clearAllMocks(); mocks.getUser.mockResolvedValue({ data: { user: { id: owner } } }); mocks.create.mockResolvedValue({ jobId: job.id }); mocks.read.mockResolvedValue(job); });
