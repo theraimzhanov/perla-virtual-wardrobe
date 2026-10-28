@@ -87,6 +87,7 @@ async function submit(job: Job) {
   let task: { taskId: string; endpoint: string };
   try { task = await send(); }
   catch (cause) {
+    console.error("Generation submit failed", cause instanceof Error ? `${cause.name}: ${cause.message}` : "unknown");
     // The provider has no documented idempotency, so an uncertain POST is never repeated.
     return fail(job.id, cause instanceof GenerationProviderError ? cause.message : "Submission status is uncertain, so it was not repeated. Please try again.");
   }
