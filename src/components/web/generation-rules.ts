@@ -73,3 +73,22 @@ export function trustedMediaUrl(value: string, kind: "input" | "result", supabas
   }
   return url.toString();
 }
+// App-managed processing: each status check advances a saved job by at most one safe step.
+export type DirectJobState = { status: string; stage: string; kind: string; provider_task_id: string | null; created_at: string; updated_at: string };
+export type DirectAction = "none" | "wait" | "submit" | "uncertain" | "poll" | "expired";
+export const DIRECT_STALE_MS = 90_000;
+export const directLimitMs = (kind: string) => (kind === "video" ? 30 : 10) * 60_000;
+
+export function nextDirectAction(job: DirectJobState, now: number): DirectAction {
+  if (["completed", "failed"].includes(job.status)) return "none";
+  const stale = now - Date.parse(job.updated_at) > DIRECT_STALE_MS;
+  if (!job.provider_task_id) {
+    // A submission that never recorded its task ID is never repeated: the provider has no idempotency.
+    if (job.stage === "submitting") return stale ? "uncertain" : "wait";
+    if (job.stage === "classifying") return stale ? "submit" : "wait";
+    return "submit";
+  }
+  if (now - Date.parse(job.created_at) > directLimitMs(job.kind)) return "expired";
+  if (job.stage === "saving" && !stale) return "wait";
+  return "poll";
+}
