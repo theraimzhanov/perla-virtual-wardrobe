@@ -125,9 +125,21 @@
   transform: translateX(-100%);
   animation: perla-shimmer 2.4s ease-in-out infinite;
 }
+.generation-gradient {
+  background: linear-gradient(135deg, var(--gold-soft), var(--secondary), var(--accent), var(--gold-soft), var(--background));
+  background-size: 300% 300%;
+  animation: perla-gradient 6s ease-in-out infinite;
+}
+@keyframes perla-gradient { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 .generation-progress { animation: perla-progress 1.8s ease-in-out infinite alternate; }
 @keyframes perla-shimmer { to { transform: translateX(100%); } }
 @keyframes perla-progress { to { transform: translateX(100%); } }
 @media (prefers-reduced-motion: reduce) {
-  .generation-skeleton::after, .generation-progress { animation: none; }
+  .generation-skeleton::after, .generation-gradient {
+  background: linear-gradient(135deg, var(--gold-soft), var(--secondary), var(--accent), var(--gold-soft), var(--background));
+  background-size: 300% 300%;
+  animation: perla-gradient 6s ease-in-out infinite;
+}
+@keyframes perla-gradient { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.generation-progress { animation: none; }
 }
