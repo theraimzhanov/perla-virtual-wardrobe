@@ -15,7 +15,7 @@ export async function renderStudioImage(image: { bytes: Uint8Array; mime: string
   form.set("size", "1024x1536");
   form.set("quality", "medium");
   form.set("stream", "true");
-  form.append("image", new File([image.bytes], `look.${image.mime === "image/png" ? "png" : "jpg"}`, { type: image.mime }));
+  form.append("image", new File([image.bytes as Uint8Array<ArrayBuffer>], `look.${image.mime === "image/png" ? "png" : "jpg"}`, { type: image.mime }));
   const response = await fetch(GATEWAY, { method: "POST", headers: { authorization: `Bearer ${key}` }, body: form });
   if (!response.ok || !response.body) {
     const status = response.status;
