@@ -8,6 +8,7 @@ import { tallyGeneratedMedia, type GeneratedMedia } from "./brand-insights-rules
 export type CommunityLook = { jobId: string; kind: "photo" | "video"; image: string; video: string | null; product: string; brand: string | null; author: string; source: "discover" | "own" | "internet" | "store"; likes: number; liked: boolean; mine: boolean };
 export type ProductSignal = { id: string; tryOns: number; likes: number };
 export type WardrobePiece = { id: string; name: string; brand: string | null; image: string };
+export type { GeneratedMedia };
 
 const source = (value: string) => (value === "own" || value === "internet" || value === "store" ? value : "discover");
 

@@ -67,7 +67,7 @@ function Landing() {
             <Link to="/mobile" className="rounded-full bg-card px-7 py-3.5 shadow-card">See mobile app</Link>
           </div>
           <div className="mt-10 grid grid-cols-3 gap-4 sm:gap-10">
-            {[["120k", "try-ons"], ["340", "brands"], [(created?.total ?? 0).toLocaleString(), "generated images & videos"]].map(([v, l]) => (
+            {[["120k", "try-ons"], ["340", "brands"], [(created?.total ?? 0).toLocaleString(), "images & videos"]].map(([v, l]) => (
               <div key={l} className="min-w-0"><p className="font-serif text-3xl sm:text-4xl">{v}</p><p className="mt-1 max-w-48 text-xs uppercase text-muted-foreground">{l}</p></div>
             ))}
           </div>
