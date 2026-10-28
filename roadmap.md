@@ -1,5 +1,9 @@
 # Perla update
 
+## App-managed generation (no webhooks)
+- [x] Submit photo/video jobs inside the request and advance them on each status check; save results before completing.
+- [ ] Run one signed-in photo + video on studioperla.live after publishing — needs the user to publish and try it.
+
 ## Move photo + video generation to app server
 - [x] Point processors at studioperla.live, fix regional QStash address, enable direct photo processing.
 - [x] Add real video generation (Perfect Corp image-to-video, Gemini motion prompt, saved to Supabase) wired to Generate video.
