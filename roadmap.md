@@ -1,5 +1,8 @@
 # Perla update
 
+## Public sitemap
+- [ ] Create and verify `public/sitemap.xml` for indexable public pages on studioperla.live, excluding private app pages, account recovery and API endpoints.
+
 ## Saved Try-On results and real data
 - [x] Single-submit guards on generate, video, like, share, delete and feedback.
 - [x] Gradient loading state; delete for photo and video (removed from database and storage).
