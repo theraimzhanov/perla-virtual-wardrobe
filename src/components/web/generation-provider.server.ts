@@ -9,8 +9,13 @@ export class GenerationProviderError extends Error {
   constructor(message: string, readonly retryable = false) { super(message); }
 }
 
+// Workers support only "follow" and "manual" redirects; a manual redirect surfaces as 3xx or an opaque redirect.
+export const isRedirect = (response: Response) => response.type === "opaqueredirect" || (response.status >= 300 && response.status < 400);
+
 export async function boundedImage(url: string, maximum: number) {
-  const response = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(25000) });
+  // Cloudflare Workers reject redirect "error"; use "manual" and refuse any redirect ourselves.
+  const response = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(25000) });
+  if (isRedirect(response)) throw new GenerationProviderError("The image address redirected unexpectedly.");
   if (!response.ok) throw new GenerationProviderError("Couldn't retrieve the image. Please retry.", response.status >= 500);
   const mime = response.headers.get("content-type")?.split(";")[0]?.toLowerCase() ?? "";
   if (!["image/jpeg", "image/png", "image/webp"].includes(mime)) throw new GenerationProviderError("The image format is not supported.");
@@ -55,10 +60,11 @@ export async function classifyProduct(url: string, key: string, supabaseOrigin: 
 
 async function providerRequest(path: string, key: string, body?: object) {
   const response = await fetch(`${API}/${path}`, {
-    method: body ? "POST" : "GET", redirect: "error", signal: AbortSignal.timeout(25000),
+    method: body ? "POST" : "GET", redirect: "manual", signal: AbortSignal.timeout(25000),
     headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
+  if (isRedirect(response)) throw new GenerationProviderError("Perfect Corp couldn't process this try-on.");
   if (!response.ok) {
     // Never expose the response body: providers may echo credentials or signed image addresses.
     const code = await response.json().then((value: { error_code?: string }) => value.error_code).catch(() => undefined);

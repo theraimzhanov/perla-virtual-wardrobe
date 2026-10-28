@@ -26,7 +26,7 @@ export function generationConfig() {
 
 export async function enqueuePhoto(jobId: string) {
   const config = generationConfig();
-  const online = await fetch(config.url, { signal: AbortSignal.timeout(10000), redirect: "error" });
+  const online = await fetch(config.url, { signal: AbortSignal.timeout(10000), redirect: "manual" });
   if (!online.ok || (await online.json() as { processor?: string }).processor !== "perla-photo-v1") throw new Error("The photo processor is not published yet.");
   const client = new WorkflowClient({ token: config.token, baseUrl: config.baseUrl });
   await client.trigger({ url: config.url, body: { jobId }, workflowRunId: `photo-${jobId}`, retries: 3 });
@@ -34,7 +34,7 @@ export async function enqueuePhoto(jobId: string) {
 
 export async function enqueueVideo(jobId: string) {
   const config = generationConfig();
-  const online = await fetch(config.videoUrl, { signal: AbortSignal.timeout(10000), redirect: "error" });
+  const online = await fetch(config.videoUrl, { signal: AbortSignal.timeout(10000), redirect: "manual" });
   if (!online.ok || (await online.json() as { processor?: string }).processor !== "perla-video-v1") throw new Error("The video processor is not published yet.");
   const client = new WorkflowClient({ token: config.token, baseUrl: config.baseUrl });
   await client.trigger({ url: config.videoUrl, body: { jobId }, workflowRunId: `video-${jobId}`, retries: 3 });
