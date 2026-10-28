@@ -22,6 +22,8 @@ export function generationConfig() {
 
 export async function enqueuePhoto(jobId: string) {
   const config = generationConfig();
+  const online = await fetch(config.url, { signal: AbortSignal.timeout(10000), redirect: "error" });
+  if (!online.ok || (await online.json() as { processor?: string }).processor !== "perla-photo-v1") throw new Error("The photo processor is not published yet.");
   const client = new WorkflowClient({ token: config.token });
   await client.trigger({ url: config.url, body: { jobId }, workflowRunId: `photo-${jobId}`, retries: 3 });
 }
@@ -64,7 +66,7 @@ async function safeStep<T>(operation: () => Promise<T>): Promise<T> {
 
 export async function runPhotoWorkflow(context: WorkflowContext<{ jobId: string }>) {
   const { jobId } = generationPayloadSchema.parse(context.requestPayload);
-  const initial = await context.run("load-job", () => loadJob(jobId));
+  const initial = await context.run("load-job", async () => ({ status: (await loadJob(jobId)).status }));
   if (["completed", "failed"].includes(initial.status)) return;
   const category = await context.run("classify-product", () => safeStep(async () => {
     const job = await loadJob(jobId);

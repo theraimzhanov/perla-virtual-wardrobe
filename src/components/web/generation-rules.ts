@@ -8,6 +8,7 @@ export const generationRequestSchema = z.object({
 export const generationPayloadSchema = z.object({ jobId: z.string().uuid() });
 export const classificationSchema = z.object({ category: z.enum(["Clothes", "Bag", "Hat", "Shoes", "unsupported"]) });
 export type AccessoryFit = "female" | "male";
+export const directGenerationEnabled = (value: string | undefined) => value === "true";
 export type PhotoJob = {
   id: string;
   status: string;

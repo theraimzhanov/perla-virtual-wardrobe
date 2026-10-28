@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { generationRequestSchema, photoJobPhase, providerBody, providerEndpoint, resultObjectPath, trustedMediaUrl } from "@/components/web/generation-rules";
+import { directGenerationEnabled, generationRequestSchema, photoJobPhase, providerBody, providerEndpoint, resultObjectPath, trustedMediaUrl } from "@/components/web/generation-rules";
 
 describe("Direct photo-generation rules", () => {
+  it("keeps n8n active unless the direct processor is explicitly activated", () => { expect(directGenerationEnabled(undefined)).toBe(false); expect(directGenerationEnabled("false")).toBe(false); expect(directGenerationEnabled("true")).toBe(true); });
   it.each([["Clothes", "cloth-v4"], ["Bag", "bag"], ["Hat", "hat"], ["Shoes", "shoes-transfer"]])("routes %s to its own Perfect Corp API", (category, endpoint) => { expect(providerEndpoint(category)).toBe(endpoint); });
   it("rejects unknown products until classification identifies their category", () => { expect(() => providerEndpoint("unknown")).toThrow(); });
   it("never shows a pending request as a finished sample", () => { expect(photoJobPhase({ status: "pending", image: null })).toBe("loading"); });
