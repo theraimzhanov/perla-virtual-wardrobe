@@ -1,8 +1,14 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /app/
+Disallow: /api/
+Disallow: /reset-password
 
 User-agent: Bingbot
 Allow: /
+Disallow: /app/
+Disallow: /api/
+Disallow: /reset-password
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +18,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /app/
+Disallow: /api/
+Disallow: /reset-password
+
+Sitemap: https://studioperla.live/sitemap.xml
