@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { createVideoJob, getPhotoJob } from "./generation.functions";
-import { photoJobPhase, type PhotoJob } from "./generation-rules";
+import { photoJobPhase, pickShownJob, type PhotoJob } from "./generation-rules";
 
 // Real video generation for a finished, saved try-on photo; restores the photo's latest saved video.
 export function useVideoGeneration(userId: string | null, photoJobId: string | null, restored?: PhotoJob) {
@@ -20,7 +20,7 @@ export function useVideoGeneration(userId: string | null, photoJobId: string | n
   useEffect(() => { version.current++; request.current = null; lock.current = false; dismissed.current = null; setJob(null); setStarting(false); setStartError(null); }, [photoJobId, userId]);
   useEffect(() => {
     if (lock.current || !restored || restored.id === dismissed.current || restored.parentJobId !== photoJobId) return;
-    setJob((current) => current && current.id !== restored.id && Date.parse(current.createdAt ?? "") > Date.parse(restored.createdAt ?? "") ? current : { ...current, ...restored });
+    setJob((current) => pickShownJob(current, restored));
   }, [restored, photoJobId]);
 
   const refresh = useCallback(async (id: string, epoch: number) => {

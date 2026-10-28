@@ -101,3 +101,12 @@ export function nextDirectAction(job: DirectJobState, now: number): DirectAction
   if (job.stage === "saving" && !stale) return "wait";
   return "poll";
 }
+
+const finished = (status: string) => status === "completed" || status === "failed";
+// Which saved job the Try-On screen shows: a newer local job wins, and a stale list row never rolls back a finished one.
+export function pickShownJob<T extends Pick<PhotoJob, "id" | "status"> & { createdAt?: string }>(current: T | null, restored: T): T {
+  if (!current) return restored;
+  if (current.id !== restored.id) return Date.parse(current.createdAt ?? "") > Date.parse(restored.createdAt ?? "") ? current : restored;
+  if (finished(current.status) && !finished(restored.status)) return current;
+  return { ...current, ...restored };
+}

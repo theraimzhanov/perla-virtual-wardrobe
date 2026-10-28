@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { createGenerationJob, getPhotoJob } from "./generation.functions";
-import { photoJobPhase, type AccessoryFit, type PhotoJob } from "./generation-rules";
+import { photoJobPhase, pickShownJob, type AccessoryFit, type PhotoJob } from "./generation-rules";
 
 // The latest saved try-on stays on screen across navigation and selection changes
 // until the member deletes it or generates a new one.
@@ -29,7 +29,7 @@ export function usePhotoGeneration(userId: string | null, _selectionKey: string,
 
   useEffect(() => {
     if (lock.current || !restored || restored.id === dismissed.current) return;
-    setJob((current) => current && current.id !== restored.id && Date.parse(current.createdAt ?? "") > Date.parse(restored.createdAt ?? "") ? current : { ...current, ...restored });
+    setJob((current) => pickShownJob(current, restored));
   }, [restored, userId]);
 
   const refresh = useCallback(async (id: string, epoch: number) => {
