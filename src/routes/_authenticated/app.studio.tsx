@@ -41,12 +41,12 @@ function Studio() {
   const [prompt, setPrompt] = useState("");
   const [output, setOutput] = useState<"photo" | "video">("photo");
   const [starting, setStarting] = useState(false);
-  // Only the creation made in this visit is shown here; everything is kept in Profile collections.
-  const [currentId, setCurrentId] = useState<string | null>(null);
+    const [currentId, setCurrentId] = useState<string | null>(null);
   const lock = useRef(false);
 
   const pending = studioJobs.filter((job) => photoJobPhase(job) === "loading");
-  const current = studioJobs.find((job) => job.id === currentId);
+  // Keeps showing the newest creation (across visits) until it is deleted or a new one is made.
+  const current = studioJobs.find((job) => job.id === currentId) ?? studioJobs[0];
 
   // Each status check advances an unfinished creation one step (videos poll the provider).
   const pendingKey = pending.map((job) => job.id).join(",");

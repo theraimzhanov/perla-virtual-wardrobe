@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/perla-emblem.svg.asset.json";
+import { PerlaMascot } from "@/components/perla/PerlaMascot";
 import after from "@/assets/model-after.jpg";
 
 export const Route = createFileRoute("/login")({
@@ -104,7 +104,7 @@ function Login() {
     <div className="grid min-h-screen bg-background md:grid-cols-2">
       <div className="flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
-          <img src={logo.url} alt="PERLA" className="mx-auto h-40 w-auto" />
+          <div className="flex justify-center"><PerlaMascot mood="look" className="h-40 w-40" /></div>
           {checkEmail ? (
             <div className="mt-8 rounded-[1.75rem] bg-card p-8 text-center shadow-card">
               <h1 className="font-serif text-3xl">Check your <em className="text-gold">email</em></h1>
