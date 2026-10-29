@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, BarChart3, Camera, Clock, Heart, PackageX, Ruler, Shirt, Sparkles, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/perla-emblem.svg.asset.json";
@@ -9,6 +9,7 @@ import slip from "@/assets/community-slip.jpg";
 import dress from "@/assets/g-dress.jpg";
 import trench from "@/assets/g-trench.jpg";
 import bag from "@/assets/g-bag.jpg";
+import { useMascotJourney } from "@/components/perla/useMascotJourney";
 import { CompareSlider } from "@/components/perla/CompareSlider";
 import { modelBefore, modelAfter } from "@/components/perla/data";
 import { Eyebrow } from "@/components/web/ui";
@@ -54,6 +55,12 @@ const insights = [
 function Landing() {
   const nav = useNavigate();
   const [created, setCreated] = useState<GeneratedMedia | null>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const mascotRef = useRef<HTMLImageElement>(null);
+  const eyebrowRef = useRef<HTMLDivElement>(null);
+  const phraseRef = useRef<HTMLSpanElement>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const introDone = useMascotJourney({ heroRef, mascotRef, eyebrowRef, phraseRef, sliderRef });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => { if (data.session) nav({ to: "/app" }); });
