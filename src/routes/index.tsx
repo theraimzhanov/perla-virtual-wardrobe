@@ -10,7 +10,6 @@ import dress from "@/assets/g-dress.jpg";
 import trench from "@/assets/g-trench.jpg";
 import bag from "@/assets/g-bag.jpg";
 import { CompareSlider } from "@/components/perla/CompareSlider";
-import { PerlaMascot } from "@/components/perla/PerlaMascot";
 import { modelBefore, modelAfter } from "@/components/perla/data";
 import { Eyebrow } from "@/components/web/ui";
 import { SiteFooter } from "@/components/web/SiteFooter";
