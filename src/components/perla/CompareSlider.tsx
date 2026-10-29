@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronsLeftRight } from "lucide-react";
 import { PerlaMascot } from "./PerlaMascot";
+import { cn } from "@/lib/utils";
 
 // Before/after slider. With `mascot`, the PERLA logo is the handle; `autoPlay` sweeps between images until touched.
 export function CompareSlider({ before, after, mascot = false, autoPlay = false, delayedMascot = false }: { before: string; after: string; mascot?: boolean; autoPlay?: boolean; delayedMascot?: boolean }) {
@@ -46,7 +47,7 @@ export function CompareSlider({ before, after, mascot = false, autoPlay = false,
       <span className="absolute right-3 top-3 rounded-full bg-primary/85 px-3 py-1 text-[11px] uppercase tracking-widest text-primary-foreground">After</span>
       <div className="absolute inset-y-0 w-px bg-background" style={{ left: `${pos}%` }}>
         {mascot ? (
-          <div className="absolute top-1/2 left-1/2 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-background/90 shadow-soft">
+          <div className={cn("absolute top-1/2 left-1/2 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-background/90 shadow-soft", delayedMascot && "perla-mascot-appear")}>
             <PerlaMascot mood={touched ? "happy" : "look"} className="h-11 w-11" />
             <ChevronsLeftRight className="absolute -bottom-5 h-4 w-4 text-gold" />
           </div>
