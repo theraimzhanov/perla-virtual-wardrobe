@@ -1,13 +1,15 @@
 # Perla update
 
 ## October 29 requested updates
-- [ ] Set the labelled active-user demo baseline to 15 and redesign homepage/Insights statistics with subtle motion.
-- [ ] Replace Why PERLA with Demo and add a working, privately stored brand application form.
-- [ ] Add colorful dress/hat/classic-dress examples and three male plus three female sample photos.
-- [ ] Add a repository privacy policy and connect Legal enquiries to it.
-- [ ] Remove Accessory fit controls while keeping category-specific generation working.
-- [ ] Make Discover selections and successful local product uploads replace each other, with focused tests.
-- [ ] Verify public demo submission, layouts and focused tests; report unavailable signed-in checks.
+- [x] Set the labelled active-user demo baseline to 15 and redesign homepage/Insights statistics with subtle motion.
+- [x] Replace Why PERLA with Demo and privately store applications; test entry saved, read back and removed. Owner reviews brand_demo_applications in Supabase; email notifications need verified sending.
+- [x] Add colorful dress/hat/classic-dress examples and three male plus three female sample photos.
+- [x] Create PRIVACY.md and connect Legal enquiries to the supplied GitHub HEAD policy path.
+- [ ] Make the GitHub privacy notice publicly accessible — supplied repository returns 404 publicly; owner must check Git sync and repository visibility or provide a public policy destination.
+- [x] Remove Accessory fit controls; retain required provider preset and category-specific endpoints. Known male sample photos use male preset; other inputs use fixed female provider default, not inferred identity.
+- [x] Make Discover selections and successful local product uploads replace each other, with focused tests.
+- [x] Verify public demo submission, desktop/mobile layouts and sample picker; all 108 tests pass and build OK.
+- [ ] Signed-in Insights and private sample-upload/replacement end-to-end check — external unmanaged Supabase does not provide a test session.
 
 ## Public sitemap
 - [x] Create and verify `public/sitemap.xml` for indexable public pages on studioperla.live, excluding private app pages, account recovery and API endpoints; local URL returns 200 XML, 4 focused tests pass, build OK.

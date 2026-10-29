@@ -20,7 +20,7 @@
 - Normalize saved product selections in the shared hook and authenticated save function to one exclusive source; clear references, not upload history, so replacements stay consistent across screens and reloads.
 - Keep sample model photos in one browser-safe asset module and save a chosen sample through the normal private upload flow for signed-in members, so real generation always has a durable owner-bound photo.
 - Public platform statistics return only aggregate counts; exclude AI Studio restyles from virtual try-ons and deduplicate tried catalog products across accounts so homepage and Insights use the same definitions.
-- Bag/hat APIs require a female/male styling field; preserve explicit legacy values and use the fixed female provider preset when omitted, without claiming it infers a person's gender or physical fit.
+- Bag/hat APIs require a female/male styling field; preserve legacy values, use the known male preset for supplied male sample photos and otherwise the fixed female default, without claiming to infer identity or physical fit.
 - Store demo applications through a validated public server function using an insert-only publishable client; never expose application rows or show delivery success before persistence succeeds.
 - Keep the repository privacy notice in PRIVACY.md and link Legal enquiries to its GitHub HEAD path so the policy follows the default branch.
 - Keep Discover rankings and shared-look filtering in pure rules, and store media, product/source metadata and likes in TryOnProvider so community and profile cards remain consistent with Try-On results.

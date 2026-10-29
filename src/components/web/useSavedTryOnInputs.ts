@@ -111,8 +111,9 @@ export function useSavedTryOnInputs(userId: string | null, authReady: boolean) {
 
   const persist = async (next: LocalInputs, expectedOwner: string, isCurrent: () => boolean) => {
     if (!isCurrent()) return;
-    await saveSelection({ data: { ...next.selection, expectedOwner } });
-    if (isCurrent()) { commit(next); retryAction.current = null; }
+    const selection = exclusiveSelection(next.selection);
+    await saveSelection({ data: { ...selection, expectedOwner } });
+    if (isCurrent()) { commit({ ...next, selection, personal: selection.mode === "personal" ? next.personal : null }); retryAction.current = null; }
   };
 
   const upload = (file: File, kind: "photo" | "product") => run(async (expectedOwner, isCurrent) => {
@@ -148,8 +149,9 @@ export function useSavedTryOnInputs(userId: string | null, authReady: boolean) {
     await persist(next, expectedOwner, isCurrent);
   });
   const setMode = (mode: InputSelection["mode"]) => {
-    if (!userId) { commit({ ...current.current, selection: { ...current.current.selection, mode } }); return Promise.resolve(true); }
-    return run((expectedOwner, isCurrent) => persist({ ...current.current, selection: { ...current.current.selection, mode } }, expectedOwner, isCurrent));
+    // Browsing the other source isn't a new product action. Persist only once a replacement is chosen.
+    commit({ ...current.current, selection: { ...current.current.selection, mode } });
+    return Promise.resolve(true);
   };
   const setPhoto = (photo: string | null) => {
     const update = () => ({ ...current.current, photo, selection: { ...current.current.selection, photoId: null } });
