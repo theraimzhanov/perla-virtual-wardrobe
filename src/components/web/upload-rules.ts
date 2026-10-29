@@ -21,6 +21,12 @@ export const inputSelectionSchema = z.object({
 export type InputSelection = z.infer<typeof inputSelectionSchema>;
 export const emptyInputSelection = (): InputSelection => ({ photoId: null, personalProductId: null, mode: "discover", selectedProductIds: [] });
 
+export function exclusiveSelection(selection: InputSelection): InputSelection {
+  return selection.mode === "personal"
+    ? { ...selection, selectedProductIds: [] }
+    : { ...selection, personalProductId: null, selectedProductIds: selection.selectedProductIds.slice(-1) };
+}
+
 export function validateImage(file: Pick<File, "name" | "type" | "size">) {
   if (!imageTypes.some((type) => type === file.type)) throw new Error("Choose a JPG, PNG or WebP image.");
   if (file.size <= 0 || file.size > maxImageBytes) throw new Error("Choose an image smaller than 10 MB.");

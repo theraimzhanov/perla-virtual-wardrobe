@@ -17,8 +17,7 @@ import { cn } from "@/lib/utils";
 import { validateImage } from "./upload-rules";
 import { usePhotoGeneration } from "./usePhotoGeneration";
 import { useVideoGeneration } from "./useVideoGeneration";
-import type { AccessoryFit } from "./generation-rules";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SamplePhotoPicker } from "./SamplePhotoPicker";
 
 type Phase = "idle" | "loading" | "done";
 
@@ -45,7 +44,6 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   const [deleting, setDeleting] = useState<"photo" | "video" | null>(null);
   const [lookId, setLookId] = useState(0);
   const [demoPhotoPhase, setDemoPhotoPhase] = useState<Phase>("idle");
-  const [accessoryFit, setAccessoryFit] = useState<AccessoryFit | null>(null);
   const [demoVideoPhase, setVideoPhase] = useState<Phase>("idle");
   const [photoDialog, setPhotoDialog] = useState(false);
   const [productSource, setProductSource] = useState<LookSource>(lookSource(mode));
@@ -138,6 +136,18 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     if (saved && kind === "photo") setPhotoDialog(false);
   };
 
+  const useSample = async (image: string, id: string) => {
+    if (!signedIn) { await setPhoto(image); setPhotoDialog(false); return true; }
+    try {
+      const response = await fetch(image);
+      if (!response.ok) throw new Error("Couldn't open this sample photo.");
+      const blob = await response.blob();
+      const saved = await uploadPhoto(new File([blob], `perla-sample-${id}.jpg`, { type: "image/jpeg" }));
+      if (saved) setPhotoDialog(false);
+      return saved;
+    } catch { toast.error("Couldn't save the sample photo. Please try again."); return false; }
+  };
+
   const generate = () => {
     if (savingInputs || inputError) return;
     const issue = generationIssue(photo, selected);
@@ -147,7 +157,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     setLookId(Date.now());
     setVideoPhase("idle");
     if (!signedIn) { setDemoPhotoPhase("loading"); return; }
-    void generation.start(accessoryFit);
+    void generation.start();
   };
 
   const lookTitle = selected[0]?.name ?? "New look";
@@ -194,9 +204,10 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
             </div>
           ) : (
             <div className="grid aspect-[3/4] place-items-center rounded-2xl border border-dashed border-gold/50 bg-secondary/60 px-6 text-center">
-              <div><div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-card"><ImagePlus className="h-7 w-7 text-gold" /></div><h3 className="mt-5 font-serif text-3xl">Start with you</h3><p className="mt-2 text-sm text-muted-foreground">Your full-body photo</p><Button disabled={busy || !signedIn} onClick={() => photoInput.current?.click()} className="mt-5 rounded-full"><Upload />Upload photo</Button><div><Button disabled={busy} variant="link" className="mt-2 text-xs text-muted-foreground" onClick={() => setPhoto(modelBefore)}>Use sample photo</Button></div></div>
+              <div><div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-card"><ImagePlus className="h-7 w-7 text-gold" /></div><h3 className="mt-5 font-serif text-3xl">Start with you</h3><p className="mt-2 text-sm text-muted-foreground">Your full-body photo</p><Button disabled={busy || !signedIn} onClick={() => photoInput.current?.click()} className="mt-5 rounded-full"><Upload />Upload photo</Button></div>
             </div>
           )}
+          <SamplePhotoPicker disabled={busy} onSelect={useSample} />
         </section>
 
         <section aria-label="Selected products" className="min-w-0">
@@ -210,7 +221,6 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
             {selected.length === 0 && (mode === "discover" ? <div className="border-y py-8 text-center"><Sparkles className="mx-auto h-6 w-6 text-gold" /><p className="mt-3 font-serif text-xl">Something new awaits</p><Button asChild variant="link" className="mt-2"><Link to="/app">Explore Discover</Link></Button></div> : <div className="grid min-h-48 place-items-center rounded-xl border border-dashed bg-secondary/50"><Button disabled={busy || !signedIn} variant="ghost" onClick={() => productInput.current?.click()}><ImagePlus />Upload product photo</Button></div>)}
           </div>
           {mode === "personal" && personal && <Button variant="outline" disabled={busy} onClick={() => productInput.current?.click()} className="mt-4 w-full rounded-full border-dashed"><Upload />Change product photo</Button>}
-          {signedIn && (mode === "personal" || ["Bag", "Hat"].includes(selected[0]?.category ?? "")) && <div className="mt-4"><label id="accessory-fit-label" className="mb-2 block text-sm text-muted-foreground">Accessory fit</label><Select value={accessoryFit ?? ""} disabled={busy} onValueChange={(value) => { if (value === "female" || value === "male") setAccessoryFit(value); }}><SelectTrigger aria-labelledby="accessory-fit-label"><SelectValue placeholder="Choose fit" /></SelectTrigger><SelectContent><SelectItem value="female">Women's fit</SelectItem><SelectItem value="male">Men's fit</SelectItem></SelectContent></Select></div>}
           <Button disabled={busy || preparing || !!inputError} onClick={generate} className="mt-6 h-auto w-full whitespace-normal rounded-full px-5 py-4 shadow-soft"><Sparkles />{savingInputs ? "Saving inputs…" : photoPhase === "loading" ? "Creating your look…" : hasResult ? "Generate again" : "Generate try-on"}</Button>
           <div className="mt-7 flex items-center gap-3 border-t pt-5"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold-soft"><Film className="h-4 w-4 text-gold" /></div><div><p className="font-serif text-lg">Then, see it in motion</p><p className="text-xs text-muted-foreground">Photo → Video</p></div></div>
         </section>
@@ -229,7 +239,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
       </section>}
 
 
-      <Dialog open={photoDialog} onOpenChange={setPhotoDialog}><DialogContent className="w-[calc(100%-2rem)] max-w-sm rounded-2xl p-7"><div className="grid h-12 w-12 place-items-center rounded-full bg-gold-soft"><ImagePlus className="h-6 w-6 text-gold" /></div><DialogTitle className="font-serif text-3xl font-normal">Let's see it on you</DialogTitle><DialogDescription>Add your photo to try on your selection.</DialogDescription>{inputError && <p role="alert" className="text-sm text-destructive">{inputError}</p>}<Button disabled={busy || !signedIn} onClick={() => photoInput.current?.click()} className="h-auto rounded-full py-3">{savingInputs ? <LoaderCircle className="motion-safe:animate-spin" /> : <Upload />}{savingInputs ? "Saving photo…" : "Upload your photo"}</Button><Button disabled={busy} variant="outline" onClick={() => { setPhoto(modelBefore); setPhotoDialog(false); }} className="rounded-full">Use sample photo</Button></DialogContent></Dialog>
+      <Dialog open={photoDialog} onOpenChange={setPhotoDialog}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto rounded-2xl p-7"><div className="grid h-12 w-12 place-items-center rounded-full bg-gold-soft"><ImagePlus className="h-6 w-6 text-gold" /></div><DialogTitle className="font-serif text-3xl font-normal">Let's see it on you</DialogTitle><DialogDescription>Add your photo to try on your selection.</DialogDescription>{inputError && <p role="alert" className="text-sm text-destructive">{inputError}</p>}<Button disabled={busy || !signedIn} onClick={() => photoInput.current?.click()} className="h-auto rounded-full py-3">{savingInputs ? <LoaderCircle className="motion-safe:animate-spin" /> : <Upload />}{savingInputs ? "Saving photo…" : "Upload your photo"}</Button><SamplePhotoPicker disabled={busy} onSelect={useSample} /></DialogContent></Dialog>
     </div>
   );
 }

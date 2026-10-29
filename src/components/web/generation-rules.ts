@@ -56,8 +56,9 @@ export function providerBody(category: string, person: string, item: string, fit
   const images = { src_file_url: person, ref_file_url: item };
   if (endpoint === "cloth-v4") return { ...images, garment_category: "auto", change_shoes: false, filter_multi_person: "normal" };
   if (endpoint === "bag" || endpoint === "hat") {
-    if (!fit) throw new Error("Choose an accessory fit before generating this bag or hat.");
-    return { ...images, gender: fit };
+    // Perfect Corp requires this styling preset; it is not an inference about the person's identity.
+    // Keep explicit values for legacy jobs; new jobs use the same fixed default without an extra UI step.
+    return { ...images, gender: fit ?? "female" };
   }
   return images;
 }

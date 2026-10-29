@@ -39,7 +39,6 @@ export const createGenerationJob = createServerFn({ method: "POST" })
     ]);
     if (photoRes.error || !photoRes.data || productRes.error || !productRes.data) throw new Error("Couldn't find your saved photo or product.");
     const product = productRes.data;
-    if (["Bag", "Hat"].includes(product.category) && !data.accessoryFit) throw new Error("Choose an accessory fit for this bag or hat.");
     const storage = context.supabase.storage.from(uploadBucket);
     const person = await storage.createSignedUrl(photoRes.data.storage_path, LINK_SECONDS);
     const item = product.storage_path ? await storage.createSignedUrl(product.storage_path, LINK_SECONDS) : null;

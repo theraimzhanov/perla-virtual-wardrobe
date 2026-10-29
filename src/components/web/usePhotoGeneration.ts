@@ -62,7 +62,7 @@ export function usePhotoGeneration(userId: string | null, _selectionKey: string,
     return () => { active = false; clearInterval(timer); void supabase.removeChannel(channel); };
   }, [job?.id, job?.status, signedIn, refresh]);
 
-  const start = async (fit: AccessoryFit | null) => {
+  const start = async (fit: AccessoryFit | null = null) => {
     if (!signedIn || lock.current) return;
     lock.current = true;
     const epoch = ++version.current;

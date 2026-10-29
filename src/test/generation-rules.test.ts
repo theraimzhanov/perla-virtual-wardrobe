@@ -9,7 +9,7 @@ describe("Direct photo-generation rules", () => {
   it("never substitutes a sample when generation fails", () => { expect(photoJobPhase({ status: "failed", image: null })).toBe("failed"); });
   it("rejects completion without an actual saved image", () => { expect(photoJobPhase({ status: "completed", image: null })).toBe("failed"); });
   it("shows the actual completed image", () => { expect(photoJobPhase({ status: "completed", image: "https://storage.example/look.jpg" })).toBe("done"); });
-  it("requires the user's accessory fit instead of guessing gender", () => { expect(() => providerBody("Bag", "person", "product", null)).toThrow(); expect(providerBody("Hat", "person", "product", "male")).toMatchObject({ gender: "male" }); });
+  it("generates bags and hats without asking for accessory fit", () => { expect(providerBody("Bag", "person", "product", null)).toMatchObject({ gender: "female" }); expect(providerBody("Hat", "person", "product", null)).toMatchObject({ gender: "female" }); expect(providerBody("Hat", "person", "product", "male")).toMatchObject({ gender: "male" }); });
   it("preserves shoe transfers without unsupported gender parameters", () => { expect(providerBody("Shoes", "person", "product", null)).toEqual({ src_file_url: "person", ref_file_url: "product" }); });
   it("uses a stable owner-bound path for repeated result saves", () => { expect(resultObjectPath("owner", "job", "image/jpeg")).toBe("owner/tryon/job.jpg"); });
   it("rejects caller-controlled internal image URLs", () => { expect(() => trustedMediaUrl("https://127.0.0.1/image", "input", "https://perla.supabase.co")).toThrow(); });
