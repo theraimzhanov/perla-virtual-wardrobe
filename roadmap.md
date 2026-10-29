@@ -1,5 +1,14 @@
 # Perla update
 
+## October 29 requested updates
+- [ ] Set the labelled active-user demo baseline to 15 and redesign homepage/Insights statistics with subtle motion.
+- [ ] Replace Why PERLA with Demo and add a working, privately stored brand application form.
+- [ ] Add colorful dress/hat/classic-dress examples and three male plus three female sample photos.
+- [ ] Add a repository privacy policy and connect Legal enquiries to it.
+- [ ] Remove Accessory fit controls while keeping category-specific generation working.
+- [ ] Make Discover selections and successful local product uploads replace each other, with focused tests.
+- [ ] Verify public demo submission, layouts and focused tests; report unavailable signed-in checks.
+
 ## Public sitemap
 - [x] Create and verify `public/sitemap.xml` for indexable public pages on studioperla.live, excluding private app pages, account recovery and API endpoints; local URL returns 200 XML, 4 focused tests pass, build OK.
 
