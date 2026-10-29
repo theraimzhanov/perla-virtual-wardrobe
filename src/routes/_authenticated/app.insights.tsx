@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Heart, Ruler, Shirt, Sparkles, Wand2 } from "lucide-react";
+import { Heart, Ruler, Shirt, Sparkles, Wand2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getWeeklyReport, listProductSignals, type ProductSignal } from "@/components/web/looks.functions";
+import { countPlatformActivity, getWeeklyReport, listProductSignals, type ProductSignal, type PlatformActivity } from "@/components/web/looks.functions";
 import type { WeeklyReport } from "@/components/web/weekly-insights-rules";
 import { PageHeader, Panel, Eyebrow } from "@/components/web/ui";
 import { useTryOn } from "@/components/web/TryOnContext";
 import { LookCard } from "@/components/web/LookCard";
 import { PANEL_BASE, productBase, rankDiscoverProducts, sharedVirtualLooks } from "@/components/web/brand-insights-rules";
+import { StatStrip } from "@/components/web/StatStrip";
 
 export const Route = createFileRoute("/_authenticated/app/insights")({
   head: () => ({
@@ -28,6 +29,8 @@ function Insights() {
   const { looks, catalog, photoJobs } = useTryOn();
   const loadSignals = useServerFn(listProductSignals);
   const loadReport = useServerFn(getWeeklyReport);
+  const loadActivity = useServerFn(countPlatformActivity);
+  const [activity, setActivity] = useState<PlatformActivity | null>(null);
   const [signals, setSignals] = useState<ProductSignal[] | null>(null);
   const [report, setReport] = useState<WeeklyReport | null | undefined>(undefined);
   const finished = photoJobs.filter((job) => job.status === "completed").length;
@@ -42,7 +45,12 @@ function Insights() {
     loadReport().then((r) => { if (alive) setReport(r); }).catch(() => { if (alive) setReport(null); });
     return () => { alive = false; };
   }, [loadReport]);
-  // Sample panel of ~100 members, added on top of real signals for the demo.
+  useEffect(() => {
+    let alive = true;
+    loadActivity().then((total) => { if (alive) setActivity(total); }).catch(() => {});
+    return () => { alive = false; };
+  }, [loadActivity, finished, likeTotal]);
+  // Clearly labelled demo starting figures; new saved activity is additive.
   const sampleSignals: ProductSignal[] = catalog.map((p, i) => {
     const real = signals?.find((s) => s.id === p.id);
     const base = productBase(i);
@@ -50,16 +58,19 @@ function Insights() {
   });
   const ranked = rankDiscoverProducts(catalog, signals === null ? [] : sampleSignals, "tryOns").filter((product) => product.tryOns > 0 || product.likes > 0).slice(0, 8);
   const community = sharedVirtualLooks(looks);
-  const panelTryOns = PANEL_BASE.tryOns + (signals ?? []).reduce((s, r) => s + r.tryOns, 0);
-  const panelLikes = PANEL_BASE.likes + (signals ?? []).reduce((s, r) => s + r.likes, 0);
+  const panelTryOns = PANEL_BASE.tryOns + (activity?.tryOns ?? 0);
+  const panelLikes = PANEL_BASE.likes + (activity?.likes ?? 0);
   return (
     <div>
       <PageHeader eyebrow="For brands · Maison Ivoire" title="What shoppers" accent="love" desc="Signals from try-ons, likes and feedback on new pieces." />
-      <section aria-label="Panel summary" className="mb-10 grid grid-cols-2 gap-4 md:grid-cols-4">
-        {[[String(PANEL_BASE.members), "active members"], [panelTryOns.toLocaleString(), "virtual try-ons"], [panelLikes.toLocaleString(), "likes"], ["46%", "would add to wardrobe"]].map(([v, l]) => (
-          <div key={l} className="rounded-2xl bg-card p-5 shadow-card"><p className="font-serif text-4xl text-gold">{v}</p><p className="mt-1 text-xs uppercase text-muted-foreground">{l}</p></div>
-        ))}
-        <p className="col-span-full text-xs text-muted-foreground">Sample panel data for demonstration.</p>
+      <section aria-label="Panel summary" className="mb-10">
+        <StatStrip items={[
+          { value: PANEL_BASE.members, label: "Active users", icon: Users },
+          { value: panelTryOns, label: "Virtual try-ons", icon: Wand2 },
+          { value: PANEL_BASE.productsTried + (activity?.productsTried ?? 0), label: "Products tried", icon: Shirt },
+          { value: panelLikes, label: "Likes", icon: Heart },
+        ]} />
+        <p className="mt-4 text-xs text-muted-foreground">Demo starting figures + saved platform activity.</p>
       </section>
       <section aria-label="Discover product rankings">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
