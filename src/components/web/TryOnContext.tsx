@@ -27,9 +27,13 @@ function useTryOnState(userId: string | null, authReady: boolean) {
     return () => { alive = false; };
   }, []);
 
+  const selectionLock = useRef(false);
   const selectProduct = async (id: string) => {
+    if (selectionLock.current) return false;
+    selectionLock.current = true;
     setPreparing(true);
-    await savedInputs.selectProduct(id);
+    try { return await savedInputs.selectProduct(id); }
+    finally { selectionLock.current = false; }
   };
 
   const [jobs, setJobs] = useState<PhotoJob[]>([]);

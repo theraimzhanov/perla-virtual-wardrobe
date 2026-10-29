@@ -50,7 +50,7 @@ export const createGenerationJob = createServerFn({ method: "POST" })
       engine: direct ? "direct" : "n8n",
       request_id: data.requestId,
       source: inputs.product_mode === "personal" ? "own" : "discover",
-      accessory_fit: data.accessoryFit,
+      accessory_fit: data.accessoryFit ?? (photoRes.data.original_filename.startsWith("perla-sample-man-") ? "male" : null),
       kind: "photo",
       status: "pending",
       category: product.category,

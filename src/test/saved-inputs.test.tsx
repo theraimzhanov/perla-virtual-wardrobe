@@ -74,6 +74,24 @@ describe("Account-scoped saved Try-On inputs", () => {
     expect(result.current.selectedIds).toEqual([catalogId]);
     expect(mocks.persist).not.toHaveBeenCalled();
   });
+  it("a new Discover product replaces rather than accumulates previous products", async () => {
+    const replacementId = "66666666-6666-4666-8666-666666666666";
+    const replacementCatalog = "77777777-7777-4777-8777-777777777777";
+    mocks.load.mockResolvedValue({ selection: { ...selection, selectedProductIds: [productId] }, photo: null, products: [{ id: productId, catalog_product_id: catalogId, category: "Clothes", name: "First", image_url: "first.jpg" }] });
+    mocks.discover.mockResolvedValue({ id: replacementId, catalog_product_id: replacementCatalog, category: "Hat", name: "Second", image_url: "second.jpg" });
+    const { result } = renderHook(() => useSavedTryOnInputs(owner, true));
+    await waitFor(() => expect(result.current.selectedIds).toEqual([catalogId]));
+    await act(async () => { await result.current.selectProduct(replacementCatalog); });
+    expect(result.current.selectedIds).toEqual([replacementCatalog]);
+    expect(mocks.persist.mock.calls[0]?.[0].data.selectedProductIds).toEqual([replacementId]);
+  });
+  it("restores a personal upload without reviving older Discover actions", async () => {
+    mocks.load.mockResolvedValue({ selection: { ...selection, mode: "personal", personalProductId: productId, selectedProductIds: ["66666666-6666-4666-8666-666666666666"] }, photo: null, products: [{ id: productId, category: "unknown", name: "Local", storage_path: `${owner}/products/local.png` }, { id: "66666666-6666-4666-8666-666666666666", catalog_product_id: catalogId, category: "Clothes", name: "Old Discover", image_url: "old.jpg" }] });
+    const { result } = renderHook(() => useSavedTryOnInputs(owner, true));
+    await waitFor(() => expect(result.current.personal?.id).toBe(productId));
+    expect(result.current.selectedIds).toEqual([]);
+    expect(result.current.selected.map((p) => p.id)).toEqual([productId]);
+  });
   it("keeps the previous photo if a replacement cannot upload", async () => {
     mocks.load.mockResolvedValue({ selection: { ...selection, photoId }, photo: { id: photoId, storage_path: `${owner}/photos/existing.png` }, products: [] });
     mocks.upload.mockResolvedValue({ error: new Error("Connection unavailable") });
