@@ -21,7 +21,6 @@ import { countPlatformActivity, type PlatformActivity } from "@/components/web/l
 import { PANEL_BASE } from "@/components/web/brand-insights-rules";
 import { StatStrip } from "@/components/web/StatStrip";
 import { DemoApplication } from "@/components/web/DemoApplication";
-import { sampleModels } from "@/components/web/sample-models";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -186,8 +185,7 @@ function Landing() {
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[{ image: dress, name: "Dress" }, { image: hat, name: "Hat" }, { image: trench, name: "Classic trench" }, { image: bag, name: "Everyday bag" }].map((product) => <figure key={product.name} className="min-w-0"><img src={product.image} alt={product.name} loading="lazy" className="aspect-square w-full rounded-lg bg-card object-contain" /><figcaption className="mt-2 text-sm text-muted-foreground">{product.name}</figcaption></figure>)}
         </div>
-        <div className="mt-16 border-t pt-8"><Eyebrow>Start with a sample</Eyebrow><h3 className="mt-3 font-serif text-3xl">Six faces. Endless <em className="text-gold">possibilities.</em></h3><div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-6">{sampleModels.map((model) => <Button key={model.id} asChild variant="outline" className="h-auto min-w-0 overflow-hidden rounded-lg p-0"><Link to="/app/try-on" aria-label={`Try on with sample ${model.label.toLowerCase()}`}><img src={model.image} alt={`Sample ${model.label.toLowerCase()}`} width={768} height={1024} loading="lazy" className="aspect-[3/4] w-full object-contain" /></Link></Button>)}</div><p className="mt-3 text-xs text-muted-foreground">Three women · three men · sample photos available in Try-On</p></div>
-      </section>
+       </section>
 
       <section id="brands" className="scroll-mt-20 bg-primary py-20 text-primary-foreground">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
