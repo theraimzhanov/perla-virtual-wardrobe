@@ -241,6 +241,8 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
 
 
       <Dialog open={photoDialog} onOpenChange={setPhotoDialog}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto rounded-2xl p-7"><div className="grid h-12 w-12 place-items-center rounded-full bg-gold-soft"><ImagePlus className="h-6 w-6 text-gold" /></div><DialogTitle className="font-serif text-3xl font-normal">Let's see it on you</DialogTitle><DialogDescription>Add your photo to try on your selection.</DialogDescription>{inputError && <p role="alert" className="text-sm text-destructive">{inputError}</p>}<Button disabled={busy || !signedIn} onClick={() => photoInput.current?.click()} className="h-auto rounded-full py-3">{savingInputs ? <LoaderCircle className="motion-safe:animate-spin" /> : <Upload />}{savingInputs ? "Saving photo…" : "Upload your photo"}</Button><SamplePhotoPicker disabled={busy} onSelect={useSample} /></DialogContent></Dialog>
+
+      <Dialog open={sampleDialog} onOpenChange={setSampleDialog}><DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl p-7"><DialogTitle className="font-serif text-3xl font-normal">Choose a sample model</DialogTitle><DialogDescription>Three women · three men — pick one to start your try-on.</DialogDescription><SamplePhotoPicker disabled={busy} onSelect={async (image, id) => { const ok = await useSample(image, id); if (ok) setSampleDialog(false); return ok; }} /></DialogContent></Dialog>
     </div>
   );
 }
