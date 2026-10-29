@@ -46,6 +46,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   const [demoPhotoPhase, setDemoPhotoPhase] = useState<Phase>("idle");
   const [demoVideoPhase, setVideoPhase] = useState<Phase>("idle");
   const [photoDialog, setPhotoDialog] = useState(false);
+  const [sampleDialog, setSampleDialog] = useState(false);
   const [productSource, setProductSource] = useState<LookSource>(lookSource(mode));
   const [compare, setCompare] = useState(false);
   const [videoError, setVideoError] = useState(false);
@@ -207,7 +208,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
               <div><div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-card"><ImagePlus className="h-7 w-7 text-gold" /></div><h3 className="mt-5 font-serif text-3xl">Start with you</h3><p className="mt-2 text-sm text-muted-foreground">Your full-body photo</p><Button disabled={busy || !signedIn} onClick={() => photoInput.current?.click()} className="mt-5 rounded-full"><Upload />Upload photo</Button></div>
             </div>
           )}
-          <SamplePhotoPicker disabled={busy} onSelect={useSample} />
+           <Button variant="outline" disabled={busy} onClick={() => setSampleDialog(true)} className="mt-5 w-full rounded-full border-dashed"><Sparkles />Use a sample model</Button>
         </section>
 
         <section aria-label="Selected products" className="min-w-0">
