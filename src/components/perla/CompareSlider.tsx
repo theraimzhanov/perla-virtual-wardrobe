@@ -3,7 +3,7 @@ import { ChevronsLeftRight } from "lucide-react";
 import { PerlaMascot } from "./PerlaMascot";
 
 // Before/after slider. With `mascot`, the PERLA logo is the handle; `autoPlay` sweeps between images until touched.
-export function CompareSlider({ before, after, mascot = false, autoPlay = false }: { before: string; after: string; mascot?: boolean; autoPlay?: boolean }) {
+export function CompareSlider({ before, after, mascot = false, autoPlay = false, delayedMascot = false }: { before: string; after: string; mascot?: boolean; autoPlay?: boolean; delayedMascot?: boolean }) {
   const [pos, setPos] = useState(50);
   const [touched, setTouched] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
