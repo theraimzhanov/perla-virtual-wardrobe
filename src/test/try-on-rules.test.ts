@@ -7,8 +7,8 @@ describe("Discover and Try-On rules", () => {
     expect(discoverCategories).toEqual(["Clothes", "Bag", "Hat", "Shoes"]);
     for (const category of discoverCategories) expect(discoverProducts.some((product) => product.category === category)).toBe(true);
   });
-  it("adds the starred product to the selection", () => {
-    expect(addSelection(["g1"], "g6")).toEqual(["g1", "g6"]);
+  it("replaces the previous product with the starred product", () => {
+    expect(addSelection(["g1"], "g6")).toEqual(["g6"]);
   });
   it("does not duplicate a starred product", () => {
     expect(addSelection(["g1"], "g1")).toEqual(["g1"]);

@@ -16,7 +16,7 @@ export const videoQuestions = [
 ] as const;
 
 export function addSelection(ids: string[], id: string) {
-  return ids.includes(id) ? ids : [...ids, id];
+  return ids.length === 1 && ids[0] === id ? ids : [id];
 }
 
 export function generationIssue(photo: string | null, products: DiscoverProduct[]): "photo" | "product" | null {

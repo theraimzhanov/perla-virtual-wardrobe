@@ -42,6 +42,38 @@ describe("Account-scoped saved Try-On inputs", () => {
     expect(mocks.register.mock.calls[0]?.[0].data.kind).toBe("product");
     expect(mocks.persist.mock.calls[0]?.[0].data).toMatchObject({ personalProductId: result.current.personal?.id, mode: "personal", expectedOwner: owner });
   });
+  it("a successful local product upload removes the Discover action and persists only the uploaded product", async () => {
+    mocks.load.mockResolvedValue({ selection: { ...selection, selectedProductIds: [productId] }, photo: null, products: [{ id: productId, catalog_product_id: catalogId, category: "Clothes", name: "First piece", image_url: "first.jpg" }] });
+    const { result } = renderHook(() => useSavedTryOnInputs(owner, true));
+    await waitFor(() => expect(result.current.selectedIds).toEqual([catalogId]));
+    await act(async () => { await result.current.uploadProduct(new File(["image"], "replacement.png", { type: "image/png" })); });
+    expect(result.current.mode).toBe("personal");
+    expect(result.current.selectedIds).toEqual([]);
+    expect(result.current.selected).toHaveLength(1);
+    expect(mocks.persist.mock.calls[0]?.[0].data.selectedProductIds).toEqual([]);
+  });
+  it("a Discover selection clears a previous local product selection", async () => {
+    mocks.load.mockResolvedValue({ selection: { ...selection, mode: "personal", personalProductId: productId }, photo: null, products: [{ id: productId, category: "unknown", name: "Upload", storage_path: `${owner}/products/local.png` }] });
+    const discoveredId = "66666666-6666-4666-8666-666666666666";
+    mocks.discover.mockResolvedValue({ id: discoveredId, catalog_product_id: catalogId, category: "Hat", name: "Hat", image_url: "hat.jpg" });
+    const { result } = renderHook(() => useSavedTryOnInputs(owner, true));
+    await waitFor(() => expect(result.current.personal?.id).toBe(productId));
+    await act(async () => { await result.current.selectProduct(catalogId); });
+    expect(result.current.personal).toBeNull();
+    expect(result.current.personalProductId).toBeNull();
+    expect(result.current.selectedIds).toEqual([catalogId]);
+    expect(mocks.persist.mock.calls[0]?.[0].data).toMatchObject({ mode: "discover", personalProductId: null, selectedProductIds: [discoveredId] });
+  });
+  it("a failed local replacement does not remove the existing Discover product", async () => {
+    mocks.load.mockResolvedValue({ selection: { ...selection, selectedProductIds: [productId] }, photo: null, products: [{ id: productId, catalog_product_id: catalogId, category: "Clothes", name: "First piece", image_url: "first.jpg" }] });
+    mocks.upload.mockResolvedValue({ error: new Error("Unavailable") });
+    const { result } = renderHook(() => useSavedTryOnInputs(owner, true));
+    await waitFor(() => expect(result.current.selectedIds).toEqual([catalogId]));
+    await act(async () => { await result.current.uploadProduct(new File(["image"], "replacement.png", { type: "image/png" })); });
+    expect(result.current.mode).toBe("discover");
+    expect(result.current.selectedIds).toEqual([catalogId]);
+    expect(mocks.persist).not.toHaveBeenCalled();
+  });
   it("keeps the previous photo if a replacement cannot upload", async () => {
     mocks.load.mockResolvedValue({ selection: { ...selection, photoId }, photo: { id: photoId, storage_path: `${owner}/photos/existing.png` }, products: [] });
     mocks.upload.mockResolvedValue({ error: new Error("Connection unavailable") });

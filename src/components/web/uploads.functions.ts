@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { emptyInputSelection, inputSelectionSchema, uploadBucket, uploadMetadataSchema, uploadedProductName, validateUploadOwner } from "./upload-rules";
+import { emptyInputSelection, exclusiveSelection, inputSelectionSchema, uploadBucket, uploadMetadataSchema, uploadedProductName, validateUploadOwner } from "./upload-rules";
 
 export const getSavedInputs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -68,7 +68,8 @@ export const saveInputSelection = createServerFn({ method: "POST" })
     if (data.expectedOwner !== context.userId) throw new Error("Your account changed. Please try again.");
     const { error: profileError } = await context.supabase.from("profiles").upsert({ id: context.userId }, { onConflict: "id", ignoreDuplicates: true });
     if (profileError) throw new Error("Couldn't save your account details. Please try again.");
-    const { error } = await context.supabase.from("try_on_inputs").upsert({ user_id: context.userId, photo_id: data.photoId, personal_product_id: data.personalProductId, product_mode: data.mode, selected_product_ids: [...new Set(data.selectedProductIds)] });
+    const next = exclusiveSelection(data);
+    const { error } = await context.supabase.from("try_on_inputs").upsert({ user_id: context.userId, photo_id: next.photoId, personal_product_id: next.personalProductId, product_mode: next.mode, selected_product_ids: next.selectedProductIds });
     if (error) throw new Error("Couldn't save your selection. Please retry.");
     return { saved: true };
   });

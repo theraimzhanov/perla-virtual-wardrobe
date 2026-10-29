@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/perla-emblem.svg.asset.json";
 import { Button } from "@/components/ui/button";
+import { privacyPolicyUrl } from "./demo-rules";
 
 const supportEmail = "raimjanovnursultan@gmail.com";
 const productLinks = [
@@ -37,7 +38,7 @@ export function SiteFooter() {
           <div>
             <h2 className="text-base font-medium">Legal</h2>
             <p className="mt-5 text-sm text-muted-foreground">© 2026 PERLA</p>
-            <Button asChild variant="link" className={`${linkClass} mt-3`}><a href={`mailto:${supportEmail}?subject=PERLA%20legal%20enquiry`}>Legal enquiries</a></Button>
+            <Button asChild variant="link" className={`${linkClass} mt-3`}><a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer">Legal enquiries</a></Button>
           </div>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-4 border-t py-6 text-sm text-muted-foreground">

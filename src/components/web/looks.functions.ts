@@ -132,6 +132,34 @@ export const countGeneratedMedia = createServerFn({ method: "POST" }).handler(as
   return tallyGeneratedMedia(data ?? []);
 });
 
+export type PlatformActivity = { tryOns: number; productsTried: number; likes: number; created: number };
+// Only totals are public; source photos, product selections and member identities stay on the server.
+export const countPlatformActivity = createServerFn({ method: "POST" }).handler(async (): Promise<PlatformActivity> => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const [images, videos, tryOns, likes] = await Promise.all([
+    supabaseAdmin.from("generation_jobs").select("id", { count: "exact", head: true }).eq("kind", "photo").eq("status", "completed").is("deleted_at", null).not("result_image_url", "is", null),
+    supabaseAdmin.from("generation_jobs").select("id", { count: "exact", head: true }).eq("kind", "video").eq("status", "completed").is("deleted_at", null).not("result_video_url", "is", null),
+    supabaseAdmin.from("generation_jobs").select("id", { count: "exact", head: true }).eq("kind", "photo").eq("status", "completed").is("deleted_at", null).is("studio_scene", null).not("result_image_url", "is", null),
+    supabaseAdmin.from("look_likes").select("job_id", { count: "exact", head: true }),
+  ]);
+  if ([images, videos, tryOns, likes].some((result) => result.error)) throw new Error("Couldn't load platform activity.");
+  const productIds = new Set<string>();
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await supabaseAdmin.from("generation_jobs").select("product_id").eq("kind", "photo").eq("status", "completed").is("studio_scene", null).is("deleted_at", null).not("result_image_url", "is", null).order("id").range(offset, offset + 999);
+    if (error) throw new Error("Couldn't load platform activity.");
+    for (const row of data ?? []) if (row.product_id) productIds.add(row.product_id);
+    if (!data || data.length < 1000) break;
+  }
+  const pieces = new Set<string>();
+  const ids = [...productIds];
+  for (let offset = 0; offset < ids.length; offset += 500) {
+    const { data, error } = await supabaseAdmin.from("try_on_products").select("id,catalog_product_id").in("id", ids.slice(offset, offset + 500));
+    if (error) throw new Error("Couldn't load platform activity.");
+    for (const row of data ?? []) pieces.add(row.catalog_product_id ?? row.id);
+  }
+  return { tryOns: tryOns.count ?? 0, productsTried: pieces.size, likes: likes.count ?? 0, created: (images.count ?? 0) + (videos.count ?? 0) };
+});
+
 // Latest weekly report written by the n8n job (aggregate numbers + AI text only).
 export const getWeeklyReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

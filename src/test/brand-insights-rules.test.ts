@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { discoverProducts } from "@/components/web/data";
-import { rankDiscoverProducts, sharedVirtualLooks, tallyGeneratedMedia } from "@/components/web/brand-insights-rules";
+import { PANEL_BASE, rankDiscoverProducts, sharedVirtualLooks, tallyGeneratedMedia } from "@/components/web/brand-insights-rules";
 import { seedLooks, sourceFromFeedback, toggleLike, type Look } from "@/components/web/looks";
 
 describe("Brand Insights rules", () => {
+  it("uses exactly 15 demo active users", () => { expect(PANEL_BASE.members).toBe(15); });
   it("ranks only products from Discover, never own uploads", () => {
     const base = discoverProducts[0];
     if (!base) throw new Error("Missing sample product");

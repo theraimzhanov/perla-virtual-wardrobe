@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { discoverCategories, type DiscoverProduct } from "./data";
-import { emptyInputSelection, personalUpload, saveUploadedInput, uploadBucket, uploadMetadataSchema, uploadPath, validateImage, type InputSelection } from "./upload-rules";
+import { emptyInputSelection, exclusiveSelection, personalUpload, saveUploadedInput, uploadBucket, uploadMetadataSchema, uploadPath, validateImage, type InputSelection } from "./upload-rules";
 import { getSavedInputs, registerUploadedInput, saveDiscoverInput, saveInputSelection } from "./uploads.functions";
 
 type LocalInputs = {
@@ -43,13 +43,14 @@ export function useSavedTryOnInputs(userId: string | null, authReady: boolean) {
     setError(null);
     try {
       const saved = await loadInputs();
-      const personalRow = saved.products.find((product) => product.id === saved.selection.personalProductId);
+      const selection = exclusiveSelection(saved.selection);
+      const personalRow = saved.products.find((product) => product.id === selection.personalProductId);
       const [photo, personalImage] = await Promise.all([
         saved.photo ? signedImage(saved.photo.storage_path) : Promise.resolve(null),
         personalRow?.storage_path ? signedImage(personalRow.storage_path) : Promise.resolve(null),
       ]);
       if (owner.current !== expectedOwner || epoch.current !== version) return;
-      commit({ selection: saved.selection, photo, products: saved.products, personal: personalRow && personalImage ? personalUpload(personalRow.id, personalRow.original_filename ?? personalRow.name, personalImage) : null });
+      commit({ selection, photo, products: saved.products, personal: personalRow && personalImage ? personalUpload(personalRow.id, personalRow.original_filename ?? personalRow.name, personalImage) : null });
       loaded.current = true;
       retryAction.current = null;
     } catch (cause) {
@@ -135,7 +136,7 @@ export function useSavedTryOnInputs(userId: string | null, authReady: boolean) {
     if (!isCurrent()) return;
     const next = kind === "photo"
       ? { ...current.current, photo: image, selection: { ...current.current.selection, photoId: id } }
-      : { ...current.current, personal: personalUpload(id, file.name, image), selection: { ...current.current.selection, personalProductId: id, mode: "personal" as const } };
+      : { ...current.current, personal: personalUpload(id, file.name, image), selection: exclusiveSelection({ ...current.current.selection, personalProductId: id, mode: "personal" }) };
     await persist(next, expectedOwner, isCurrent);
   });
 
@@ -143,7 +144,7 @@ export function useSavedTryOnInputs(userId: string | null, authReady: boolean) {
     const product = await registerDiscover({ data: { catalogId, expectedOwner } });
     if (!isCurrent()) return;
     const previous = current.current;
-    const next = { ...previous, products: previous.products.some((item) => item.id === product.id) ? previous.products : [...previous.products, product], selection: { ...previous.selection, mode: "discover" as const, selectedProductIds: [...new Set([...previous.selection.selectedProductIds, product.id])] } };
+    const next = { ...previous, personal: null, products: previous.products.some((item) => item.id === product.id) ? previous.products : [...previous.products, product], selection: exclusiveSelection({ ...previous.selection, mode: "discover", selectedProductIds: [product.id] }) };
     await persist(next, expectedOwner, isCurrent);
   });
   const setMode = (mode: InputSelection["mode"]) => {
