@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_demo_applications: {
+        Row: {
+          brand: string
+          consent: boolean
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          request_id: string
+        }
+        Insert: {
+          brand: string
+          consent: boolean
+          created_at?: string
+          email: string
+          id?: string
+          message?: string
+          name: string
+          request_id: string
+        }
+        Update: {
+          brand?: string
+          consent?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          request_id?: string
+        }
+        Relationships: []
+      }
       feedback_answers: {
         Row: {
           answer: string
