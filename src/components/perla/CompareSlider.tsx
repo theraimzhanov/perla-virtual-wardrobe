@@ -4,7 +4,7 @@ import { PerlaMascot } from "./PerlaMascot";
 import { cn } from "@/lib/utils";
 
 // Before/after slider. With `mascot`, the PERLA logo is the handle; `autoPlay` sweeps between images until touched.
-export function CompareSlider({ before, after, mascot = false, autoPlay = false, delayedMascot = false }: { before: string; after: string; mascot?: boolean; autoPlay?: boolean; delayedMascot?: boolean }) {
+export function CompareSlider({ before, after, mascot = false, autoPlay = false, delayedMascot = false, introDone = true }: { before: string; after: string; mascot?: boolean; autoPlay?: boolean; delayedMascot?: boolean; introDone?: boolean }) {
   const [pos, setPos] = useState(50);
   const [touched, setTouched] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -14,7 +14,7 @@ export function CompareSlider({ before, after, mascot = false, autoPlay = false,
     setPos(Math.min(100, Math.max(0, ((clientX - r.left) / r.width) * 100)));
   };
   useEffect(() => {
-    if (!autoPlay || touched) return;
+    if (!autoPlay || touched || !introDone) return;
     let frame = 0;
     const start = performance.now();
     const tick = (now: number) => {
@@ -22,12 +22,18 @@ export function CompareSlider({ before, after, mascot = false, autoPlay = false,
       const t = ((now - start) / 7000) % 1;
       const wave = t < 0.15 ? 0 : t < 0.5 ? (t - 0.15) / 0.35 : t < 0.65 ? 1 : 1 - (t - 0.65) / 0.35;
       const eased = wave * wave * (3 - 2 * wave);
-      setPos(95 - eased * 90);
+      const elapsed = now - start;
+      // First pass after the mascot lands: it "struggles" — jerky tugs, slips back, then heaves.
+      if (delayedMascot && elapsed < 4200) {
+        const s = elapsed / 4200;
+        const tug = Math.sin(s * Math.PI * 9) * 6 * (1 - s) + Math.sin(s * Math.PI * 23) * 1.5;
+        setPos(50 + Math.sin(s * Math.PI * 1.5) * 30 * s + tug);
+      } else setPos(95 - eased * 90);
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [autoPlay, touched]);
+  }, [autoPlay, touched, introDone, delayedMascot]);
   return (
     <div
       ref={ref}
@@ -47,8 +53,9 @@ export function CompareSlider({ before, after, mascot = false, autoPlay = false,
       <span className="absolute right-3 top-3 rounded-full bg-primary/85 px-3 py-1 text-[11px] uppercase tracking-widest text-primary-foreground">After</span>
       <div className="absolute inset-y-0 w-px bg-background" style={{ left: `${pos}%` }}>
         {mascot ? (
-          <div className={cn("absolute top-1/2 left-1/2 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-background/90 shadow-soft", delayedMascot && "perla-mascot-appear")}>
-            <PerlaMascot mood={touched ? "happy" : "look"} className="h-11 w-11" />
+          <div className={cn("absolute top-1/2 left-1/2 grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-background/90 shadow-soft transition-opacity", delayedMascot && !introDone && "opacity-0", delayedMascot && introDone && !touched && "perla-struggle")}>
+            <PerlaMascot mood={touched ? "happy" : "look"} className="h-14 w-14" />
+            {delayedMascot && introDone && !touched && <span aria-hidden className="perla-sweat absolute -right-1 top-1 text-sm">💧</span>}
             <ChevronsLeftRight className="absolute -bottom-5 h-4 w-4 text-gold" />
           </div>
         ) : (

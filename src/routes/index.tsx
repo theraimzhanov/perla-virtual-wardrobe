@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, BarChart3, Camera, Clock, Heart, PackageX, Ruler, Shirt, Sparkles, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/perla-emblem.svg.asset.json";
@@ -9,6 +9,7 @@ import slip from "@/assets/community-slip.jpg";
 import dress from "@/assets/g-dress.jpg";
 import trench from "@/assets/g-trench.jpg";
 import bag from "@/assets/g-bag.jpg";
+import { useMascotJourney } from "@/components/perla/useMascotJourney";
 import { CompareSlider } from "@/components/perla/CompareSlider";
 import { modelBefore, modelAfter } from "@/components/perla/data";
 import { Eyebrow } from "@/components/web/ui";
@@ -54,6 +55,12 @@ const insights = [
 function Landing() {
   const nav = useNavigate();
   const [created, setCreated] = useState<GeneratedMedia | null>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const mascotRef = useRef<HTMLImageElement>(null);
+  const eyebrowRef = useRef<HTMLDivElement>(null);
+  const phraseRef = useRef<HTMLSpanElement>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const introDone = useMascotJourney({ heroRef, mascotRef, eyebrowRef, phraseRef, sliderRef });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => { if (data.session) nav({ to: "/app" }); });
@@ -82,12 +89,12 @@ function Landing() {
         </div>
       </header>
 
-      <section className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-10 sm:px-6 md:grid-cols-2 md:py-20">
-        <img src={logo.url} alt="" aria-hidden className="perla-mascot-journey h-12 w-12 object-contain drop-shadow-md" />
+      <section ref={heroRef} className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-10 sm:px-6 md:grid-cols-2 md:py-20">
+        <img ref={mascotRef} src={logo.url} alt="" aria-hidden className="pointer-events-none absolute left-0 top-0 z-20 h-20 w-20 object-contain opacity-0 drop-shadow-lg" />
         <div>
-          <Eyebrow>AI fashion discovery</Eyebrow>
+          <div ref={eyebrowRef} className="inline-block"><Eyebrow>AI fashion discovery</Eyebrow></div>
           <h1 className="mt-2 font-serif text-5xl leading-[1.02] sm:text-6xl md:text-7xl">Wear it <em className="text-gold">before</em> anyone.</h1>
-          <p className="mt-6 max-w-md text-lg text-muted-foreground">See yourself in any new piece with virtual try-on, turn it into an AI photoshoot — and tell brands what you'd truly love to own.</p>
+          <p className="mt-6 max-w-md text-lg text-muted-foreground">See yourself in any new piece <span ref={phraseRef}>with virtual try-on, turn</span> it into an AI photoshoot — and tell brands what you'd truly love to own.</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/app/try-on" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-primary-foreground shadow-soft">Try it on <ArrowRight className="h-4 w-4" /></Link>
             <a href="#examples" className="rounded-full bg-card px-7 py-3.5 shadow-card">See examples</a>
@@ -97,7 +104,7 @@ function Landing() {
             <div><p className="font-serif text-4xl">4</p><p className="mt-1 text-xs uppercase text-muted-foreground">categories to try</p></div>
           </div>
         </div>
-        <div className="mx-auto w-full max-w-md rounded-[2rem] bg-card p-4 shadow-soft"><CompareSlider before={modelBefore} after={modelAfter} mascot autoPlay delayedMascot /></div>
+        <div ref={sliderRef} className="mx-auto w-full max-w-md rounded-[2rem] bg-card p-4 shadow-soft"><CompareSlider before={modelBefore} after={modelAfter} mascot autoPlay delayedMascot introDone={introDone} /></div>
       </section>
 
       <section id="problem" className="scroll-mt-20 bg-secondary/50 py-20">
