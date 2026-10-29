@@ -78,6 +78,15 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     setDeleting(null);
     if (ok) { generation.clear(); realVideo.clear(); setCompare(false); toast("Try-on deleted"); }
   };
+  // Stop removes the unfinished job; a request already sent to Perfect Corp can't be recalled, so its result is discarded.
+  const stopPhoto = async () => {
+    if (deleting || !generation.job) return;
+    setDeleting("photo");
+    const ok = await deleteJob(generation.job.id);
+    setDeleting(null);
+    if (ok) { generation.clear(); setCompare(false); toast("Generation stopped"); }
+    else toast.error("Couldn't stop it. Please try again.");
+  };
   const removeVideo = async () => {
     if (deleting) return;
     if (!signedIn || !realVideo.job) { setVideoPhase("idle"); return; }
@@ -209,7 +218,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
 
       {(preparing || photoPhase !== "idle") && <section ref={resultRef} aria-label="Try-on result" className="mt-12 scroll-mt-24 border-t pt-7">
         <div className="mb-5 flex items-center justify-between gap-4"><h2 className="font-serif text-3xl">Your new look</h2><span className="rounded-full border px-3 py-1 text-[10px] uppercase text-muted-foreground">{!signedIn ? "Sample preview" : photoPhase === "done" ? "Saved photo" : photoPhase === "failed" ? "Not completed" : "Generating"}</span></div>
-        {preparing || photoPhase === "loading" ? <GenerationSkeleton kind={preparing ? "prepare" : "photo"} className="mx-auto max-w-md" /> : photoPhase === "failed" ? <div role="alert" className="border-y py-6 text-sm text-destructive">{generation.job?.error ?? "No generated image was returned. Please try again."}</div> : <>
+        {preparing || photoPhase === "loading" ? <div className="mx-auto max-w-md"><GenerationSkeleton kind={preparing ? "prepare" : "photo"} />{signedIn && generation.job && photoPhase === "loading" && <Button variant="outline" disabled={deleting !== null} onClick={() => { void stopPhoto(); }} className="mt-4 w-full rounded-full"><X />{deleting === "photo" ? "Stopping…" : "Stop generating"}</Button>}</div> : photoPhase === "failed" ? <div role="alert" className="border-y py-6 text-sm text-destructive">{generation.job?.error ?? "No generated image was returned. Please try again."}</div> : <>
           <div className={cn("grid items-start gap-7", !compact && "sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10")}>
             <div className="min-w-0">{compare && photo ? <CompareSlider before={photo} after={signedIn ? resultImage ?? "" : modelAfter} /> : <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl bg-muted"><img src={signedIn ? resultImage ?? "" : modelAfter} alt={signedIn ? "Your generated try-on look" : "Sample generated try-on look"} className="h-full w-full object-contain" /></div>}
               <div className="mt-3 flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Like picture" title="Like picture" aria-pressed={likedPhoto} onClick={() => likeLook(photoLookId)} className={cn("rounded-full", likedPhoto && "border-gold text-gold")}><Heart className={likedPhoto ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download picture" title="Download picture" onClick={() => { if (!signedIn || resultImage) void downloadMedia(resultImage ?? modelAfter, "perla-try-on.jpg"); }} className="rounded-full"><Download /></Button><Button size="icon" variant="outline" aria-label="Delete picture" title="Delete picture" disabled={deleting !== null || videoPhase === "loading"} onClick={() => { void removePhoto(); }} className="rounded-full text-destructive">{deleting === "photo" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Trash2 />}</Button><Button variant="outline" aria-pressed={compare} onClick={() => setCompare((value) => !value)} className="ml-auto rounded-full text-xs">{compare ? "View picture" : "Compare"}</Button></div><div className="mt-2"><ShareButton id={photoLookId} /></div>
