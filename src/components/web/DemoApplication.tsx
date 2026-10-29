@@ -1,5 +1,6 @@
 import { useRef, useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useHydrated } from "@tanstack/react-router";
 import { ArrowRight, Check, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { submitDemoApplication } from "./demo.functions";
 
 export function DemoApplication() {
   const submit = useServerFn(submitDemoApplication);
+  const hydrated = useHydrated();
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +38,6 @@ export function DemoApplication() {
     <div className="hidden" aria-hidden="true"><input name="website" tabIndex={-1} autoComplete="off" /></div>
     <div className="flex items-start gap-3"><Checkbox id="demo-consent" checked={consent} disabled={busy} onCheckedChange={(value) => setConsent(value === true)} /><label htmlFor="demo-consent" className="text-xs leading-relaxed text-muted-foreground">I agree that PERLA may use these details to respond to my demo application. <a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer" className="underline">Privacy policy</a></label></div>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-    <Button type="submit" disabled={busy} className="h-auto w-full rounded-full py-3.5">{busy ? <LoaderCircle className="motion-safe:animate-spin" /> : <ArrowRight />}{busy ? "Submitting…" : "Submit application"}</Button>
+    <Button type="submit" disabled={busy || !hydrated} className="h-auto w-full rounded-full py-3.5">{busy ? <LoaderCircle className="motion-safe:animate-spin" /> : <ArrowRight />}{busy ? "Submitting…" : "Submit application"}</Button>
   </form>;
 }
