@@ -92,6 +92,15 @@ describe("Account-scoped saved Try-On inputs", () => {
     expect(result.current.selectedIds).toEqual([]);
     expect(result.current.selected.map((p) => p.id)).toEqual([productId]);
   });
+  it("opening the local upload source without choosing a file does not overwrite the saved Discover action", async () => {
+    mocks.load.mockResolvedValue({ selection: { ...selection, selectedProductIds: [productId] }, photo: null, products: [{ id: productId, catalog_product_id: catalogId, category: "Clothes", name: "First", image_url: "first.jpg" }] });
+    const { result } = renderHook(() => useSavedTryOnInputs(owner, true));
+    await waitFor(() => expect(result.current.selectedIds).toEqual([catalogId]));
+    await act(async () => { await result.current.setMode("personal"); });
+    expect(mocks.persist).not.toHaveBeenCalled();
+    await act(async () => { await result.current.setMode("discover"); });
+    expect(result.current.selectedIds).toEqual([catalogId]);
+  });
   it("keeps the previous photo if a replacement cannot upload", async () => {
     mocks.load.mockResolvedValue({ selection: { ...selection, photoId }, photo: { id: photoId, storage_path: `${owner}/photos/existing.png` }, products: [] });
     mocks.upload.mockResolvedValue({ error: new Error("Connection unavailable") });
