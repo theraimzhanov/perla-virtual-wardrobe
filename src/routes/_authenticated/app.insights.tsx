@@ -7,7 +7,7 @@ import type { WeeklyReport } from "@/components/web/weekly-insights-rules";
 import { PageHeader, Panel, Eyebrow } from "@/components/web/ui";
 import { useTryOn } from "@/components/web/TryOnContext";
 import { LookCard } from "@/components/web/LookCard";
-import { rankDiscoverProducts, sharedVirtualLooks } from "@/components/web/brand-insights-rules";
+import { PANEL_BASE, productBase, rankDiscoverProducts, sharedVirtualLooks } from "@/components/web/brand-insights-rules";
 
 export const Route = createFileRoute("/_authenticated/app/insights")({
   head: () => ({
@@ -45,18 +45,18 @@ function Insights() {
   // Sample panel of ~100 members, added on top of real signals for the demo.
   const sampleSignals: ProductSignal[] = catalog.map((p, i) => {
     const real = signals?.find((s) => s.id === p.id);
-    const seed = (i * 37 + 11) % 97;
-    return { id: p.id, tryOns: (real?.tryOns ?? 0) + 18 + seed, likes: (real?.likes ?? 0) + 6 + Math.round(seed * 0.6) };
+    const base = productBase(i);
+    return { id: p.id, tryOns: (real?.tryOns ?? 0) + base.tryOns, likes: (real?.likes ?? 0) + base.likes };
   });
   const ranked = rankDiscoverProducts(catalog, signals === null ? [] : sampleSignals, "tryOns").filter((product) => product.tryOns > 0 || product.likes > 0).slice(0, 8);
   const community = sharedVirtualLooks(looks);
-  const panelTryOns = sampleSignals.reduce((s, r) => s + r.tryOns, 0);
-  const panelLikes = sampleSignals.reduce((s, r) => s + r.likes, 0);
+  const panelTryOns = PANEL_BASE.tryOns + (signals ?? []).reduce((s, r) => s + r.tryOns, 0);
+  const panelLikes = PANEL_BASE.likes + (signals ?? []).reduce((s, r) => s + r.likes, 0);
   return (
     <div>
       <PageHeader eyebrow="For brands · Maison Ivoire" title="What shoppers" accent="love" desc="Signals from try-ons, likes and feedback on new pieces." />
       <section aria-label="Panel summary" className="mb-10 grid grid-cols-2 gap-4 md:grid-cols-4">
-        {[["104", "active members"], [panelTryOns.toLocaleString(), "virtual try-ons"], [panelLikes.toLocaleString(), "likes"], ["46%", "would add to wardrobe"]].map(([v, l]) => (
+        {[[String(PANEL_BASE.members), "active members"], [panelTryOns.toLocaleString(), "virtual try-ons"], [panelLikes.toLocaleString(), "likes"], ["46%", "would add to wardrobe"]].map(([v, l]) => (
           <div key={l} className="rounded-2xl bg-card p-5 shadow-card"><p className="font-serif text-4xl text-gold">{v}</p><p className="mt-1 text-xs uppercase text-muted-foreground">{l}</p></div>
         ))}
         <p className="col-span-full text-xs text-muted-foreground">Sample panel data for demonstration.</p>

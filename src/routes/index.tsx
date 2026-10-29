@@ -45,9 +45,9 @@ const fun = [
   { icon: Heart, title: "Share & get liked", text: "Post your best looks to the community and see what everyone else is wearing." },
 ];
 
-const insights = [
-  ["104", "members in the panel"],
-  ["2,940", "virtual try-ons"],
+const insightsFor = (created: GeneratedMedia | null) => [
+  [String(PANEL_BASE.members), "members in the panel"],
+  [(PANEL_BASE.tryOns + (created?.images ?? 0)).toLocaleString(), "virtual try-ons"],
   ["46%", "would add the piece"],
   ["50%", "say Moto Jacket runs small"],
 ];
@@ -100,7 +100,7 @@ function Landing() {
             <a href="#examples" className="rounded-full bg-card px-7 py-3.5 shadow-card">See examples</a>
           </div>
           <div className="mt-10 flex gap-10">
-            <div><p className="font-serif text-4xl">{(created?.total ?? 0).toLocaleString()}</p><p className="mt-1 text-xs uppercase text-muted-foreground">images & videos created</p></div>
+            <div><p className="font-serif text-4xl">{(PANEL_BASE.created + (created?.total ?? 0)).toLocaleString()}</p><p className="mt-1 text-xs uppercase text-muted-foreground">images & videos created</p></div>
             <div><p className="font-serif text-4xl">4</p><p className="mt-1 text-xs uppercase text-muted-foreground">categories to try</p></div>
           </div>
         </div>
@@ -166,7 +166,7 @@ function Landing() {
           <p className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] opacity-80"><BarChart3 className="h-4 w-4" /> Brand insights · example week</p>
           <h2 className="mt-3 max-w-2xl font-serif text-4xl sm:text-5xl">Know what sells <em className="text-gold">before</em> you make it.</h2>
           <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
-            {insights.map(([v, l]) => <div key={l} className="rounded-2xl bg-primary-foreground/10 p-6"><p className="font-serif text-4xl text-gold">{v}</p><p className="mt-1 text-xs uppercase opacity-80">{l}</p></div>)}
+            {insightsFor(created).map(([v, l]) => <div key={l} className="rounded-2xl bg-primary-foreground/10 p-6"><p className="font-serif text-4xl text-gold">{v}</p><p className="mt-1 text-xs uppercase opacity-80">{l}</p></div>)}
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {[[Ruler, "Fit risk", "Moto Leather Jacket: half of shoppers say too fitted — add a size-up note."], [Shirt, "Shadow wardrobe", "Shoes are the most tried category from outside the catalog — a gap to fill."], [Sparkles, "AI insight", "Everyday wear leads at 38%. Versatile pieces beat event looks this week."]].map(([Icon, t, d]) => {
