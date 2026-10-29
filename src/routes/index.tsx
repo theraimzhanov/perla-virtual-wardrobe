@@ -83,10 +83,10 @@ function Landing() {
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-10 sm:px-6 md:grid-cols-2 md:py-20">
+      <section className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-10 sm:px-6 md:grid-cols-2 md:py-20">
+        <img src={logo.url} alt="" aria-hidden className="perla-mascot-journey h-12 w-12 object-contain drop-shadow-md" />
         <div>
           <Eyebrow>AI fashion discovery</Eyebrow>
-          <PerlaMascot mood="jump" className="mt-6 h-14 w-14" />
           <h1 className="mt-2 font-serif text-5xl leading-[1.02] sm:text-6xl md:text-7xl">Wear it <em className="text-gold">before</em> anyone.</h1>
           <p className="mt-6 max-w-md text-lg text-muted-foreground">See yourself in any new piece with virtual try-on, turn it into an AI photoshoot — and tell brands what you'd truly love to own.</p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -98,7 +98,7 @@ function Landing() {
             <div><p className="font-serif text-4xl">4</p><p className="mt-1 text-xs uppercase text-muted-foreground">categories to try</p></div>
           </div>
         </div>
-        <div className="mx-auto w-full max-w-md rounded-[2rem] bg-card p-4 shadow-soft"><CompareSlider before={modelBefore} after={modelAfter} mascot autoPlay /></div>
+        <div className="mx-auto w-full max-w-md rounded-[2rem] bg-card p-4 shadow-soft"><CompareSlider before={modelBefore} after={modelAfter} mascot autoPlay delayedMascot /></div>
       </section>
 
       <section id="problem" className="scroll-mt-20 bg-secondary/50 py-20">
