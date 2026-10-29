@@ -15,6 +15,7 @@ import { modelBefore, modelAfter } from "@/components/perla/data";
 import { Eyebrow } from "@/components/web/ui";
 import { SiteFooter } from "@/components/web/SiteFooter";
 import { countGeneratedMedia, type GeneratedMedia } from "@/components/web/looks.functions";
+import { PANEL_BASE } from "@/components/web/brand-insights-rules";
 
 export const Route = createFileRoute("/")({
   head: () => ({
