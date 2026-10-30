@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { getStyleDna } from "@/components/web/looks.functions";
-import { formatNextReport } from "@/components/web/report-schedule";
 
 export const Route = createFileRoute("/_authenticated/app/profile")({
   head: () => ({
@@ -83,7 +82,6 @@ function Profile() {
           <p className="text-sm text-muted-foreground">{dna?.headline ?? "Your Style DNA is written from your try-ons every two weeks."}</p>
           {dna && <div className="mt-4 flex flex-wrap gap-2">{dna.tags.map((p) => <span key={p} className="rounded-full bg-secondary px-3 py-1 text-sm">{p}</span>)}</div>}
           {dna && <p className="mt-2 text-[11px] text-muted-foreground">Updated {new Date(dna.updatedAt).toLocaleDateString()}</p>}
-          <p className="mt-2 text-[11px] text-muted-foreground">Next update: {formatNextReport()} · every two weeks</p>
           <div className="mt-6 space-y-4 text-sm">
             {["Email me new drops", "Share feedback with brands", "Private profile"].map((s, i) => (
               <label key={s} className="flex items-center justify-between">{s}<Switch defaultChecked={i < 2} /></label>

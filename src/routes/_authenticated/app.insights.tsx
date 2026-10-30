@@ -114,8 +114,8 @@ function Bar({ label, share, note }: { label: string; share: number; note?: stri
 
 function WeeklySections({ report }: { report: WeeklyReport | null | undefined }) {
   if (report === undefined) return null;
-  const stamp = `Every two weeks · next ${formatNextReport()}`;
-  const waiting = `Your insights update every two weeks. Next update: ${formatNextReport()}.`;
+  const waiting = "Your insights appear once shoppers have answered the try-on questions.";
+
   return (
     <>
       <Panel className="mt-10">
