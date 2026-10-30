@@ -43,7 +43,9 @@ async function inputImages(job: Job, origin: string) {
   const personUrl = person.data?.signedUrl;
   const itemUrl = item ? item.data?.signedUrl : product.data.image_url;
   if (!personUrl || !itemUrl) throw new GenerationProviderError("Couldn't open your saved images.", true);
-  return { person: trustedMediaUrl(personUrl, "input", origin), item: trustedMediaUrl(itemUrl, "input", origin) };
+  // An image outside PERLA storage can never pass, so fail at once instead of retrying forever.
+  try { return { person: trustedMediaUrl(personUrl, "input", origin), item: trustedMediaUrl(itemUrl, "input", origin) }; }
+  catch { throw new GenerationProviderError("This product image can't be used for try-on. Please choose another piece."); }
 }
 
 // Claim the preparation step so parallel status checks cannot submit the same request twice.

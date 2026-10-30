@@ -100,7 +100,8 @@ export function firstResultUrl(value: unknown): string | null {
 
 export async function submitVideo(image: string, prompt: string, key: string) {
   const result = taskSchema.parse(await providerRequest(VIDEO_ENDPOINT, key, {
-    src_file_url: image, resolution: "720", dst_duration: 5, model: "youcam-video-v2", prompt,
+    // 480p renders noticeably faster than 720p on Perfect Corp's queue.
+    src_file_url: image, resolution: "480", dst_duration: 5, model: "youcam-video-v2", prompt,
     negative_prompt: "worst quality, low quality, distorted body, changed clothing, extra limbs, blurry, JPEG artifacts.",
   }));
   return { taskId: result.data.task_id, endpoint: VIDEO_ENDPOINT };
