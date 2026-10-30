@@ -19,6 +19,8 @@
 
 Latest product and feedback tabs are cumulative; weekly columns and history retain their labelled UTC-week measurement period (the delivery cadence is now fortnightly). **PERLA Fortnightly Brand Insights & Style DNA** remains separate, scheduled on the same alternate Fridays at **06:00 UTC**. Its **Run insights now** trigger starts an immediate Gemini update. Failure of AI analysis does not prevent the Sheets export of real numbers.
 
+Gemini uses the credential-accessible **Gemini 3.1 Flash Lite** model for short analysis, after larger Flash models returned temporary 503 overload errors. Invalid or empty AI output fails before saving, preserving the previous report. The October 30 live run saved three fresh brand insights and five member Style DNA profiles.
+
 ## Privacy and reliability
 
 - Surveys already persist in `feedback_answers`; the report does not replace or change collection.
