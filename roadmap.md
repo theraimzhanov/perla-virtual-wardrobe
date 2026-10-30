@@ -1,5 +1,10 @@
 # Perla update
 
+## October 30 immediate and fortnightly reports
+- [ ] Send the real Google Sheets report and run fresh Gemini Brand Insights/Style DNA now.
+- [ ] Change both active n8n schedules to every two weeks, next November 13, 2026.
+- [ ] Update Style DNA/Insights timing messages and reporting documentation; verify tests and saved results.
+
 ## Weekly Google Sheets reporting
 - [x] Add real brand/product, personal-upload, survey and Insights report tables with private customer identities excluded.
 - [x] Connect Google Sheets and add the weekly n8n report in Perla Virtual Wardrobe without changing survey collection; Mondays 06:15 UTC.
