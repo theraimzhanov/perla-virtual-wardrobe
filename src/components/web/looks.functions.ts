@@ -6,7 +6,7 @@ import { feedbackSchema } from "./generation-rules";
 import { tallyGeneratedMedia, type GeneratedMedia } from "./brand-insights-rules";
 import type { WeeklyReport } from "./weekly-insights-rules";
 
-export type CommunityLook = { jobId: string; kind: "photo" | "video"; image: string; video: string | null; product: string; brand: string | null; author: string; source: "discover" | "own" | "internet" | "store"; likes: number; liked: boolean; mine: boolean };
+export type CommunityLook = { jobId: string; kind: "photo"; image: string; catalogProductId: string | null; productImage: string | null; product: string; brand: string | null; author: string; source: "discover" | "own" | "internet" | "store"; likes: number; liked: boolean; mine: boolean };
 export type ProductSignal = { id: string; tryOns: number; likes: number };
 export type WardrobePiece = { id: string; name: string; brand: string | null; image: string };
 export type { GeneratedMedia };
@@ -18,19 +18,28 @@ export const listCommunityLooks = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<CommunityLook[]> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: jobs, error } = await supabaseAdmin.from("generation_jobs").select("id,user_id,kind,result_image_url,result_video_url,product_name,brand_name,source").eq("shared", true).eq("status", "completed").is("deleted_at", null).order("created_at", { ascending: false }).limit(100);
+    const { data: jobs, error } = await supabaseAdmin.from("generation_jobs").select("id,user_id,kind,product_id,result_image_url,product_name,brand_name,source").eq("kind", "photo").eq("shared", true).eq("status", "completed").is("deleted_at", null).order("created_at", { ascending: false }).limit(100);
     if (error) throw new Error("Couldn't load community looks.");
-    const rows = (jobs ?? []).filter((job) => job.result_image_url && (job.kind !== "video" || job.result_video_url));
+    const rows = (jobs ?? []).filter((job) => job.result_image_url);
     if (rows.length === 0) return [];
-    const [likes, profiles] = await Promise.all([
+    const productIds = [...new Set(rows.map((row) => row.product_id).filter((id): id is string => Boolean(id)))];
+    const [likes, profiles, pieces] = await Promise.all([
       supabaseAdmin.from("look_likes").select("job_id,user_id").in("job_id", rows.map((row) => row.id)),
       supabaseAdmin.from("profiles").select("id,display_name,email").in("id", [...new Set(rows.map((row) => row.user_id))]),
+      productIds.length ? supabaseAdmin.from("try_on_products").select("id,catalog_product_id,storage_path,image_url").in("id", productIds) : Promise.resolve({ data: [] as { id: string; catalog_product_id: string | null; storage_path: string | null; image_url: string | null }[] }),
     ]);
     const likeRows = likes.data ?? [];
+    // Product image lets another member try the same piece; private uploads get a short-lived link.
+    const productOf = new Map(await Promise.all((pieces.data ?? []).map(async (piece) => {
+      let image = piece.image_url;
+      if (piece.storage_path) image = (await supabaseAdmin.storage.from(uploadBucket).createSignedUrl(piece.storage_path, 3600)).data?.signedUrl ?? null;
+      return [piece.id, { catalogProductId: piece.catalog_product_id, image }] as const;
+    })));
     return rows.map((row) => {
+      const piece = row.product_id ? productOf.get(row.product_id) : undefined;
       const profile = profiles.data?.find((item) => item.id === row.user_id);
       const author = profile?.display_name || profile?.email?.split("@")[0] || "PERLA member";
-      return { jobId: row.id, kind: row.kind === "video" ? "video" : "photo", image: row.result_image_url!, video: row.result_video_url, product: row.product_name ?? "New look", brand: row.brand_name, author: row.user_id === context.userId ? "You" : author, source: source(row.source), likes: likeRows.filter((like) => like.job_id === row.id).length, liked: likeRows.some((like) => like.job_id === row.id && like.user_id === context.userId), mine: row.user_id === context.userId };
+      return { jobId: row.id, kind: "photo" as const, image: row.result_image_url!, catalogProductId: piece?.catalogProductId ?? null, productImage: piece?.image ?? null, product: row.product_name ?? "New look", brand: row.brand_name, author: row.user_id === context.userId ? "You" : author, source: source(row.source), likes: likeRows.filter((like) => like.job_id === row.id).length, liked: likeRows.some((like) => like.job_id === row.id && like.user_id === context.userId), mine: row.user_id === context.userId };
     });
   });
 
@@ -132,17 +141,17 @@ export const countGeneratedMedia = createServerFn({ method: "POST" }).handler(as
   return tallyGeneratedMedia(data ?? []);
 });
 
-export type PlatformActivity = { tryOns: number; productsTried: number; likes: number; created: number };
+export type PlatformActivity = { members: number; tryOns: number; productsTried: number; likes: number; created: number };
 // Only totals are public; source photos, product selections and member identities stay on the server.
 export const countPlatformActivity = createServerFn({ method: "POST" }).handler(async (): Promise<PlatformActivity> => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const [images, videos, tryOns, likes] = await Promise.all([
+  const [members, images, tryOns, likes] = await Promise.all([
+    supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
     supabaseAdmin.from("generation_jobs").select("id", { count: "exact", head: true }).eq("kind", "photo").eq("status", "completed").is("deleted_at", null).not("result_image_url", "is", null),
-    supabaseAdmin.from("generation_jobs").select("id", { count: "exact", head: true }).eq("kind", "video").eq("status", "completed").is("deleted_at", null).not("result_video_url", "is", null),
     supabaseAdmin.from("generation_jobs").select("id", { count: "exact", head: true }).eq("kind", "photo").eq("status", "completed").is("deleted_at", null).is("studio_scene", null).not("result_image_url", "is", null),
     supabaseAdmin.from("look_likes").select("job_id", { count: "exact", head: true }),
   ]);
-  if ([images, videos, tryOns, likes].some((result) => result.error)) throw new Error("Couldn't load platform activity.");
+  if ([members, images, tryOns, likes].some((result) => result.error)) throw new Error("Couldn't load platform activity.");
   const productIds = new Set<string>();
   for (let offset = 0; ; offset += 1000) {
     const { data, error } = await supabaseAdmin.from("generation_jobs").select("product_id").eq("kind", "photo").eq("status", "completed").is("studio_scene", null).is("deleted_at", null).not("result_image_url", "is", null).order("id").range(offset, offset + 999);
@@ -157,15 +166,20 @@ export const countPlatformActivity = createServerFn({ method: "POST" }).handler(
     if (error) throw new Error("Couldn't load platform activity.");
     for (const row of data ?? []) pieces.add(row.catalog_product_id ?? row.id);
   }
-  return { tryOns: tryOns.count ?? 0, productsTried: pieces.size, likes: likes.count ?? 0, created: (images.count ?? 0) + (videos.count ?? 0) };
+  return { members: members.count ?? 0, tryOns: tryOns.count ?? 0, productsTried: pieces.size, likes: likes.count ?? 0, created: images.count ?? 0 };
 });
 
 // Latest weekly report written by the n8n job (aggregate numbers + AI text only).
 export const getWeeklyReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<WeeklyReport | null> => {
-    const { data } = await context.supabase.from("insight_reports").select("payload").order("week_start", { ascending: false }).limit(1).maybeSingle();
-    return (data?.payload as unknown as WeeklyReport) ?? null;
+    // Numbers are always live from saved feedback and try-ons; only the AI text comes from the weekly n8n report.
+    const { data } = await context.supabase.from("insight_reports").select("payload,week_start").order("week_start", { ascending: false }).limit(1).maybeSingle();
+    const saved = (data?.payload as unknown as Partial<WeeklyReport> | undefined) ?? null;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { loadWeeklyNumbers } = await import("./weekly-insights.server");
+    const { trends, fitRisk, shadowWardrobe } = await loadWeeklyNumbers(supabaseAdmin);
+    return { trends, fitRisk, shadowWardrobe, aiInsights: saved?.aiInsights ?? [], weekStart: saved?.weekStart ?? data?.week_start ?? "", generatedAt: saved?.generatedAt ?? "" };
   });
 
 export const getStyleDna = createServerFn({ method: "POST" })

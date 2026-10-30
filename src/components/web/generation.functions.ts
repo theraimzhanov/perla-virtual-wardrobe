@@ -125,7 +125,7 @@ async function decorate(rows: JobRow[], userId: string, supabase: SupabaseClient
 export const listPhotoJobs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.from("generation_jobs").select("*").eq("user_id", context.userId).is("deleted_at", null).order("created_at", { ascending: false }).limit(200);
+    const { data, error } = await context.supabase.from("generation_jobs").select("*").eq("user_id", context.userId).eq("kind", "photo").is("deleted_at", null).order("created_at", { ascending: false }).limit(200);
     if (error) throw new Error("Couldn't load your generated looks.");
     return decorate(data ?? [], context.userId, context.supabase);
   });
