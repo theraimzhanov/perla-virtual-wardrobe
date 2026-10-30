@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Heart, Ruler, Shirt, Sparkles, Wand2, Users } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Heart, Ruler, Shirt, Sparkles, Star, Wand2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { countPlatformActivity, getWeeklyReport, listProductSignals, type ProductSignal, type PlatformActivity } from "@/components/web/looks.functions";
@@ -7,7 +7,7 @@ import type { WeeklyReport } from "@/components/web/weekly-insights-rules";
 import { PageHeader, Panel, Eyebrow } from "@/components/web/ui";
 import { useTryOn } from "@/components/web/TryOnContext";
 import { LookCard } from "@/components/web/LookCard";
-import { PANEL_BASE, productBase, rankDiscoverProducts, sharedVirtualLooks } from "@/components/web/brand-insights-rules";
+import { rankDiscoverProducts, sharedVirtualLooks } from "@/components/web/brand-insights-rules";
 import { StatStrip } from "@/components/web/StatStrip";
 
 export const Route = createFileRoute("/_authenticated/app/insights")({
@@ -26,7 +26,9 @@ export const Route = createFileRoute("/_authenticated/app/insights")({
 
 
 function Insights() {
-  const { looks, catalog, photoJobs } = useTryOn();
+  const { looks, catalog, photoJobs, selectProduct } = useTryOn();
+  const navigate = useNavigate();
+  const tryProduct = async (id: string) => { if (await selectProduct(id)) await navigate({ to: "/app/try-on" }); };
   const loadSignals = useServerFn(listProductSignals);
   const loadReport = useServerFn(getWeeklyReport);
   const loadActivity = useServerFn(countPlatformActivity);
@@ -50,27 +52,19 @@ function Insights() {
     loadActivity().then((total) => { if (alive) setActivity(total); }).catch(() => {});
     return () => { alive = false; };
   }, [loadActivity, finished, likeTotal]);
-  // Clearly labelled demo starting figures; new saved activity is additive.
-  const sampleSignals: ProductSignal[] = catalog.map((p, i) => {
-    const real = signals?.find((s) => s.id === p.id);
-    const base = productBase(i);
-    return { id: p.id, tryOns: (real?.tryOns ?? 0) + base.tryOns, likes: (real?.likes ?? 0) + base.likes };
-  });
-  const ranked = rankDiscoverProducts(catalog, signals === null ? [] : sampleSignals, "tryOns").filter((product) => product.tryOns > 0 || product.likes > 0).slice(0, 8);
+  const ranked = rankDiscoverProducts(catalog, signals ?? [], "tryOns").filter((product) => product.tryOns > 0 || product.likes > 0).slice(0, 8);
   const community = sharedVirtualLooks(looks);
-  const panelTryOns = PANEL_BASE.tryOns + (activity?.tryOns ?? 0);
-  const panelLikes = PANEL_BASE.likes + (activity?.likes ?? 0);
   return (
     <div>
       <PageHeader eyebrow="For brands · Maison Ivoire" title="What shoppers" accent="love" desc="Signals from try-ons, likes and feedback on new pieces." />
       <section aria-label="Panel summary" className="mb-10">
         <StatStrip items={[
-          { value: PANEL_BASE.members, label: "Active users", icon: Users },
-          { value: panelTryOns, label: "Virtual try-ons", icon: Wand2 },
-          { value: PANEL_BASE.productsTried + (activity?.productsTried ?? 0), label: "Products tried", icon: Shirt },
-          { value: panelLikes, label: "Likes", icon: Heart },
+          { value: activity?.members ?? 0, label: "Active users", icon: Users },
+          { value: activity?.tryOns ?? 0, label: "Virtual try-ons", icon: Wand2 },
+          { value: activity?.productsTried ?? 0, label: "Products tried", icon: Shirt },
+          { value: activity?.likes ?? 0, label: "Likes", icon: Heart },
         ]} />
-        <p className="mt-4 text-xs text-muted-foreground">Demo starting figures + saved platform activity.</p>
+        <p className="mt-4 text-xs text-muted-foreground">Live totals from saved member activity.</p>
       </section>
       <section aria-label="Discover product rankings">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
@@ -79,7 +73,7 @@ function Insights() {
         {signals !== null && ranked.length === 0 && <p className="border-y py-8 text-center text-sm text-muted-foreground">No try-ons on Discover pieces yet. Rankings appear after the first saved try-on.</p>}
         <ol tabIndex={0} aria-label="Most tried on and most liked products" className="grid snap-x snap-mandatory auto-cols-[min(15rem,80%)] grid-flow-col gap-4 overflow-x-auto pb-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring xl:auto-cols-[calc((100%_-_3rem)/4)]">
           {ranked.map((product) => <li key={product.id} aria-label={product.name} className="min-w-0 snap-start overflow-hidden rounded-lg bg-card shadow-card">
-            <img src={product.image} alt={product.name} loading="lazy" className="aspect-[3/5] w-full object-cover" />
+            <div className="relative"><img src={product.image} alt={product.name} loading="lazy" className="aspect-[3/5] w-full object-cover" /><button type="button" onClick={() => { void tryProduct(product.id); }} aria-label={`Try on ${product.name}`} title="Try this piece on" className="absolute left-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-background/90 text-gold shadow-card transition hover:scale-110"><Star className="h-5 w-5 fill-current" /></button></div>
             <div className="px-3 pt-4 sm:px-4">
               <p className="break-words text-[10px] uppercase text-gold">{product.brand}</p>
               <h3 className="mt-1 break-words font-serif text-xl leading-tight">{product.name}</h3>
@@ -94,8 +88,8 @@ function Insights() {
 
       <section aria-label="Community looks" className="mt-10">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><h2 className="font-serif text-3xl">Best looks <em className="text-gold">from the community</em></h2><span className="text-xs text-muted-foreground">{community.length} shared · most liked first</span></div>
-        <div tabIndex={0} role="group" aria-label="Shared community photos and videos" className="grid snap-x snap-mandatory auto-cols-[min(15rem,80%)] grid-flow-col gap-4 overflow-x-auto pb-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring xl:auto-cols-[calc((100%_-_3rem)/4)]">{community.map((look) => <div key={look.id} className="min-w-0 snap-start"><LookCard look={look} /></div>)}</div>
-        {community.length === 0 && <p className="border-y py-8 text-center text-sm text-muted-foreground">No shared looks yet. Share a try-on photo or video to feature it here.</p>}
+        <div tabIndex={0} role="group" aria-label="Shared community looks" className="grid snap-x snap-mandatory auto-cols-[min(15rem,80%)] grid-flow-col gap-4 overflow-x-auto pb-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring xl:auto-cols-[calc((100%_-_3rem)/4)]">{community.map((look) => <div key={look.id} className="min-w-0 snap-start"><LookCard look={look} showTry /></div>)}</div>
+        {community.length === 0 && <p className="border-y py-8 text-center text-sm text-muted-foreground">No shared looks yet. Share a try-on photo to feature it here.</p>}
       </section>
 
       <WeeklySections report={report} />
