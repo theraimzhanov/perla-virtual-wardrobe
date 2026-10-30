@@ -191,7 +191,6 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
           </div>
           {mode === "personal" && personal && <Button variant="outline" disabled={busy} onClick={() => productInput.current?.click()} className="mt-4 w-full rounded-full border-dashed"><Upload />Change product photo</Button>}
           <Button disabled={busy || preparing || !!inputError} onClick={generate} className="mt-6 h-auto w-full whitespace-normal rounded-full px-5 py-4 shadow-soft"><Sparkles />{savingInputs ? "Saving inputs…" : photoPhase === "loading" ? "Creating your look…" : hasResult ? "Generate again" : "Generate try-on"}</Button>
-          <p className="mt-3 text-center text-xs text-muted-foreground">Try-ons stop automatically after 1 minute.</p>
         </section>
       </div>
 
