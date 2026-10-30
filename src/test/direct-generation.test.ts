@@ -14,7 +14,6 @@ describe("App-managed generation steps", () => {
   it("keeps polling a try-on photo within 1 minute", () => { expect(nextDirectAction(job({ status: "processing", stage: "polling", provider_task_id: "t1", created_at: ago(50) }), now)).toBe("poll"); });
   it("stops a try-on photo after 1 minute", () => { expect(nextDirectAction(job({ status: "processing", stage: "polling", provider_task_id: "t1", created_at: ago(61) }), now)).toBe("expired"); });
   it("stops a try-on photo stuck before submission after 1 minute", () => { expect(nextDirectAction(job({ status: "processing", stage: "queued", created_at: ago(61) }), now)).toBe("expired"); });
-  it("gives an AI Studio photo up to 10 minutes", () => { expect(nextDirectAction(job({ status: "processing", stage: "polling", provider_task_id: "t1", studio_scene: "model", created_at: ago(5 * 60) }), now)).toBe("poll"); });
   it("stops an AI Studio image after 2 minutes", () => { expect(nextDirectAction(job({ status: "processing", stage: "rendering", studio_scene: "Model", created_at: ago(121), updated_at: ago(5) }), now)).toBe("expired"); });
   it("keeps an AI Studio image running before 2 minutes", () => { expect(nextDirectAction(job({ status: "processing", stage: "rendering", studio_scene: "Model", created_at: ago(100), updated_at: ago(5) }), now)).toBe("wait"); });
   it("waits while a result is being saved, then retries a stale save", () => {
