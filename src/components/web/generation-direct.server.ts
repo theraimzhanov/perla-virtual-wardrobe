@@ -157,7 +157,7 @@ export async function advanceDirectJob(id: string) {
     const action = nextDirectAction(job, Date.now());
     if (action === "submit") await submit(job);
     else if (action === "uncertain") await fail(id, "Submission status is uncertain, so it was not repeated. Please try again.");
-    else if (action === "expired") await fail(id, `This ${job.kind === "video" ? "video" : "try-on"} took too long. Please try again.`);
+    else if (action === "expired") await fail(id, `This ${job.kind === "video" ? "video" : "try-on"} took too long, so it was stopped. Please try again.`);
     else if (action === "poll") await pollAndSave(job);
   } catch (cause) {
     if (cause instanceof GenerationProviderError && !cause.retryable) { await fail(id, cause.message).catch(() => undefined); return; }
