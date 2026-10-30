@@ -50,8 +50,8 @@ function Discover() {
           <article key={product.id} aria-label={product.name} className="group overflow-hidden rounded-lg bg-card shadow-card">
             <div className="relative overflow-hidden bg-muted">
               <img src={product.image} alt={product.name} loading="lazy" className="aspect-[4/5] w-full object-cover transition duration-500 motion-safe:group-hover:scale-105" />
-              <span className="absolute left-3 top-3 rounded-full bg-background/90 px-3 py-1 text-[10px] uppercase">New form</span>
-              <Button variant="secondary" size="icon" disabled={savingInputs} aria-label={`Try on ${product.name}`} title={`Try on ${product.name}`} onClick={() => { void selectProduct(product.id); navigate({ to: "/app/try-on" }); }} className={cn("absolute right-3 top-3 h-14 w-14 rounded-full shadow-card [&_svg]:size-6", selectedIds.includes(product.id) ? "bg-primary text-gold hover:bg-primary" : "bg-background/95 text-gold")}><Sparkles /></Button>
+              <span className="absolute left-3 top-3 rounded-full bg-lavender-soft px-3 py-1 text-[10px] uppercase">New form</span>
+              <Button variant="secondary" size="icon" disabled={savingInputs} aria-label={`Try on ${product.name}`} title={`Try on ${product.name}`} onClick={() => { void selectProduct(product.id); navigate({ to: "/app/try-on" }); }} className={cn("absolute right-3 top-3 h-14 w-14 rounded-full shadow-card [&_svg]:size-6", selectedIds.includes(product.id) ? "bg-primary text-primary-foreground hover:bg-primary" : "bg-background/95 text-gold")}><Sparkles /></Button>
             </div>
             <div className="p-5"><p className="text-[10px] uppercase text-muted-foreground">{product.brand}</p><h2 className="mt-1 font-serif text-2xl">{product.name}</h2><div className="mt-3 border-t pt-3"><p className="text-xs text-gold">{product.style}</p></div></div>
           </article>

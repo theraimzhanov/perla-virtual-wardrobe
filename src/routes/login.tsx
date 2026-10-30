@@ -110,16 +110,16 @@ function Login() {
             <div className="mt-8 rounded-[1.75rem] bg-card p-8 text-center shadow-card">
               <h1 className="font-serif text-3xl">Check your <em className="text-gold">email</em></h1>
               <p className="mt-3 text-sm text-muted-foreground">We sent a confirmation link to {email}. Confirm your address to finish creating your account.</p>
-              <button type="button" onClick={() => { setMode("signin"); setCheckEmail(false); }} className="mt-6 w-full rounded-full bg-primary py-3.5 text-primary-foreground shadow-soft">Back to sign in</button>
+              <Button type="button" onClick={() => { setMode("signin"); setCheckEmail(false); }} className="mt-6 h-auto w-full py-3.5">Back to sign in</Button>
             </div>
           ) : (
             <>
               {mode !== "forgot" && (
                 <div role="tablist" className="mt-6 grid grid-cols-2 rounded-full bg-card p-1 shadow-card">
                   {(["signin", "signup"] as const).map((m) => (
-                    <button key={m} type="button" role="tab" aria-selected={mode === m} onClick={() => switchMode(m)} className={`rounded-full py-2.5 text-sm transition ${mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+                    <Button key={m} variant={mode === m ? "default" : "ghost"} type="button" role="tab" aria-selected={mode === m} onClick={() => switchMode(m)} className={`h-auto rounded-full py-2.5 text-sm transition ${mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
                       {m === "signin" ? "Sign in" : "Create account"}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
@@ -129,7 +129,7 @@ function Login() {
               {mode === "forgot" && resetSent ? (
                 <div className="mt-8 rounded-[1.75rem] bg-card p-6 text-center text-sm text-muted-foreground shadow-card">
                   If an account exists for {email}, a reset link is on its way. Check your inbox.
-                  <button type="button" onClick={() => switchMode("signin")} className="mt-5 w-full rounded-full bg-primary py-3.5 text-primary-foreground shadow-soft">Back to sign in</button>
+                  <Button type="button" onClick={() => switchMode("signin")} className="mt-5 h-auto w-full py-3.5">Back to sign in</Button>
                 </div>
               ) : (
               <form className="mt-8 space-y-3" onSubmit={handleSubmit}>
@@ -150,15 +150,15 @@ function Login() {
                   </label>
                 )}
                 {mode === "signin" && (
-                  <div className="text-right"><button type="button" onClick={() => switchMode("forgot")} className="px-4 text-sm text-muted-foreground underline">Forgot password?</button></div>
+                  <div className="text-right"><Button variant="link" type="button" onClick={() => switchMode("forgot")} className="h-auto px-4 text-sm text-muted-foreground underline">Forgot password?</Button></div>
                 )}
                 {error && <p className="px-4 text-center text-sm text-destructive">{error}</p>}
-                <button type="submit" disabled={busy} className="w-full rounded-full bg-primary py-3.5 text-primary-foreground shadow-soft disabled:opacity-60">{busy ? "One moment…" : mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}</button>
-                {mode !== "forgot" && <button type="button" onClick={handleGoogle} disabled={busy} className="w-full rounded-full bg-card py-3.5 shadow-card disabled:opacity-60">Continue with Google</button>}
+                <Button variant="runway" type="submit" disabled={busy} className="h-auto w-full py-3.5 disabled:opacity-60">{busy ? "One moment…" : mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}</Button>
+                {mode !== "forgot" && <Button variant="outline" type="button" onClick={handleGoogle} disabled={busy} className="h-auto w-full bg-card py-3.5 disabled:opacity-60">Continue with Google</Button>}
               </form>
               )}
               {mode === "forgot" && !resetSent && (
-                <p className="mt-6 text-center text-sm"><button type="button" onClick={() => switchMode("signin")} className="text-muted-foreground underline">Back to sign in</button></p>
+                <p className="mt-6 text-center text-sm"><Button variant="link" type="button" onClick={() => switchMode("signin")} className="text-muted-foreground underline">Back to sign in</Button></p>
               )}
             </>
           )}

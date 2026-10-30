@@ -38,6 +38,6 @@ export function DemoApplication() {
     <div className="hidden" aria-hidden="true"><input name="website" tabIndex={-1} autoComplete="off" /></div>
     <div className="flex items-start gap-3"><Checkbox id="demo-consent" checked={consent} disabled={busy} onCheckedChange={(value) => setConsent(value === true)} /><label htmlFor="demo-consent" className="text-xs leading-relaxed text-muted-foreground">I agree that PERLA may use these details to respond to my demo application. <a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer" className="underline">Privacy policy</a></label></div>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-    <Button type="submit" disabled={busy || !hydrated} className="h-auto w-full rounded-full py-3.5">{busy ? <LoaderCircle className="motion-safe:animate-spin" /> : <ArrowRight />}{busy ? "Submitting…" : "Submit application"}</Button>
+    <Button variant="runway" type="submit" disabled={busy || !hydrated} className="h-auto w-full rounded-full py-3.5">{busy ? <LoaderCircle className="motion-safe:animate-spin" /> : <ArrowRight />}{busy ? "Submitting…" : "Submit application"}</Button>
   </form>;
 }
