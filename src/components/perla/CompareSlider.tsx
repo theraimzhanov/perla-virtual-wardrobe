@@ -15,25 +15,28 @@ export function CompareSlider({ before, after, mascot = false, autoPlay = false,
   };
   useEffect(() => {
     if (!autoPlay || touched || !introDone) return;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
-    const start = performance.now();
+    let start = performance.now();
     const tick = (now: number) => {
-      // Holds on the original, glides to the generated look, then back.
-      const t = ((now - start) / 7000) % 1;
-      const wave = t < 0.15 ? 0 : t < 0.5 ? (t - 0.15) / 0.35 : t < 0.65 ? 1 : 1 - (t - 0.65) / 0.35;
-      const eased = wave * wave * (3 - 2 * wave);
-      const elapsed = now - start;
-      // First pass after the mascot lands: it "struggles" — jerky tugs, slips back, then heaves.
-      if (delayedMascot && elapsed < 4200) {
-        const s = elapsed / 4200;
-        const tug = Math.sin(s * Math.PI * 9) * 6 * (1 - s) + Math.sin(s * Math.PI * 23) * 1.5;
-        setPos(50 + Math.sin(s * Math.PI * 1.5) * 30 * s + tug);
-      } else setPos(95 - eased * 90);
+      // Begin exactly where the mascot lands and turn gently at each edge.
+      setPos(50 - Math.sin(((now - start) / 10000) * Math.PI * 2) * 45);
       frame = requestAnimationFrame(tick);
     };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [autoPlay, touched, introDone, delayedMascot]);
+    const syncMotion = () => {
+      cancelAnimationFrame(frame);
+      setPos(50);
+      if (motion.matches) return;
+      start = performance.now();
+      frame = requestAnimationFrame(tick);
+    };
+    syncMotion();
+    motion.addEventListener("change", syncMotion);
+    return () => {
+      cancelAnimationFrame(frame);
+      motion.removeEventListener("change", syncMotion);
+    };
+  }, [autoPlay, touched, introDone]);
   return (
     <div
       ref={ref}
@@ -53,9 +56,8 @@ export function CompareSlider({ before, after, mascot = false, autoPlay = false,
       <span className="absolute right-3 top-3 rounded-full bg-primary/85 px-3 py-1 text-[11px] uppercase tracking-widest text-primary-foreground">After</span>
       <div className="absolute inset-y-0 w-px bg-background" style={{ left: `${pos}%` }}>
         {mascot ? (
-          <div className={cn("absolute top-1/2 left-1/2 grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-background/90 shadow-soft transition-opacity", delayedMascot && !introDone && "opacity-0", delayedMascot && introDone && !touched && "perla-struggle")}>
-            <PerlaMascot mood={touched ? "happy" : "look"} className="h-14 w-14" />
-            {delayedMascot && introDone && !touched && <span aria-hidden className="perla-sweat absolute -right-1 top-1 text-sm">💧</span>}
+          <div className={cn("absolute top-1/2 left-1/2 grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-background/90 shadow-soft transition-opacity", delayedMascot && !introDone && "opacity-0")}>
+            <PerlaMascot mood={autoPlay && introDone && !touched ? "glide" : "look"} className="h-14 w-14" />
             <ChevronsLeftRight className="absolute -bottom-5 h-4 w-4 text-gold" />
           </div>
         ) : (
