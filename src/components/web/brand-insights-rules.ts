@@ -16,7 +16,7 @@ export function rankDiscoverProducts(products: DiscoverProduct[], signals: Produ
 }
 
 export function sharedVirtualLooks(looks: Look[]) {
-  return byLikes(looks.filter((look) => look.shared && (look.kind === "photo" || Boolean(look.video?.webm || look.video?.mp4))));
+  return byLikes(looks.filter((look) => look.shared && look.kind === "photo"));
 }
 
 // A saved job counts once for the image it made (photo jobs) or the video it made
@@ -29,6 +29,3 @@ export function tallyGeneratedMedia(rows: GeneratedMediaRow[]): GeneratedMedia {
   const videos = rows.filter((row) => row.kind === "video" && Boolean(row.result_video_url)).length;
   return { images, videos, total: images + videos };
 }
-// Starting demo baseline; real activity is always added on top so numbers keep growing (30 → 31).
-export const PANEL_BASE = { members: 15, tryOns: 50, likes: 50, created: 70, productsTried: 8 } as const;
-export const productBase = (index: number) => ({ tryOns: 10 + ((index * 7 + 3) % 6), likes: 8 + ((index * 5 + 2) % 8) });
