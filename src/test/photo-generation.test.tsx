@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { usePhotoGeneration } from "@/components/web/usePhotoGeneration";
 import type { PhotoJob } from "@/components/web/generation-rules";
 
@@ -12,6 +12,43 @@ const job: PhotoJob = { id: "22222222-2222-4222-8222-222222222222", kind: "photo
 
 describe("Account-scoped photo generation", () => {
   beforeEach(() => { vi.clearAllMocks(); mocks.getUser.mockResolvedValue({ data: { user: { id: owner } } }); mocks.create.mockResolvedValue({ jobId: job.id }); mocks.read.mockResolvedValue(job); });
+  afterEach(() => { vi.useRealTimers(); });
+  it("dismisses a timeout exactly after three seconds without changing its failed status or restoring it on refresh", async () => {
+    vi.useFakeTimers();
+    const failed: PhotoJob = { ...job, status: "failed", image: null, error: "This try-on took too long. Please try again." };
+    mocks.read.mockResolvedValue(failed);
+    const { result, rerender } = renderHook(({ restored }) => usePhotoGeneration(owner, "selection", restored), { initialProps: { restored: failed } });
+    expect(result.current.error).not.toBeNull();
+    act(() => { vi.advanceTimersByTime(2999); });
+    expect(result.current.error).not.toBeNull();
+    act(() => { vi.advanceTimersByTime(1); });
+    expect(result.current.error).toBeNull();
+    expect(result.current.phase).toBe("failed");
+    expect(result.current.job?.image).toBeNull();
+    await act(async () => { result.current.retryStatus(); });
+    rerender({ restored: { ...failed } });
+    expect(result.current.error).toBeNull();
+  });
+  it("gives a newly failed attempt its own three-second timeout message", () => {
+    vi.useFakeTimers();
+    const failed: PhotoJob = { ...job, status: "failed", image: null, error: "This try-on took too long, so it was stopped. Please try again." };
+    const { result, rerender } = renderHook(({ restored }) => usePhotoGeneration(owner, "selection", restored), { initialProps: { restored: failed } });
+    act(() => { vi.advanceTimersByTime(3000); });
+    expect(result.current.error).toBeNull();
+    rerender({ restored: { ...failed, id: "44444444-4444-4444-8444-444444444444" } });
+    expect(result.current.error).not.toBeNull();
+    act(() => { vi.advanceTimersByTime(2999); });
+    expect(result.current.error).not.toBeNull();
+    act(() => { vi.advanceTimersByTime(1); });
+    expect(result.current.error).toBeNull();
+  });
+  it("keeps non-timeout failures available instead of dismissing them", () => {
+    vi.useFakeTimers();
+    const failed: PhotoJob = { ...job, status: "failed", image: null, error: "Provider failed" };
+    const { result } = renderHook(() => usePhotoGeneration(owner, "selection", failed));
+    act(() => { vi.advanceTimersByTime(3000); });
+    expect(result.current.error).toBe("Provider failed");
+  });
   it("restores a real completed photo", async () => {
     const { result } = renderHook(() => usePhotoGeneration(owner, "selection", job));
     await waitFor(() => expect(result.current.phase).toBe("done"));

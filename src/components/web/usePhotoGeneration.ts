@@ -14,6 +14,7 @@ export function usePhotoGeneration(userId: string | null, _selectionKey: string,
   const [job, setJob] = useState<PhotoJob | null>(null);
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+  const [dismissedTimeout, setDismissedTimeout] = useState<string | null>(null);
   const request = useRef<string | null>(null);
   const version = useRef(0);
   const lock = useRef(false);
@@ -24,13 +25,21 @@ export function usePhotoGeneration(userId: string | null, _selectionKey: string,
     request.current = null;
     lock.current = false;
     dismissed.current = null;
-    setJob(null); setStarting(false); setStartError(null);
+    setJob(null); setStarting(false); setStartError(null); setDismissedTimeout(null);
   }, [userId]);
 
   useEffect(() => {
     if (lock.current || !restored || restored.id === dismissed.current) return;
     setJob((current) => pickShownJob(current, restored));
   }, [restored, userId]);
+
+  const failure = startError ?? (job?.status === "failed" ? job.error ?? "Photo generation failed." : null);
+  const timeoutKey = failure && /\btook too long\b/i.test(failure) ? `${userId}:${job?.id ?? "start"}:${failure}` : null;
+  useEffect(() => {
+    if (!timeoutKey) return;
+    const timer = setTimeout(() => setDismissedTimeout(timeoutKey), 3000);
+    return () => clearTimeout(timer);
+  }, [timeoutKey]);
 
   const refresh = useCallback(async (id: string, epoch: number) => {
     try {
@@ -78,7 +87,7 @@ export function usePhotoGeneration(userId: string | null, _selectionKey: string,
     } catch (cause) {
       if (epoch === version.current) {
         const message = cause instanceof Error ? cause.message : "Couldn't start your photo.";
-        setStartError(message); toast.error(message);
+        setStartError(message); toast.error(message, /\btook too long\b/i.test(message) ? { duration: 3000 } : undefined);
       }
     } finally {
       if (epoch === version.current) { lock.current = false; setStarting(false); }
@@ -87,5 +96,5 @@ export function usePhotoGeneration(userId: string | null, _selectionKey: string,
   const clear = () => { version.current++; dismissed.current = job?.id ?? null; setJob(null); setStartError(null); };
   useEffect(() => { if (job && ["completed", "failed"].includes(job.status)) request.current = null; }, [job?.status]);
   const phase = starting ? "loading" : job ? photoJobPhase(job) : "idle";
-  return { job, phase, start, clear, error: startError ?? (job?.status === "failed" ? job.error ?? "Photo generation failed." : null), retryStatus: () => { if (job) void refresh(job.id, version.current); } };
+  return { job, phase, start, clear, error: timeoutKey && dismissedTimeout === timeoutKey ? null : failure, retryStatus: () => { if (job) void refresh(job.id, version.current); } };
 }
