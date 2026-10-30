@@ -115,7 +115,6 @@ function Studio() {
         <div className="mb-3 flex flex-wrap gap-2">{studioSceneNames.map((s) => <Pill key={s} active={s === scene} onClick={() => setScene(s)}>{s}</Pill>)}</div>
         <textarea value={prompt} maxLength={STUDIO_PROMPT_LIMIT} onChange={(e) => setPrompt(e.target.value)} rows={2} placeholder="e.g. in Paris, soft wind, film look" className="w-full resize-none rounded-2xl bg-secondary p-4 font-serif text-lg outline-none" />
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <p className="text-xs text-muted-foreground">Images stop automatically after 2 minutes.</p>
           <div className="ml-auto flex items-center gap-2">
             {pending.length > 0 && <Button variant="outline" className="rounded-full" onClick={() => void stop()} disabled={stopping}><Square className="h-3.5 w-3.5 fill-current" /> {stopping ? "Stopping…" : "Stop"}</Button>}
             <GoldButton onClick={() => void generate()} disabled={!base || busy}><Sparkles className="h-4 w-4" /> {busy ? "Creating…" : "Create image"}</GoldButton>
