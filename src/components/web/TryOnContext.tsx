@@ -117,7 +117,18 @@ function useTryOnState(userId: string | null, authReady: boolean) {
       void refreshPhotoJobs();
     }).catch(() => false);
   };
-  const deleteJob = (jobId: string) => changeLook(`job:${jobId}`, { deleted: true });
+  // Works for unfinished jobs too (Stop generating): those are not in the finished-looks list.
+  const deleteJob = (jobId: string) => {
+    const expectedOwner = userId;
+    return guard(`change:${jobId}`, async () => {
+      try { await changeSavedLook({ data: { id: jobId, deleted: true } }); }
+      catch (cause) { toast.error(cause instanceof Error ? cause.message : "Couldn't delete it. Please retry."); throw cause; }
+      if (owner.current !== expectedOwner) return;
+      setJobs((all) => all.filter((job) => job.id !== jobId && job.parentJobId !== jobId));
+      setCommunity((all) => all.filter((item) => item.jobId !== jobId));
+      void refreshPhotoJobs();
+    }).catch(() => false);
+  };
   const likeLook = (id: string) => {
     const look = looks.find((item) => item.id === id);
     if (!look) return;
