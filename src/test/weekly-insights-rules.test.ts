@@ -14,7 +14,7 @@ describe("weekly insights", () => {
   it("fit risk is the share of too fitted plus too loose", () => {
     const jobs = [job("a"), job("b"), job("c"), job("d")];
     const answers = ["Too fitted", "Too loose", "Just right", "Just right"];
-    const fb = jobs.map((j, i) => ({ job_id: j.id, question_id: "fit", answer: answers[i]! }));
+    const fb = jobs.map((j, i) => ({ job_id: j.id, question_id: "fit", answer: answers[i] ?? "Just right" }));
     expect(computeWeeklyNumbers(jobs, [], fb).fitRisk[0]?.risk).toBe(50);
   });
 
@@ -27,6 +27,15 @@ describe("weekly insights", () => {
 
   it("weeks start on Monday UTC", () => {
     expect(weekStartOf(new Date("2026-10-28T12:00:00Z"))).toBe("2026-10-26");
+  });
+
+  it("ignores survey answers not linked to eligible photo try-ons", () => {
+    const result = computeWeeklyNumbers([job("a"), job("v", { kind: "video" })], [], [
+      { job_id: "a", question_id: "intent", answer: "Definitely" },
+      { job_id: "v", question_id: "intent", answer: "Pass for now" },
+      { job_id: "missing", question_id: "intent", answer: "Pass for now" },
+    ]);
+    expect(result.trends.find((t) => t.question === "intent")?.options).toEqual([{ label: "Definitely", count: 1, share: 100 }]);
   });
 
   it("rejects style DNA for a non-uuid member", () => {
