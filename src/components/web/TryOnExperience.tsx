@@ -1,22 +1,19 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { Check, Download, Trash2, Film, Heart, ImagePlus, LoaderCircle, RefreshCw, Send, Sparkles, Upload, X } from "lucide-react";
+import { Check, Download, Trash2, Heart, ImagePlus, LoaderCircle, RefreshCw, Send, Sparkles, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { CompareSlider } from "@/components/perla/CompareSlider";
 import { modelBefore, modelAfter } from "@/components/perla/data";
-import demoVideo from "@/assets/try-on-demo.mp4.asset.json";
-import demoVideoWebm from "@/assets/try-on-demo.webm.asset.json";
 import { useTryOn } from "./TryOnContext";
 import { GenerationSkeleton } from "./GenerationSkeleton";
 import { ResultFeedback } from "./ResultFeedback";
 import { generationIssue, lookSource, showFeedback } from "./try-on-rules";
-import { sampleLookVideo, sourceFromFeedback, type LookSource } from "./looks";
+import { sourceFromFeedback, type LookSource } from "./looks";
 import { cn } from "@/lib/utils";
 import { validateImage } from "./upload-rules";
 import { usePhotoGeneration } from "./usePhotoGeneration";
-import { useVideoGeneration } from "./useVideoGeneration";
 import { SamplePhotoPicker } from "./SamplePhotoPicker";
 
 type Phase = "idle" | "loading" | "done";
@@ -40,20 +37,17 @@ async function downloadMedia(url: string, filename: string) {
 }
 
 export function TryOnExperience({ compact = false }: { compact?: boolean }) {
-  const { userId, selectedInputProductId, photo, photoId, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource, markTried, savingInputs, inputError, retryInputs, signedIn, photoJobs, videoJobs, deleteJob, patchJob, refreshPhotoJobs, generationHistoryError } = useTryOn();
-  const [deleting, setDeleting] = useState<"photo" | "video" | null>(null);
+  const { userId, selectedInputProductId, photo, photoId, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource, markTried, savingInputs, inputError, retryInputs, signedIn, photoJobs, deleteJob, patchJob, refreshPhotoJobs, generationHistoryError } = useTryOn();
+  const [deleting, setDeleting] = useState<"photo" | null>(null);
   const [lookId, setLookId] = useState(0);
   const [demoPhotoPhase, setDemoPhotoPhase] = useState<Phase>("idle");
-  const [demoVideoPhase, setVideoPhase] = useState<Phase>("idle");
   const [photoDialog, setPhotoDialog] = useState(false);
   const [sampleDialog, setSampleDialog] = useState(false);
   const [productSource, setProductSource] = useState<LookSource>(lookSource(mode));
   const [compare, setCompare] = useState(false);
-  const [videoError, setVideoError] = useState(false);
   const photoInput = useRef<HTMLInputElement>(null);
   const productInput = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLElement>(null);
   const selectionKey = selected.map((item) => `${item.id}:${item.image}`).join("|");
   // The newest saved try-on stays here until it is deleted or replaced by a new one.
   const restored = signedIn ? photoJobs[0] : undefined;
@@ -62,20 +56,14 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   const resultImage = generation.job?.image ?? null;
   const photoLookId = generation.job ? `job:${generation.job.id}` : `p${lookId}`;
   const likedPhoto = looks.some((look) => look.id === photoLookId && look.liked);
-  const shownPhotoId = signedIn && generation.job?.status === "completed" ? generation.job.id : null;
-  const realVideo = useVideoGeneration(userId, shownPhotoId, shownPhotoId ? videoJobs.find((job) => job.parentJobId === shownPhotoId) : undefined);
-  const videoLookId = signedIn && realVideo.job ? `job:${realVideo.job.id}` : `v${lookId}`;
   const feedbackMode = signedIn && generation.job ? (generation.job.source === "discover" ? "discover" : "personal") : mode;
-  const videoPhase = (signedIn ? realVideo.phase : demoVideoPhase) as Phase | "failed";
-  const videoSrc = signedIn ? realVideo.video : null;
-  const likedVideo = looks.some((look) => look.id === videoLookId && look.liked);
   const removePhoto = async () => {
     if (deleting) return;
-    if (!signedIn || !generation.job) { setDemoPhotoPhase("idle"); setVideoPhase("idle"); setCompare(false); return; }
+    if (!signedIn || !generation.job) { setDemoPhotoPhase("idle"); setCompare(false); return; }
     setDeleting("photo");
     const ok = await deleteJob(generation.job.id);
     setDeleting(null);
-    if (ok) { generation.clear(); realVideo.clear(); setCompare(false); toast("Try-on deleted"); }
+    if (ok) { generation.clear(); setCompare(false); toast("Try-on deleted"); }
   };
   // Stop removes the unfinished job; a request already sent to Perfect Corp can't be recalled, so its result is discarded.
   const stopPhoto = async () => {
@@ -86,22 +74,11 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     if (ok) { generation.clear(); setCompare(false); toast("Generation stopped"); }
     else toast.error("Couldn't stop it. Please try again.");
   };
-  const removeVideo = async () => {
-    if (deleting) return;
-    if (!signedIn || !realVideo.job) { setVideoPhase("idle"); return; }
-    setDeleting("video");
-    const ok = await deleteJob(realVideo.job.id);
-    setDeleting(null);
-    if (ok) { realVideo.clear(); toast("Video deleted"); }
-  };
-  const startVideo = () => { setVideoError(false); if (signedIn) void realVideo.start(); else setVideoPhase("loading"); };
 
   useEffect(() => {
     setDemoPhotoPhase("idle");
-    setVideoPhase("idle");
     setProductSource(lookSource(mode));
     setCompare(false);
-    setVideoError(false);
   }, [photo, selectionKey, mode]);
 
   useEffect(() => {
@@ -118,15 +95,8 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   }, [signedIn, demoPhotoPhase]);
 
   useEffect(() => {
-    if (signedIn || demoVideoPhase !== "loading") return;
-    const timer = setTimeout(() => setVideoPhase("done"), 3200);
-    return () => clearTimeout(timer);
-  }, [signedIn, demoVideoPhase]);
-
-  useEffect(() => {
     if (photoPhase === "loading") resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    if (videoPhase === "loading") videoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [photoPhase, videoPhase]);
+  }, [photoPhase]);
 
   const acceptFile = async (event: ChangeEvent<HTMLInputElement>, kind: "photo" | "product") => {
     const file = event.target.files?.[0];
@@ -156,7 +126,6 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     if (issue === "product") { toast.error("Select a product in Discover or upload your own."); return; }
     setPreparing(false);
     setLookId(Date.now());
-    setVideoPhase("idle");
     if (!signedIn) { setDemoPhotoPhase("loading"); return; }
     void generation.start();
   };
@@ -168,17 +137,16 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
     if (signedIn) { if (resultImage && generation.job) void refreshPhotoJobs(); }
     else addLook({ id: `p${lookId}`, title: lookTitle, product: lookTitle, kind: "photo", image: modelAfter, source: productSource });
   }, [photoPhase, resultImage]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (videoPhase === "done" && !signedIn) addLook({ id: `v${lookId}`, title: lookTitle, product: lookTitle, kind: "video", image: signedIn ? resultImage ?? modelAfter : modelAfter, video: videoSrc ? { mp4: videoSrc } : sampleLookVideo, source: productSource }); }, [videoPhase, videoSrc]); // eslint-disable-line react-hooks/exhaustive-deps
   const recordSource = (question: string, answer: string) => {
     if (mode !== "personal" || question !== "where") return;
     const source = sourceFromFeedback(answer);
     if (!source) return;
     setProductSource(source);
-    updateLookSource([photoLookId, videoLookId], source);
+    updateLookSource([photoLookId], source);
   };
   const isShared = (id: string) => looks.some((look) => look.id === id && look.shared);
   const ShareButton = ({ id }: { id: string }) => <Button variant="outline" disabled={isShared(id)} onClick={() => shareLook(id)} className="rounded-full text-xs"><Send />{isShared(id) ? "Shared" : "Share to Brand Insights"}</Button>;
-  const busy = savingInputs || photoPhase === "loading" || videoPhase === "loading" || deleting !== null;
+  const busy = savingInputs || photoPhase === "loading" || deleting !== null;
   const hasResult = photoPhase === "done";
   return (
     <div className="min-w-0">
@@ -223,7 +191,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
           </div>
           {mode === "personal" && personal && <Button variant="outline" disabled={busy} onClick={() => productInput.current?.click()} className="mt-4 w-full rounded-full border-dashed"><Upload />Change product photo</Button>}
           <Button disabled={busy || preparing || !!inputError} onClick={generate} className="mt-6 h-auto w-full whitespace-normal rounded-full px-5 py-4 shadow-soft"><Sparkles />{savingInputs ? "Saving inputs…" : photoPhase === "loading" ? "Creating your look…" : hasResult ? "Generate again" : "Generate try-on"}</Button>
-          <div className="mt-7 flex items-center gap-3 border-t pt-5"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gold-soft"><Film className="h-4 w-4 text-gold" /></div><div><p className="font-serif text-lg">Then, see it in motion</p><p className="text-xs text-muted-foreground">Photo → Video</p></div></div>
+          <p className="mt-3 text-center text-xs text-muted-foreground">Try-ons stop automatically after 1 minute.</p>
         </section>
       </div>
 
@@ -232,7 +200,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
         {preparing || photoPhase === "loading" ? <div className="mx-auto max-w-md"><GenerationSkeleton kind={preparing ? "prepare" : "photo"} />{signedIn && generation.job && photoPhase === "loading" && <Button variant="outline" disabled={deleting !== null} onClick={() => { void stopPhoto(); }} className="mt-4 w-full rounded-full"><X />{deleting === "photo" ? "Stopping…" : "Stop generating"}</Button>}</div> : photoPhase === "failed" ? <div role="alert" className="border-y py-6 text-sm text-destructive">{generation.job?.error ?? "No generated image was returned. Please try again."}</div> : <>
           <div className={cn("grid items-start gap-7", !compact && "sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10")}>
             <div className="min-w-0">{compare && photo ? <CompareSlider before={photo} after={signedIn ? resultImage ?? "" : modelAfter} /> : <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl bg-muted"><img src={signedIn ? resultImage ?? "" : modelAfter} alt={signedIn ? "Your generated try-on look" : "Sample generated try-on look"} className="h-full w-full object-contain" /></div>}
-              <div className="mt-3 flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Like picture" title="Like picture" aria-pressed={likedPhoto} onClick={() => likeLook(photoLookId)} className={cn("rounded-full", likedPhoto && "border-gold text-gold")}><Heart className={likedPhoto ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download picture" title="Download picture" onClick={() => { if (!signedIn || resultImage) void downloadMedia(resultImage ?? modelAfter, "perla-try-on.jpg"); }} className="rounded-full"><Download /></Button><Button size="icon" variant="outline" aria-label="Delete picture" title="Delete picture" disabled={deleting !== null || videoPhase === "loading"} onClick={() => { void removePhoto(); }} className="rounded-full text-destructive">{deleting === "photo" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Trash2 />}</Button><Button variant="outline" aria-pressed={compare} onClick={() => setCompare((value) => !value)} className="ml-auto rounded-full text-xs">{compare ? "View picture" : "Compare"}</Button></div><div className="mt-2"><ShareButton id={photoLookId} /></div>
+              <div className="mt-3 flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Like picture" title="Like picture" aria-pressed={likedPhoto} onClick={() => likeLook(photoLookId)} className={cn("rounded-full", likedPhoto && "border-gold text-gold")}><Heart className={likedPhoto ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download picture" title="Download picture" onClick={() => { if (!signedIn || resultImage) void downloadMedia(resultImage ?? modelAfter, "perla-try-on.jpg"); }} className="rounded-full"><Download /></Button><Button size="icon" variant="outline" aria-label="Delete picture" title="Delete picture" disabled={deleting !== null} onClick={() => { void removePhoto(); }} className="rounded-full text-destructive">{deleting === "photo" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Trash2 />}</Button><Button variant="outline" aria-pressed={compare} onClick={() => setCompare((value) => !value)} className="ml-auto rounded-full text-xs">{compare ? "View picture" : "Compare"}</Button></div><div className="mt-2"><ShareButton id={photoLookId} /></div>
             </div>
             <div className="min-w-0"><p className="text-xs uppercase text-gold">Photo complete <Check className="ml-1 inline h-3 w-3" /></p><h3 className="mt-2 font-serif text-3xl">A different point of view.</h3>{showFeedback(feedbackMode) && <ResultFeedback key={`photo:${generation.job?.id ?? `${mode}:${selectionKey}:${lookId}`}`} kind="photo" mode={feedbackMode} jobId={signedIn ? generation.job?.id : undefined} alreadySent={signedIn && Boolean(generation.job?.feedbackSent)} onSent={() => { if (generation.job) patchJob(generation.job.id, { feedbackSent: true }); }} onAnswer={recordSource} />}</div>
           </div>
