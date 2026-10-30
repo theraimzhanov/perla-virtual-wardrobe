@@ -39,8 +39,8 @@ const top = (values: Array<string | null | undefined>, n = 3) =>
 
 export function computeWeeklyNumbers(jobs: JobRow[], products: ProductRow[], feedback: FeedbackRow[]): WeeklyNumbers {
   const productOf = new Map(products.map((p) => [p.id, p]));
-  const jobOf = new Map(jobs.map((j) => [j.id, j]));
-  const answersOf = (q: string) => feedback.filter((f) => f.question_id === q);
+  const jobOf = new Map(jobs.filter((j) => j.kind === "photo").map((j) => [j.id, j]));
+  const answersOf = (q: string) => feedback.filter((f) => jobOf.has(f.job_id) && f.question_id === q);
 
   const trends = TREND_QUESTIONS.map(({ id, title }) => {
     const answers = answersOf(id).map((f) => f.answer);
