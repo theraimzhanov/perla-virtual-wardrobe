@@ -1,23 +1,27 @@
-import { Download, Film, Heart, Image, Send, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { Download, Heart, Send, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTryOn } from "./TryOnContext";
 import { sourceLabel, type Look } from "./looks";
 
-export function LookCard({ look, showShare = false, showDelete = false, showDownload = false }: { look: Look; showShare?: boolean; showDelete?: boolean; showDownload?: boolean }) {
-  const { likeLook, shareLook, unshareLook, deleteLook } = useTryOn();
+export function LookCard({ look, showShare = false, showDelete = false, showDownload = false, showTry = false }: { look: Look; showShare?: boolean; showDelete?: boolean; showDownload?: boolean; showTry?: boolean }) {
+  const { likeLook, shareLook, unshareLook, deleteLook, tryLook } = useTryOn();
+  const navigate = useNavigate();
+  const [trying, setTrying] = useState(false);
+  const tryIt = async () => {
+    if (trying) return;
+    setTrying(true);
+    try { if (await tryLook(look)) await navigate({ to: "/app/try-on" }); } finally { setTrying(false); }
+  };
   const label = sourceLabel(look.source);
   const productName = look.product ?? look.title;
   return (
     <article aria-label={look.title} className="min-w-0 overflow-hidden rounded-lg bg-card shadow-card">
       <div className="relative aspect-[3/4] bg-secondary">
-        {look.kind === "video" && look.video ? (
-          <video poster={look.image} controls playsInline loop preload="none" aria-label={`${productName} virtual try-on video by ${look.author}`} className="h-full w-full object-contain">
-            {look.video.webm && <source src={look.video.webm} type="video/webm" />}
-            {look.video.mp4 && <source src={look.video.mp4} type="video/mp4" />}
-          </video>
-        ) : <img src={look.image} alt={`${productName} virtual try-on by ${look.author}`} loading="lazy" width={768} height={1024} className="h-full w-full object-cover" />}
-        <span className="pointer-events-none absolute left-3 top-3 flex items-center gap-1 rounded-full bg-background/90 px-2.5 py-1 text-[10px] uppercase">{look.kind === "video" ? <Film className="h-3 w-3" /> : <Image className="h-3 w-3" />}{look.kind === "video" ? "Video" : "Photo"}</span>
+        <img src={look.image} alt={`${productName} virtual try-on by ${look.author}`} loading="lazy" width={768} height={1024} className="h-full w-full object-cover" />
+        {showTry && <button type="button" onClick={() => { void tryIt(); }} disabled={trying} aria-label={`Try on ${productName}`} title="Try this piece on" className="absolute left-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-background/90 text-gold shadow-card transition hover:scale-110 disabled:opacity-60"><Star className={cn("h-5 w-5 fill-current", trying && "motion-safe:animate-spin")} /></button>}
       </div>
       <div className="p-3 sm:p-4">
         {look.brand && <p className="mb-1 break-words text-[10px] uppercase text-muted-foreground">{look.brand}</p>}
@@ -28,7 +32,7 @@ export function LookCard({ look, showShare = false, showDelete = false, showDown
           <Button size="sm" variant="ghost" aria-pressed={look.liked} aria-label={`Like ${look.title}`} title={`Like ${look.title}`} onClick={() => likeLook(look.id)} className={cn("shrink-0 rounded-full px-2 tabular-nums", look.liked && "text-gold")}><Heart className={look.liked ? "fill-current" : ""} />{look.likes.toLocaleString()}</Button>
           {showShare && !look.shared && <Button size="icon" variant="outline" aria-label={`Share ${look.title} to Brand Insights`} title="Share to Brand Insights" onClick={() => shareLook(look.id)} className="h-8 w-8 shrink-0 rounded-full"><Send /></Button>}
           {showShare && look.shared && <Button size="icon" variant="default" aria-label={`Unshare ${look.title} from Brand Insights`} title="Shared — click to remove from Brand Insights" onClick={() => unshareLook(look.id)} className="h-8 w-8 shrink-0 rounded-full"><Send /></Button>}
-          {showDownload && <Button size="icon" variant="outline" asChild className="h-8 w-8 shrink-0 rounded-full"><a href={look.video?.mp4 ?? look.image} download target="_blank" rel="noreferrer" aria-label={`Download ${look.title}`} title="Download"><Download /></a></Button>}
+          {showDownload && <Button size="icon" variant="outline" asChild className="h-8 w-8 shrink-0 rounded-full"><a href={look.image} download target="_blank" rel="noreferrer" aria-label={`Download ${look.title}`} title="Download"><Download /></a></Button>}
           {showDelete && <Button size="icon" variant="outline" aria-label={`Delete ${look.title}`} title="Delete" onClick={() => deleteLook(look.id)} className="h-8 w-8 shrink-0 rounded-full text-destructive"><Trash2 /></Button>}
         </div>
       </div>
