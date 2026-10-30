@@ -1,9 +1,9 @@
 # Perla update
 
 ## October 30 notification and mascot presentation
-- [ ] Remove the separate Profile notification section and retain the top-bar bell.
-- [ ] Replace comparison-handle struggle effects with smooth, effortless push/pull motion and respect reduced motion.
-- [ ] Verify the homepage comparison and notification placement.
+- [x] Remove the separate Profile notification section and retain the top-bar bell.
+- [x] Replace comparison-handle struggle effects with smooth, effortless push/pull motion and respect reduced motion.
+- [x] Verify the homepage comparison at 1280px and 681px: full smooth sweep, manual dragging stops autoplay, reduced motion stays centered, no browser errors; 3 routing tests pass and build OK. Notification placement verified in source; signed-in Profile browser check unavailable for external unmanaged Supabase.
 
 ## October 29 requested updates
 - [x] Set the labelled active-user demo baseline to 15 and redesign homepage/Insights statistics with subtle motion.
