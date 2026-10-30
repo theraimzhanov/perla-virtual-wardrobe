@@ -21,7 +21,6 @@ import { Route as AuthenticatedAppProfileRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppStudioRouteImport } from './routes/_authenticated/app.studio'
 import { Route as AuthenticatedAppTryOnRouteImport } from './routes/_authenticated/app.try-on'
 import { Route as ApiPublicGenerationPhotoRouteImport } from './routes/api/public/generation/photo'
-import { Route as ApiPublicGenerationVideoRouteImport } from './routes/api/public/generation/video'
 import { Route as ApiPublicInsightsWeeklyRouteImport } from './routes/api/public/insights/weekly'
 
 const IndexRoute = IndexRouteImport.update({
@@ -85,12 +84,6 @@ const ApiPublicGenerationPhotoRoute =
     path: '/api/public/generation/photo',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicGenerationVideoRoute =
-  ApiPublicGenerationVideoRouteImport.update({
-    id: '/api/public/generation/video',
-    path: '/api/public/generation/video',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicInsightsWeeklyRoute = ApiPublicInsightsWeeklyRouteImport.update({
   id: '/api/public/insights/weekly',
   path: '/api/public/insights/weekly',
@@ -109,7 +102,6 @@ export interface FileRoutesByFullPath {
   '/app/try-on': typeof AuthenticatedAppTryOnRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/generation/photo': typeof ApiPublicGenerationPhotoRoute
-  '/api/public/generation/video': typeof ApiPublicGenerationVideoRoute
   '/api/public/insights/weekly': typeof ApiPublicInsightsWeeklyRoute
 }
 export interface FileRoutesByTo {
@@ -123,7 +115,6 @@ export interface FileRoutesByTo {
   '/app/try-on': typeof AuthenticatedAppTryOnRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/generation/photo': typeof ApiPublicGenerationPhotoRoute
-  '/api/public/generation/video': typeof ApiPublicGenerationVideoRoute
   '/api/public/insights/weekly': typeof ApiPublicInsightsWeeklyRoute
 }
 export interface FileRoutesById {
@@ -140,7 +131,6 @@ export interface FileRoutesById {
   '/_authenticated/app/try-on': typeof AuthenticatedAppTryOnRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/generation/photo': typeof ApiPublicGenerationPhotoRoute
-  '/api/public/generation/video': typeof ApiPublicGenerationVideoRoute
   '/api/public/insights/weekly': typeof ApiPublicInsightsWeeklyRoute
 }
 export interface FileRouteTypes {
@@ -157,7 +147,6 @@ export interface FileRouteTypes {
     | '/app/try-on'
     | '/app/'
     | '/api/public/generation/photo'
-    | '/api/public/generation/video'
     | '/api/public/insights/weekly'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -171,7 +160,6 @@ export interface FileRouteTypes {
     | '/app/try-on'
     | '/app'
     | '/api/public/generation/photo'
-    | '/api/public/generation/video'
     | '/api/public/insights/weekly'
   id:
     | '__root__'
@@ -187,7 +175,6 @@ export interface FileRouteTypes {
     | '/_authenticated/app/try-on'
     | '/_authenticated/app/'
     | '/api/public/generation/photo'
-    | '/api/public/generation/video'
     | '/api/public/insights/weekly'
   fileRoutesById: FileRoutesById
 }
@@ -198,7 +185,6 @@ export interface RootRouteChildren {
   MobileRoute: typeof MobileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicGenerationPhotoRoute: typeof ApiPublicGenerationPhotoRoute
-  ApiPublicGenerationVideoRoute: typeof ApiPublicGenerationVideoRoute
   ApiPublicInsightsWeeklyRoute: typeof ApiPublicInsightsWeeklyRoute
 }
 
@@ -288,13 +274,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicGenerationPhotoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/generation/video': {
-      id: '/api/public/generation/video'
-      path: '/api/public/generation/video'
-      fullPath: '/api/public/generation/video'
-      preLoaderRoute: typeof ApiPublicGenerationVideoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/insights/weekly': {
       id: '/api/public/insights/weekly'
       path: '/api/public/insights/weekly'
@@ -342,7 +321,6 @@ const rootRouteChildren: RootRouteChildren = {
   MobileRoute: MobileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicGenerationPhotoRoute: ApiPublicGenerationPhotoRoute,
-  ApiPublicGenerationVideoRoute: ApiPublicGenerationVideoRoute,
   ApiPublicInsightsWeeklyRoute: ApiPublicInsightsWeeklyRoute,
 }
 export const routeTree = rootRouteImport
