@@ -57,9 +57,9 @@ export async function sendSheetsReport(admin: Admin) {
   ]);
   if (saved.error) throw new Error("Couldn't read saved AI insights.");
   const payload = saved.data?.payload;
-  if (payload && typeof payload === "object" && !Array.isArray(payload) && Array.isArray(payload.aiInsights)) {
+  if (payload && typeof payload === "object" && !Array.isArray(payload) && Array.isArray(payload["aiInsights"])) {
     const table = report.tables.find((t) => t.title === "Insights");
-    for (const text of payload.aiInsights) {
+    for (const text of payload["aiInsights"]) {
       if (typeof text === "string") table?.values.push(["AI narrative", text, "", "", `AI text saved for week ${saved.data?.week_start}; verify against observed numbers`]);
     }
   }
