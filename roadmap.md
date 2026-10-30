@@ -1,9 +1,11 @@
 # Perla update
 
 ## Weekly Google Sheets reporting
-- [ ] Add real brand/product, personal-upload, survey and Insights report tables with private customer identities excluded.
-- [ ] Connect Google Sheets and extend weekly n8n reporting without changing survey collection.
-- [ ] Run a real report now, read the spreadsheet back and provide its link.
+- [x] Add real brand/product, personal-upload, survey and Insights report tables with private customer identities excluded.
+- [x] Connect Google Sheets and add the weekly n8n report in Perla Virtual Wardrobe without changing survey collection; Mondays 06:15 UTC.
+- [x] Run a real report through n8n (execution 67 succeeded), read the spreadsheet back, and confirm 7 members, 14 completed try-ons, 43 survey answers and 8 products.
+- [x] Publish reporting callback after permission; unauthorized calls return 401, unexpected bodies return 400, focused reporting tests pass.
+- [ ] Verify fresh Gemini/Style DNA analysis — Google returned temporary high-demand errors; Sheets export runs independently and already succeeds.
 
 ## October 30 notification and mascot presentation
 - [x] Remove the separate Profile notification section and retain the top-bar bell.

@@ -55,4 +55,11 @@ describe("weekly Google Sheets reporting", () => {
     expect(historyRowFor("2026-11-02", rows)).toBe(4);
     expect(historyRowFor("2026-10-26", [])).toBe(2);
   });
+
+  it("Monday's weekly digest counts the previous completed week and excludes new Monday activity", () => {
+    const report = buildSheetsReport([job("last-week"), job("monday", { created_at: "2026-11-02T01:00:00Z", user_id: "new-week-user" })], [product], [], [], 7, new Date("2026-11-02T06:15:00Z"));
+    expect(report.weekStart).toBe("2026-10-26");
+    expect(report.summary.activeCustomers).toBe(1);
+    expect(report.tables.find((t) => t.title === "Weekly history")?.values[1]?.[4]).toBe(1);
+  });
 });

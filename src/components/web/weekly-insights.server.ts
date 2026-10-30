@@ -7,16 +7,15 @@ type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["su
 export async function loadWeeklyNumbers(admin: Admin): Promise<WeeklyNumbers> {
   const { jobs, products, feedback } = await readReportData(admin);
   const rows = jobs.filter((j) => !j.studio_scene && j.result_image_url);
-  return computeWeeklyNumbers(rows, products, feedback);
+  const categories = new Map(rows.filter((j) => j.product_id && j.category !== "unknown").map((j) => [j.product_id, j.category]));
+  return computeWeeklyNumbers(rows, products.map((p) => ({ ...p, category: p.category === "unknown" ? categories.get(p.id) ?? p.category : p.category })), feedback);
 }
 
 export function insightsAuthorized(request: Request): boolean {
   // n8n's existing Supabase credential injects this header; no raw token in workflow parameters.
   const service = process.env["SUPABASE_SERVICE_ROLE_KEY"];
-  if (service && sameSecret(request.headers.get("apikey") ?? "", service)) return true;
-  const secret = process.env["PERLA_INSIGHTS_SECRET"];
-  const given = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  return Boolean(secret && sameSecret(given, secret));
+  // Retire the old inline bearer: both n8n workflows now use stored credential auth only.
+  return Boolean(service && sameSecret(request.headers.get("apikey") ?? "", service));
 }
 
 function sameSecret(given: string, secret: string): boolean {
