@@ -18,7 +18,7 @@ const linkClass = "h-auto justify-start whitespace-normal p-0 text-left text-sm 
 
 export function SiteFooter() {
   return (
-    <footer className="border-t">
+    <footer className="perla-footer border-t">
       <div className="mx-auto max-w-6xl px-6 pt-12 md:pt-16">
         <div className="grid gap-x-10 gap-y-10 pb-12 sm:grid-cols-3 lg:grid-cols-[2fr_1fr_1fr_1fr]">
           <div className="min-w-0 sm:col-span-3 lg:col-span-1">

@@ -24,5 +24,5 @@ function Count({ value }: { value: number }) {
 
 export function StatStrip({ items, className }: { items: { value: number; label: string; icon: LucideIcon }[]; className?: string }) {
   const tones = ["text-stat-mint", "text-stat-rose", "text-stat-sky", "text-gold"];
-  return <div className={cn("grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-4", className)}>{items.map(({ value, label, icon: Icon }, i) => <div key={label} className="stat-reveal min-w-0 border-t border-border pt-4"><Icon className={cn("mb-3 h-5 w-5", tones[i % tones.length])} /><p className="font-serif text-4xl leading-none"><Count value={value} /></p><p className="mt-2 text-[10px] uppercase leading-relaxed text-muted-foreground">{label}</p></div>)}</div>;
+  return <div className={cn("perla-stat-strip grid grid-cols-2 gap-3 sm:grid-cols-4", className)}>{items.map(({ value, label, icon: Icon }, i) => <div key={label} className="stat-reveal min-w-0"><Icon className={cn("mb-3 h-5 w-5", tones[i % tones.length])} /><p className="font-serif text-4xl leading-none"><Count value={value} /></p><p className="mt-2 text-[10px] uppercase leading-relaxed text-muted-foreground">{label}</p></div>)}</div>;
 }

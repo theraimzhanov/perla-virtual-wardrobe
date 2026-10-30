@@ -2,7 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PerlaMascot } from "@/components/perla/PerlaMascot";
-import after from "@/assets/model-after.jpg";
+import runway from "@/assets/sunset-runway.jpg";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -101,7 +102,7 @@ function Login() {
   }
 
   return (
-    <div className="grid min-h-screen bg-background md:grid-cols-2">
+    <div className="perla-auth grid min-h-screen bg-background md:grid-cols-2">
       <div className="flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
           <div className="flex justify-center"><PerlaMascot mood="look" className="h-40 w-40" /></div>
@@ -163,7 +164,7 @@ function Login() {
           )}
         </div>
       </div>
-      <img src={after} alt="" className="hidden h-full w-full object-cover md:block" />
+      <div className="perla-auth-photo hidden md:block"><img src={runway} alt="Coral satin dress on a Mediterranean terrace" width={1920} height={1024} /><div className="absolute inset-x-0 bottom-0 bg-background/85 p-10"><p className="font-serif text-5xl">PERLA</p><p className="mt-2 font-serif text-3xl">Wear it before anyone.</p></div></div>
     </div>
   );
 }

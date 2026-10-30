@@ -96,7 +96,7 @@ function Studio() {
   return (
     <div>
       <PageHeader eyebrow="AI Studio" title="Your look," accent="reimagined" desc="Pick a try-on, choose a scene, add your idea if you like — or just press create. PERLA adds the styling details for you." />
-      <Panel className="mb-8">
+      <Panel className="perla-studio-tool mb-8">
         <h2 className="mb-3 font-serif text-2xl">1. Choose a try-on photo</h2>
         {bases.length === 0 ? (
           <p className="text-sm text-muted-foreground">Create a virtual try-on first — <Link to="/app/try-on" className="text-gold underline">go to Try On</Link>.</p>
@@ -112,7 +112,7 @@ function Studio() {
           </div>
         )}
         <h2 className="mb-3 mt-6 font-serif text-2xl">2. Scene & idea <span className="text-sm text-muted-foreground">(optional)</span></h2>
-        <div className="mb-3 flex flex-wrap gap-2">{studioSceneNames.map((s) => <Pill key={s} active={s === scene} onClick={() => setScene(s)}>{s}</Pill>)}</div>
+        <div role="group" aria-label="Studio scenes" className="mb-3 flex flex-wrap gap-2">{studioSceneNames.map((s) => <Pill key={s} active={s === scene} onClick={() => setScene(s)}>{s}</Pill>)}</div>
         <textarea value={prompt} maxLength={STUDIO_PROMPT_LIMIT} onChange={(e) => setPrompt(e.target.value)} rows={2} placeholder="e.g. in Paris, soft wind, film look" className="w-full resize-none rounded-2xl bg-secondary p-4 font-serif text-lg outline-none" />
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <div className="ml-auto flex items-center gap-2">
