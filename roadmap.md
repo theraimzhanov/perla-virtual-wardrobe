@@ -1,5 +1,10 @@
 # Perla update
 
+## Weekly Google Sheets reporting
+- [ ] Add real brand/product, personal-upload, survey and Insights report tables with private customer identities excluded.
+- [ ] Connect Google Sheets and extend weekly n8n reporting without changing survey collection.
+- [ ] Run a real report now, read the spreadsheet back and provide its link.
+
 ## October 30 notification and mascot presentation
 - [x] Remove the separate Profile notification section and retain the top-bar bell.
 - [x] Replace comparison-handle struggle effects with smooth, effortless push/pull motion and respect reduced motion.
