@@ -5,11 +5,6 @@ export const generationRequestSchema = z.object({
   requestId: z.string().uuid(),
   accessoryFit: z.enum(["female", "male"]).nullable().default(null),
 });
-export const videoRequestSchema = z.object({
-  expectedOwner: z.string().uuid(),
-  requestId: z.string().uuid(),
-  photoJobId: z.string().uuid(),
-});
 const answerKey = z.enum(["style", "fit", "wear", "movement", "confidence", "favorite", "category", "where", "similar", "occasion", "color", "price", "intent"]);
 // All answers of one feedback card (3 for legacy video cards, 5 for photo cards), tied to one saved look.
 export const feedbackSchema = z.object({ jobId: z.string().uuid(), answers: z.record(answerKey, z.string().min(1).max(40)) })
@@ -99,9 +94,9 @@ export function nextDirectAction(job: DirectJobState, now: number): DirectAction
   if (["completed", "failed"].includes(job.status)) return "none";
   const stale = now - Date.parse(job.updated_at) > DIRECT_STALE_MS;
   // An AI Studio render runs inside one request; if it never finished it is never repeated.
-  if (job.stage === "rendering") return now - Date.parse(job.updated_at) > STUDIO_RENDER_STALE_MS ? "uncertain" : "wait";
-  // Over the time limit at any step before saving: stop instead of preparing or polling forever.
+  // Over the time limit at any step before saving: stop instead of preparing, rendering or polling forever.
   if (job.stage !== "saving" && now - Date.parse(job.created_at) > directLimitMs(job.kind, Boolean(job.studio_scene))) return "expired";
+  if (job.stage === "rendering") return now - Date.parse(job.updated_at) > STUDIO_RENDER_STALE_MS ? "uncertain" : "wait";
   if (!job.provider_task_id) {
     // A submission that never recorded its task ID is never repeated: the provider has no idempotency.
     if (job.stage === "submitting") return stale ? "uncertain" : "wait";

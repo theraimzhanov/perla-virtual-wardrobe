@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { uploadBucket } from "./upload-rules";
-import { directGenerationEnabled, generationRequestSchema, videoRequestSchema, type PhotoJob } from "./generation-rules";
+import { directGenerationEnabled, generationRequestSchema, type PhotoJob } from "./generation-rules";
 import { buildStudioPrompt, studioRequestSchema } from "./studio-rules";
 
 const LINK_SECONDS = 60 * 60 * 24;
@@ -71,34 +71,6 @@ export const createGenerationJob = createServerFn({ method: "POST" })
     // Trying a piece again brings it back to the wardrobe.
     await supabaseAdmin.from("try_on_products").update({ wardrobe_hidden: false }).eq("id", product.id).eq("user_id", context.userId);
     await dispatch(job.id, direct ? "direct" : "n8n");
-    return { jobId: job.id };
-  });
-
-// Videos always run on the app's own processor: they animate a finished, owner-scoped photo.
-export const createVideoJob = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => videoRequestSchema.parse(input))
-  .handler(async ({ data, context }) => {
-    if (data.expectedOwner !== context.userId) throw new Error("Your account changed. Please try again.");
-    const { directConfig, advanceDirectJob } = await import("./generation-direct.server");
-    directConfig();
-    const existing = await context.supabase.from("generation_jobs").select("id,status").eq("user_id", context.userId).eq("request_id", data.requestId).maybeSingle();
-    if (existing.error) throw new Error("Couldn't check this request.");
-    if (existing.data) {
-      if (["pending", "processing"].includes(existing.data.status)) await advanceDirectJob(existing.data.id);
-      return { jobId: existing.data.id };
-    }
-    const { data: photo, error } = await context.supabase.from("generation_jobs").select("*").eq("id", data.photoJobId).eq("user_id", context.userId).eq("kind", "photo").eq("status", "completed").is("deleted_at", null).single();
-    if (error || !photo?.result_image_url) throw new Error("Generate a try-on photo before making a video.");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: job, error: jobError } = await supabaseAdmin.from("generation_jobs").insert({
-      user_id: context.userId, engine: "direct", request_id: data.requestId, kind: "video", status: "pending", parent_job_id: photo.id,
-      source: photo.source, category: photo.category, photo_id: photo.photo_id, product_id: photo.product_id,
-      person_image_url: photo.result_image_url, item_image_url: photo.result_image_url,
-      product_name: photo.product_name, brand_name: photo.brand_name,
-    }).select("id").single();
-    if (jobError || !job) throw new Error("Couldn't start your video. Please retry.");
-    await advanceDirectJob(job.id);
     return { jobId: job.id };
   });
 
