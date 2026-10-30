@@ -1,5 +1,10 @@
 # Perla update
 
+## October 30 notification and mascot presentation
+- [ ] Remove the separate Profile notification section and retain the top-bar bell.
+- [ ] Replace comparison-handle struggle effects with smooth, effortless push/pull motion and respect reduced motion.
+- [ ] Verify the homepage comparison and notification placement.
+
 ## October 29 requested updates
 - [x] Set the labelled active-user demo baseline to 15 and redesign homepage/Insights statistics with subtle motion.
 - [x] Replace Why PERLA with Demo and privately store applications; test entry saved, read back and removed. Owner reviews brand_demo_applications in Supabase; email notifications need verified sending.
