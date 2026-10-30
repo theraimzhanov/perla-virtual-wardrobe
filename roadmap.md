@@ -1,5 +1,10 @@
 # Perla update
 
+## Sunset Runway visual redesign
+- [ ] Apply colorful elegant design tokens, motion and shared controls without changing functionality or saved data.
+- [ ] Redesign homepage, account pages and signed-in screens consistently with existing photo frames preserved.
+- [ ] Verify public and available signed-in flows, desktop/mobile appearance and existing tests; leave unpublished for user review.
+
 ## October 30 immediate and fortnightly reports
 - [x] Send the real Google Sheets report (execution 75); fresh Gemini analysis saved three insights and five Style DNA profiles (execution 76), followed by a refreshed export.
 - [x] Publish both active n8n schedules for alternate Fridays, next November 13, 2026 at 06:00/06:15 UTC; actual date gates tested at seven date boundaries and off-date runs stop before services.
