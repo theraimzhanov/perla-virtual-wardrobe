@@ -20,7 +20,7 @@ describe("Brand Insights rules", () => {
     const signals = [{ id: "g1", tryOns: 12, likes: 90 }, { id: "g2", tryOns: 24, likes: 10 }];
     expect(rankDiscoverProducts(discoverProducts, signals, "likes").slice(0, 2).map((product) => [product.id, product.likes])).toEqual([["g1", 90], ["g2", 10]]);
   });
-  it("shows only explicitly shared photos and playable videos in the community", () => {
+  it("shows only explicitly shared photos in the community, never videos", () => {
     const base = seedLooks[0];
     if (!base) throw new Error("Missing sample look");
     const looks: Look[] = [
@@ -29,7 +29,7 @@ describe("Brand Insights rules", () => {
       { ...base, id: "video", shared: true, kind: "video", video: { webm: "sample.webm" }, likes: 8 },
       { ...base, id: "no-video", shared: true, kind: "video", video: {}, likes: 50 },
     ];
-    expect(sharedVirtualLooks(looks).map((look) => look.id)).toEqual(["video", "photo"]);
+    expect(sharedVirtualLooks(looks).map((look) => look.id)).toEqual(["photo"]);
   });
   it("includes shared own and internet products without treating them as Discover", () => {
     const base = seedLooks[0];
@@ -38,9 +38,9 @@ describe("Brand Insights rules", () => {
     expect(sharedVirtualLooks(looks).map((look) => look.source)).toEqual(["own", "internet"]);
   });
   it("counts shared virtual try-ons, updating when a look is shared", () => {
-    expect(sharedVirtualLooks(seedLooks)).toHaveLength(6);
-    const afterShare = seedLooks.map((look) => look.id === "l2" ? { ...look, shared: true } : look);
-    expect(sharedVirtualLooks(afterShare)).toHaveLength(7);
+    expect(sharedVirtualLooks(seedLooks)).toHaveLength(5);
+    const afterShare = seedLooks.map((look) => look.id === "l3" ? { ...look, shared: true } : look);
+    expect(sharedVirtualLooks(afterShare)).toHaveLength(6);
   });
   it("counts each saved generated image and video once for the homepage", () => {
     expect(tallyGeneratedMedia([
