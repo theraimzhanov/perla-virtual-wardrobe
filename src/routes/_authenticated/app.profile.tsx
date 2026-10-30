@@ -8,6 +8,7 @@ import { byLikes } from "@/components/web/looks";
 import { PageHeader, Panel, Stat } from "@/components/web/ui";
 import { Heart } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { NotificationsEmpty } from "@/components/web/Notifications";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
@@ -94,11 +95,15 @@ function Profile() {
             <Stat label="Try-ons" value={String(tryOns)} /><Stat label="Studio shots" value={String(studioShots)} /><Stat label="Saved pieces" value={String(triedProducts.length)} />
           </div>
           <Panel>
-            <div className="mb-4 flex items-end justify-between gap-3"><h2 className="font-serif text-2xl">My looks & videos</h2><span className="text-xs text-muted-foreground">Sorted by likes</span></div>
+            <div className="mb-4 flex items-end justify-between gap-3"><h2 className="font-serif text-2xl">My looks</h2><span className="text-xs text-muted-foreground">Sorted by likes</span></div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
               {myLooks.map((look) => <LookCard key={look.id} look={look} showShare showDelete />)}
             </div>
-            {myLooks.length === 0 && <p className="text-sm text-muted-foreground">Your virtual try-on photos and videos will appear here.</p>}
+            {myLooks.length === 0 && <p className="text-sm text-muted-foreground">Your virtual try-on and AI Studio photos will appear here.</p>}
+          </Panel>
+          <Panel>
+            <h2 className="mb-4 font-serif text-2xl">Notifications</h2>
+            <NotificationsEmpty />
           </Panel>
           <Panel>
             <div className="mb-4 flex items-end justify-between gap-3"><h2 className="font-serif text-2xl">Wardrobe</h2><span className="text-xs text-muted-foreground">Pieces you tried on</span></div>

@@ -3,7 +3,7 @@ import { Receiver, Client as QStashClient } from "@upstash/qstash";
 import { serve } from "@upstash/workflow/tanstack";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { generationPayloadSchema, providerEndpoint, providerBody, resultObjectPath, trustedMediaUrl, type AccessoryFit } from "./generation-rules";
-import { boundedImage, boundedVideo, classifyProduct, describeLookForVideo, GenerationProviderError, pollPhoto, pollVideo, submitPhoto, submitVideo } from "./generation-provider.server";
+import { boundedImage, classifyProduct, GenerationProviderError, pollPhoto, submitPhoto } from "./generation-provider.server";
 import { uploadBucket } from "./upload-rules";
 
 export function generationConfig() {
@@ -18,10 +18,9 @@ export function generationConfig() {
   if (!token || !currentSigningKey || !nextSigningKey || !perfectKey || !geminiKey || !url || !supabaseOrigin) throw new Error("Photo generation setup is not complete yet.");
   const callback = new URL(url);
   if (callback.protocol !== "https:" || callback.pathname !== "/api/public/generation/photo") throw new Error("Photo generation callback needs checking.");
-  const videoUrl = `${callback.origin}/api/public/generation/video`;
   // QStash tokens are regional; this account lives in us-east-1 unless QSTASH_URL says otherwise.
   const baseUrl = process.env['QSTASH_URL'] || "https://qstash-us-east-1.upstash.io";
-  return { token, currentSigningKey, nextSigningKey, perfectKey, geminiKey, url, videoUrl, baseUrl, supabaseOrigin };
+  return { token, currentSigningKey, nextSigningKey, perfectKey, geminiKey, url, baseUrl, supabaseOrigin };
 }
 
 export async function enqueuePhoto(jobId: string) {
@@ -30,14 +29,6 @@ export async function enqueuePhoto(jobId: string) {
   if (!online.ok || (await online.json() as { processor?: string }).processor !== "perla-photo-v1") throw new Error("The photo processor is not published yet.");
   const client = new WorkflowClient({ token: config.token, baseUrl: config.baseUrl });
   await client.trigger({ url: config.url, body: { jobId }, workflowRunId: `photo-${jobId}`, retries: 3 });
-}
-
-export async function enqueueVideo(jobId: string) {
-  const config = generationConfig();
-  const online = await fetch(config.videoUrl, { signal: AbortSignal.timeout(10000), redirect: "manual" });
-  if (!online.ok || (await online.json() as { processor?: string }).processor !== "perla-video-v1") throw new Error("The video processor is not published yet.");
-  const client = new WorkflowClient({ token: config.token, baseUrl: config.baseUrl });
-  await client.trigger({ url: config.videoUrl, body: { jobId }, workflowRunId: `video-${jobId}`, retries: 3 });
 }
 
 async function loadJob(id: string) {
@@ -132,57 +123,10 @@ export async function runPhotoWorkflow(context: WorkflowContext<{ jobId: string 
   throw new WorkflowNonRetryableError("This try-on took too long. Your request was not submitted again.");
 }
 
-export async function runVideoWorkflow(context: WorkflowContext<{ jobId: string }>) {
-  const { jobId } = generationPayloadSchema.parse(context.requestPayload);
-  const initial = await context.run("load-job", async () => ({ status: (await loadJob(jobId)).status }));
-  if (["completed", "failed"].includes(initial.status)) return;
-  const prompt = await context.run("write-motion-prompt", async () => {
-    const job = await loadJob(jobId);
-    await updateJob(jobId, { status: "processing", stage: "classifying" });
-    const config = generationConfig();
-    return describeLookForVideo(job.item_image_url ?? "", config.geminiKey, config.supabaseOrigin);
-  });
-  const task = await context.run("submit-video-once", async () => {
-    const job = await loadJob(jobId);
-    if (job.provider_task_id && job.provider_endpoint) return { taskId: job.provider_task_id, endpoint: job.provider_endpoint };
-    if (job.stage === "submitting") throw new WorkflowNonRetryableError("Submission status is uncertain. It was not repeated to avoid a duplicate charge.");
-    const config = generationConfig();
-    const image = trustedMediaUrl(job.item_image_url ?? "", "input", config.supabaseOrigin);
-    const { data: claim, error } = await supabaseAdmin.from("generation_jobs").update({ status: "processing", stage: "submitting", provider_endpoint: "image-to-video/youcam" }).eq("id", jobId).eq("engine", "direct").in("stage", ["queued", "ready", "classifying"]).is("provider_task_id", null).select("id").maybeSingle();
-    if (error) throw new Error("Couldn't prepare the video.");
-    if (!claim) throw new WorkflowNonRetryableError("This video is already being submitted.");
-    try { return await submitVideo(image, prompt, config.perfectKey); }
-    catch (cause) {
-      throw new WorkflowNonRetryableError(cause instanceof GenerationProviderError ? cause.message : "Submission status is uncertain. Check Perfect Corp before trying again.");
-    }
-  });
-  await context.run("persist-provider-task", () => updateJob(jobId, { provider_task_id: task.taskId, provider_endpoint: task.endpoint, stage: "polling" }));
-  for (let attempt = 0; attempt < 80; attempt++) {
-    await context.sleep(`wait-${attempt}`, 15);
-    const result = await context.run(`poll-${attempt}`, () => safeStep(() => pollVideo(task.taskId, generationConfig().perfectKey)));
-    if (!result.finished || !result.url) continue;
-    await context.run("save-generated-video", () => safeStep(async () => {
-      const job = await loadJob(jobId);
-      if (job.status === "completed") return;
-      await updateJob(jobId, { stage: "saving" });
-      const url = trustedMediaUrl(result.url ?? "", "result", generationConfig().supabaseOrigin);
-      const { bytes, mime } = await boundedVideo(url, 60 * 1024 * 1024);
-      const path = `${job.user_id}/video/${jobId}.${mime === "video/webm" ? "webm" : "mp4"}`;
-      const storage = supabaseAdmin.storage.from("generated-looks");
-      const { error } = await storage.upload(path, bytes, { contentType: mime, upsert: true });
-      if (error) throw new Error("Couldn't save the generated video.");
-      const video = storage.getPublicUrl(path).data.publicUrl;
-      await updateJob(jobId, { status: "completed", stage: "completed", result_storage_path: path, result_video_url: video, error_message: null });
-    }));
-    return;
-  }
-  throw new WorkflowNonRetryableError("This video took too long. Your request was not submitted again.");
-}
-
-async function handleWorkflow(request: Request, kind: "photo" | "video") {
+async function handleWorkflow(request: Request) {
   let config: ReturnType<typeof generationConfig>;
   try { config = generationConfig(); } catch { return Response.json({ error: "Generation setup incomplete" }, { status: 503 }); }
-  const url = kind === "photo" ? config.url : config.videoUrl;
+  const url = config.url;
   const signature = request.headers.get("upstash-signature");
   if (!signature) return Response.json({ error: "Unauthorized" }, { status: 401 });
   const body = await request.clone().text();
@@ -191,18 +135,17 @@ async function handleWorkflow(request: Request, kind: "photo" | "video") {
   try {
     if (!await receiver.verify({ signature, body, url })) return new Response("Unauthorized", { status: 401 });
   } catch { return new Response("Unauthorized", { status: 401 }); }
-  const handler = serve(kind === "photo" ? runPhotoWorkflow : runVideoWorkflow, {
+  const handler = serve(runPhotoWorkflow, {
     url, receiver, qstashClient: new QStashClient({ token: config.token, baseUrl: config.baseUrl, devMode: false }), disableTelemetry: true,
     initialPayloadParser: (payload) => generationPayloadSchema.parse(JSON.parse(payload)),
     failureFunction: async ({ context, failStatus }) => {
       const parsed = generationPayloadSchema.safeParse(context.requestPayload);
       if (!parsed.success) return;
       // Do not store Upstash's raw failure response; it can contain signed URLs.
-      await updateJob(parsed.data.jobId, { status: "failed", stage: "failed", error_message: `${kind === "photo" ? "Photo" : "Video"} generation stopped (${failStatus}). Please try again.` });
+      await updateJob(parsed.data.jobId, { status: "failed", stage: "failed", error_message: `Photo generation stopped (${failStatus}). Please try again.` });
     },
   });
   return handler.POST({ request });
 }
 
-export const handlePhotoWorkflow = (request: Request) => handleWorkflow(request, "photo");
-export const handleVideoWorkflow = (request: Request) => handleWorkflow(request, "video");
+export const handlePhotoWorkflow = (request: Request) => handleWorkflow(request);

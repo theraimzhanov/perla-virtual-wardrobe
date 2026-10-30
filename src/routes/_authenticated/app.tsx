@@ -2,10 +2,11 @@ import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-rout
 import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, Compass, LayoutDashboard, Sparkles, User, Wand2, Search, Smartphone } from "lucide-react";
+import { Compass, LayoutDashboard, Sparkles, User, Wand2, Search, Smartphone } from "lucide-react";
 import logo from "@/assets/perla-emblem.svg.asset.json";
 import { Button } from "@/components/ui/button";
 import { useTryOn } from "@/components/web/TryOnContext";
+import { NotificationsButton } from "@/components/web/Notifications";
 
 export const Route = createFileRoute("/_authenticated/app")({ component: AppLayout });
 
@@ -67,7 +68,7 @@ function AppLayout() {
             <Search className="h-4 w-4 text-muted-foreground" />
             <input aria-label="Search products" placeholder="Search pieces, brands, styles…" value={query} onChange={(event) => setQuery(event.target.value)} className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
           </div> : <div className="flex-1" />}
-          <Button size="icon" variant="ghost" className="hidden h-10 w-10 shrink-0 rounded-full bg-card shadow-card sm:inline-flex" aria-label="Notifications" title="Notifications"><Bell className="h-4 w-4" /></Button>
+          <NotificationsButton className="h-10 w-10 shrink-0 rounded-full bg-card shadow-card" />
           {session ? (
             <Link to="/app/profile" title={session.name} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold-gradient text-sm font-semibold text-primary-foreground">{session.initials}</Link>
           ) : (

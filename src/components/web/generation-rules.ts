@@ -5,11 +5,6 @@ export const generationRequestSchema = z.object({
   requestId: z.string().uuid(),
   accessoryFit: z.enum(["female", "male"]).nullable().default(null),
 });
-export const videoRequestSchema = z.object({
-  expectedOwner: z.string().uuid(),
-  requestId: z.string().uuid(),
-  photoJobId: z.string().uuid(),
-});
 const answerKey = z.enum(["style", "fit", "wear", "movement", "confidence", "favorite", "category", "where", "similar", "occasion", "color", "price", "intent"]);
 // All answers of one feedback card (3 for legacy video cards, 5 for photo cards), tied to one saved look.
 export const feedbackSchema = z.object({ jobId: z.string().uuid(), answers: z.record(answerKey, z.string().min(1).max(40)) })
@@ -89,18 +84,19 @@ export function trustedMediaUrl(value: string, kind: "input" | "result", supabas
 export type DirectJobState = { status: string; stage: string; kind: string; provider_task_id: string | null; created_at: string; updated_at: string; studio_scene?: string | null };
 export type DirectAction = "none" | "wait" | "submit" | "uncertain" | "poll" | "expired";
 export const DIRECT_STALE_MS = 90_000;
-// A Try-On photo that isn't ready within one minute is stopped; videos and AI Studio renders get longer.
+// A Try-On photo that isn't ready within one minute is stopped; AI Studio images within two minutes.
 export const TRY_ON_PHOTO_LIMIT_MS = 60_000;
-export const directLimitMs = (kind: string, studio = false) => kind === "video" ? 30 * 60_000 : studio ? 10 * 60_000 : TRY_ON_PHOTO_LIMIT_MS;
+export const STUDIO_PHOTO_LIMIT_MS = 120_000;
+export const directLimitMs = (_kind: string, studio = false) => studio ? STUDIO_PHOTO_LIMIT_MS : TRY_ON_PHOTO_LIMIT_MS;
 
 export const STUDIO_RENDER_STALE_MS = 5 * 60_000;
 export function nextDirectAction(job: DirectJobState, now: number): DirectAction {
   if (["completed", "failed"].includes(job.status)) return "none";
   const stale = now - Date.parse(job.updated_at) > DIRECT_STALE_MS;
   // An AI Studio render runs inside one request; if it never finished it is never repeated.
-  if (job.stage === "rendering") return now - Date.parse(job.updated_at) > STUDIO_RENDER_STALE_MS ? "uncertain" : "wait";
-  // Over the time limit at any step before saving: stop instead of preparing or polling forever.
+  // Over the time limit at any step before saving: stop instead of preparing, rendering or polling forever.
   if (job.stage !== "saving" && now - Date.parse(job.created_at) > directLimitMs(job.kind, Boolean(job.studio_scene))) return "expired";
+  if (job.stage === "rendering") return now - Date.parse(job.updated_at) > STUDIO_RENDER_STALE_MS ? "uncertain" : "wait";
   if (!job.provider_task_id) {
     // A submission that never recorded its task ID is never repeated: the provider has no idempotency.
     if (job.stage === "submitting") return stale ? "uncertain" : "wait";

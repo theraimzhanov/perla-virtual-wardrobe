@@ -20,7 +20,7 @@ export const studioRequestSchema = z.object({
   expectedOwner: z.string().uuid(),
   requestId: z.string().uuid(),
   baseJobId: z.string().uuid(),
-  kind: z.enum(["photo", "video"]),
+  kind: z.literal("photo"),
   scene: z.enum(studioSceneNames as [StudioScene, ...StudioScene[]]).default(DEFAULT_STUDIO_SCENE),
   prompt: z.string().max(2000).default(""),
 });

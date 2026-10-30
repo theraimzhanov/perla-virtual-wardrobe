@@ -18,7 +18,6 @@ import { modelBefore, modelAfter } from "@/components/perla/data";
 import { Eyebrow } from "@/components/web/ui";
 import { SiteFooter } from "@/components/web/SiteFooter";
 import { countPlatformActivity, type PlatformActivity } from "@/components/web/looks.functions";
-import { PANEL_BASE } from "@/components/web/brand-insights-rules";
 import { StatStrip } from "@/components/web/StatStrip";
 import { DemoApplication } from "@/components/web/DemoApplication";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "PERLA — Virtual Try-On & AI Fashion Studio" },
-      { name: "description", content: "Try on clothes virtually, create AI fashion photos and videos, and give brands real demand signals." },
+      { name: "description", content: "Try on clothes virtually, create AI fashion photos, and give brands real demand signals." },
       { property: "og:title", content: "PERLA — Virtual Try-On & AI Fashion Studio" },
       { property: "og:description", content: "Wear it before anyone. Virtual try-on for shoppers, demand intelligence for brands." },
       { property: "og:type", content: "website" },
@@ -53,10 +52,10 @@ const fun = [
 ];
 
 const insightsFor = (activity: PlatformActivity | null) => [
-  [String(PANEL_BASE.members), "members in the panel"],
-  [(PANEL_BASE.tryOns + (activity?.tryOns ?? 0)).toLocaleString(), "virtual try-ons"],
-  ["46%", "would add the piece"],
-  ["50%", "say Moto Jacket runs small"],
+  [(activity?.members ?? 0).toLocaleString(), "members in the panel"],
+  [(activity?.tryOns ?? 0).toLocaleString(), "virtual try-ons"],
+  [(activity?.productsTried ?? 0).toLocaleString(), "products tried"],
+  [(activity?.likes ?? 0).toLocaleString(), "likes on looks"],
 ];
 
 function Landing() {
@@ -107,12 +106,12 @@ function Landing() {
             <a href="#examples" className="rounded-full bg-card px-7 py-3.5 shadow-card">See examples</a>
           </div>
           <StatStrip className="mt-9" items={[
-            { value: PANEL_BASE.members, label: "Active users", icon: Users },
-            { value: PANEL_BASE.tryOns + (activity?.tryOns ?? 0), label: "Virtual try-ons", icon: Wand2 },
-            { value: PANEL_BASE.productsTried + (activity?.productsTried ?? 0), label: "Products tried", icon: Shirt },
-            { value: PANEL_BASE.created + (activity?.created ?? 0), label: "Images & videos", icon: Images },
+            { value: activity?.members ?? 0, label: "Active users", icon: Users },
+            { value: activity?.tryOns ?? 0, label: "Virtual try-ons", icon: Wand2 },
+            { value: activity?.productsTried ?? 0, label: "Products tried", icon: Shirt },
+            { value: activity?.created ?? 0, label: "Images created", icon: Images },
           ]} />
-          <p className="mt-3 text-[10px] text-muted-foreground">Demo starting figures + saved platform activity.</p>
+          <p className="mt-3 text-[10px] text-muted-foreground">Live totals from PERLA members.</p>
         </div>
         <div ref={sliderRef} className="mx-auto w-full max-w-md rounded-[2rem] bg-card p-4 shadow-soft"><CompareSlider before={modelBefore} after={modelAfter} mascot autoPlay delayedMascot introDone={introDone} /></div>
       </section>
@@ -121,7 +120,7 @@ function Landing() {
         <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
           <div><Eyebrow>PERLA demo</Eyebrow><h2 className="mt-3 font-serif text-4xl sm:text-5xl">See the look.<br /><em className="text-gold">Meet the possibility.</em></h2>
             <video src={demoVideo.url} poster={modelAfter} controls muted playsInline preload="metadata" aria-label="PERLA fashion demo" className="mt-7 aspect-video w-full rounded-lg bg-muted object-contain" />
-            <p className="mt-4 max-w-md text-sm text-muted-foreground">From a single photo to a new look, a fashion film and a clearer picture of what shoppers love.</p>
+            <p className="mt-4 max-w-md text-sm text-muted-foreground">From a single photo to a new look, an AI photoshoot and a clearer picture of what shoppers love.</p>
             <Button asChild variant="link" className="mt-3 h-auto p-0"><Link to="/app/try-on"><Play />Try PERLA yourself <ArrowRight /></Link></Button>
           </div>
           <div className="min-w-0 lg:pt-2"><p className="text-xs uppercase text-stat-mint">For brands & partners</p><h3 className="mt-3 font-serif text-3xl">Bring your brand to PERLA.</h3><p className="mb-6 mt-2 text-sm text-muted-foreground">Apply for a demo of virtual try-on and demand insights for your collection.</p><DemoApplication /></div>
@@ -132,7 +131,7 @@ function Landing() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <Eyebrow>The problem</Eyebrow>
           <h2 className="mt-3 max-w-2xl font-serif text-4xl sm:text-5xl">Online fashion is a <em className="text-gold">guessing game</em> — for shoppers and brands.</h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
             {problems.map((p) => (
               <div key={p.title} className="rounded-[1.75rem] bg-card p-8 shadow-card">
                 <p.icon className="h-6 w-6 text-gold" />
@@ -149,7 +148,7 @@ function Landing() {
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <Eyebrow>The fun part</Eyebrow>
         <h2 className="mt-3 font-serif text-4xl sm:text-5xl">Fashion you can <em className="text-gold">play</em> with.</h2>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <div className="mt-10 grid gap-6 md:grid-cols-2">
           {fun.map((f) => (
             <div key={f.title} className="rounded-[1.75rem] border border-border p-8">
               <f.icon className="h-6 w-6 text-gold" />
@@ -163,12 +162,12 @@ function Landing() {
       <section id="examples" className="scroll-mt-20 mx-auto max-w-6xl px-4 pb-20 sm:px-6">
         <Eyebrow>Made with PERLA</Eyebrow>
         <h2 className="mt-3 font-serif text-4xl sm:text-5xl">A little color.<br /><em className="text-gold">A whole new you.</em></h2>
-        <p className="mt-3 text-sm text-muted-foreground">Illustrative fashion samples · virtual try-on, photo & video</p>
+        <p className="mt-3 text-sm text-muted-foreground">Illustrative fashion samples · virtual try-on & AI Studio photos</p>
         <div className="mt-8 grid grid-cols-2 gap-4">
           <figure className="example-lift overflow-hidden rounded-lg bg-card"><img src={hatDress} alt="Coral dress with a vivid blue wide-brim hat" width={768} height={1024} loading="lazy" className="aspect-[3/4] w-full object-contain" /><figcaption className="border-t p-4"><p className="text-xs uppercase text-stat-sky">Hat & dress</p><p className="mt-1 font-serif text-2xl">A bolder kind of day.</p></figcaption></figure>
           <figure className="example-lift overflow-hidden rounded-lg bg-card"><img src={classicDress} alt="Elegant emerald green classic satin evening dress" width={768} height={1024} loading="lazy" className="aspect-[3/4] w-full object-contain" /><figcaption className="border-t p-4"><p className="text-xs uppercase text-stat-mint">Elegant classic dress</p><p className="mt-1 font-serif text-2xl">Timeless, in emerald.</p></figcaption></figure>
         </div>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <div className="mt-10 grid gap-6 md:grid-cols-2">
           <figure className="overflow-hidden rounded-[1.75rem] bg-card shadow-card">
             <div className="grid grid-cols-2 gap-1"><img src={modelBefore} alt="Original photo" className="aspect-[3/4] w-full object-cover" /><img src={modelAfter} alt="Virtual try-on result" className="aspect-[3/4] w-full object-cover" /></div>
             <figcaption className="p-5"><p className="text-[10px] uppercase text-gold">Virtual try-on</p><p className="mt-1 font-serif text-xl">Before → after in seconds</p></figcaption>
@@ -176,10 +175,6 @@ function Landing() {
           <figure className="overflow-hidden rounded-[1.75rem] bg-card shadow-card">
             <div className="grid grid-cols-2 gap-1"><img src={silk} alt="AI Studio editorial photo" className="aspect-[3/4] w-full object-cover" /><img src={slip} alt="AI Studio runway photo" className="aspect-[3/4] w-full object-cover" /></div>
             <figcaption className="p-5"><p className="text-[10px] uppercase text-gold">AI Studio photo</p><p className="mt-1 font-serif text-xl">Editorial & runway scenes</p></figcaption>
-          </figure>
-          <figure className="overflow-hidden rounded-[1.75rem] bg-card shadow-card">
-            <video src={demoVideo.url} poster={modelAfter} autoPlay muted loop playsInline className="aspect-[352/232] w-full bg-muted object-cover" />
-            <figcaption className="p-5"><p className="text-[10px] uppercase text-gold">AI Studio video</p><p className="mt-1 font-serif text-xl">Your look, walking</p></figcaption>
           </figure>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">

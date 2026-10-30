@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, Film, Image as ImageIcon, Sparkles, Square } from "lucide-react";
+import { Check, Sparkles, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,9 +18,9 @@ export const Route = createFileRoute("/_authenticated/app/studio")({
   head: () => ({
     meta: [
       { title: "AI Studio — PERLA" },
-      { name: "description", content: "Restyle your virtual try-on photos into new editorial images and videos." },
+      { name: "description", content: "Restyle your virtual try-on photos into new editorial images." },
       { property: "og:title", content: "AI Studio — PERLA" },
-      { property: "og:description", content: "Pick a try-on look, choose a scene and create new images and videos." },
+      { property: "og:description", content: "Pick a try-on look, choose a scene and create new editorial images." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -39,7 +39,6 @@ function Studio() {
   const base = bases.find((job) => job.id === baseId) ?? bases[0];
   const [scene, setScene] = useState<StudioScene>(DEFAULT_STUDIO_SCENE);
   const [prompt, setPrompt] = useState("");
-  const [output, setOutput] = useState<"photo" | "video">("photo");
   const [starting, setStarting] = useState(false);
     const [currentId, setCurrentId] = useState<string | null>(null);
   const lock = useRef(false);
@@ -48,7 +47,7 @@ function Studio() {
   // Keeps showing the newest creation (across visits) until it is deleted or a new one is made.
   const current = studioJobs.find((job) => job.id === currentId) ?? studioJobs[0];
 
-  // Each status check advances an unfinished creation one step (videos poll the provider).
+  // Each status check advances an unfinished creation one step .
   const pendingKey = pending.map((job) => job.id).join(",");
   useEffect(() => {
     if (!pendingKey) return;
@@ -68,17 +67,17 @@ function Studio() {
     try {
       const { data } = await supabase.auth.getUser();
       if (!data.user || data.user.id !== userId) throw new Error("Your account changed. Please sign in again.");
-      const made = await create({ data: { expectedOwner: data.user.id, requestId: crypto.randomUUID(), baseJobId: base.id, kind: output, scene, prompt } });
+      const made = await create({ data: { expectedOwner: data.user.id, requestId: crypto.randomUUID(), baseJobId: base.id, kind: "photo", scene, prompt } });
       setCurrentId(made.jobId);
       await refreshPhotoJobs();
-      toast.success(output === "photo" ? "New image ready — saved to your collections" : "Video started — it will appear here when ready");
+      toast.success("New image ready — saved to your collections");
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : "Couldn't start your creation.");
       await refreshPhotoJobs();
     } finally { lock.current = false; setStarting(false); }
   };
 
-  // Stop removes the unfinished creation; a video already sent to the provider can't be recalled, so its result is discarded.
+  // Stop removes the unfinished creation.
   const [stopping, setStopping] = useState(false);
   const stop = async () => {
     const targets = pending.map((job) => job.id);
@@ -114,13 +113,12 @@ function Studio() {
         )}
         <h2 className="mb-3 mt-6 font-serif text-2xl">2. Scene & idea <span className="text-sm text-muted-foreground">(optional)</span></h2>
         <div className="mb-3 flex flex-wrap gap-2">{studioSceneNames.map((s) => <Pill key={s} active={s === scene} onClick={() => setScene(s)}>{s}</Pill>)}</div>
-        <textarea value={prompt} maxLength={STUDIO_PROMPT_LIMIT} onChange={(e) => setPrompt(e.target.value)} rows={2} placeholder={output === "photo" ? "e.g. in Paris, soft wind, film look" : "e.g. slow turn, smiling"} className="w-full resize-none rounded-2xl bg-secondary p-4 font-serif text-lg outline-none" />
+        <textarea value={prompt} maxLength={STUDIO_PROMPT_LIMIT} onChange={(e) => setPrompt(e.target.value)} rows={2} placeholder="e.g. in Paris, soft wind, film look" className="w-full resize-none rounded-2xl bg-secondary p-4 font-serif text-lg outline-none" />
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Pill active={output === "photo"} onClick={() => setOutput("photo")}><ImageIcon className="mr-1 inline h-4 w-4" />Image</Pill>
-          <Pill active={output === "video"} onClick={() => setOutput("video")}><Film className="mr-1 inline h-4 w-4" />Video</Pill>
+          <p className="text-xs text-muted-foreground">Images stop automatically after 2 minutes.</p>
           <div className="ml-auto flex items-center gap-2">
             {pending.length > 0 && <Button variant="outline" className="rounded-full" onClick={() => void stop()} disabled={stopping}><Square className="h-3.5 w-3.5 fill-current" /> {stopping ? "Stopping…" : "Stop"}</Button>}
-            <GoldButton onClick={() => void generate()} disabled={!base || busy}><Sparkles className="h-4 w-4" /> {busy ? "Creating…" : `Create ${output === "photo" ? "image" : "video"}`}</GoldButton>
+            <GoldButton onClick={() => void generate()} disabled={!base || busy}><Sparkles className="h-4 w-4" /> {busy ? "Creating…" : "Create image"}</GoldButton>
           </div>
         </div>
       </Panel>
@@ -133,12 +131,12 @@ function Studio() {
           {current?.status === "failed" ? <p role="alert" className="text-sm text-destructive">This creation failed: {current.error ?? "please try again."}</p> : (
             <div className="grid items-start gap-7 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10">
               <div className="min-w-0">
-                {!current || photoJobPhase(current) === "loading" ? <GenerationSkeleton kind={current?.kind ?? output} className="mx-auto max-w-md" /> : <LookCard look={jobLook(current)} showShare showDelete showDownload />}
+                {!current || photoJobPhase(current) === "loading" ? <GenerationSkeleton kind="photo" className="mx-auto max-w-md" /> : <LookCard look={jobLook(current)} showShare showDelete showDownload />}
               </div>
               <div className="min-w-0">
-                <p className="text-xs uppercase text-gold">{(current?.kind ?? output) === "video" ? "Video created" : "Image created"}</p>
+                <p className="text-xs uppercase text-gold">Image created</p>
                 <h3 className="mt-2 font-serif text-3xl">A new take on your look.</h3>
-                <p className="mt-3 text-sm text-muted-foreground">All your creations are saved in Profile → My looks & videos.</p>
+                <p className="mt-3 text-sm text-muted-foreground">All your creations are saved in Profile → My looks.</p>
               </div>
             </div>
           )}

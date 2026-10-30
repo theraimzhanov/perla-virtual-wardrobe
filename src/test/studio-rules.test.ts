@@ -13,9 +13,6 @@ describe("AI Studio rules", () => {
     expect(studioSceneNames).toContain("Model");
     expect(studioSceneNames).toContain("Golden Hour");
   });
-  it("default video is a model walking", () => {
-    expect(buildStudioPrompt("video", "Model", "")).toMatch(/walks/i);
-  });
   it("still keeps the outfit unchanged when the shopper writes nothing", () => {
     expect(buildStudioPrompt("photo", "Model", "")).toMatch(/garment.*exactly unchanged/i);
   });
