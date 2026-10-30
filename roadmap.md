@@ -1,11 +1,16 @@
 # Perla update
 
+## October 30 immediate and fortnightly reports
+- [x] Send the real Google Sheets report (execution 75); fresh Gemini analysis saved three insights and five Style DNA profiles (execution 76), followed by a refreshed export.
+- [x] Publish both active n8n schedules for alternate Fridays, next November 13, 2026 at 06:00/06:15 UTC; actual date gates tested at seven date boundaries and off-date runs stop before services.
+- [x] Update Style DNA/Insights timing messages and documentation; 124 full-suite tests plus the added next-date boundary test pass; build OK. Signed-in display check unavailable for external unmanaged Supabase; live wording awaits app publication.
+
 ## Weekly Google Sheets reporting
 - [x] Add real brand/product, personal-upload, survey and Insights report tables with private customer identities excluded.
 - [x] Connect Google Sheets and add the weekly n8n report in Perla Virtual Wardrobe without changing survey collection; Mondays 06:15 UTC.
 - [x] Run a real report through n8n (execution 67 succeeded), read the spreadsheet back, and confirm 7 members, 14 completed try-ons, 43 survey answers and 8 products.
 - [x] Publish reporting callback after permission; unauthorized calls return 401, unexpected bodies return 400, retired bearer tokens rejected; all 120 tests pass.
-- [ ] Verify fresh Gemini/Style DNA analysis — Google returned temporary high-demand errors and a 120-second timeout; Sheets export runs independently and already succeeds.
+- [x] Verify fresh Gemini/Style DNA analysis — Gemini 3.1 Flash Lite succeeded after larger models returned temporary overload errors; three new insights and five profiles saved.
 
 ## October 30 notification and mascot presentation
 - [x] Remove the separate Profile notification section and retain the top-bar bell.

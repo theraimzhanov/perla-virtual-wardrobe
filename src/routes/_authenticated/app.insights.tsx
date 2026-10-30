@@ -9,6 +9,7 @@ import { useTryOn } from "@/components/web/TryOnContext";
 import { LookCard } from "@/components/web/LookCard";
 import { rankDiscoverProducts, sharedVirtualLooks } from "@/components/web/brand-insights-rules";
 import { StatStrip } from "@/components/web/StatStrip";
+import { formatNextReport } from "@/components/web/report-schedule";
 
 export const Route = createFileRoute("/_authenticated/app/insights")({
   head: () => ({
@@ -113,8 +114,8 @@ function Bar({ label, share, note }: { label: string; share: number; note?: stri
 
 function WeeklySections({ report }: { report: WeeklyReport | null | undefined }) {
   if (report === undefined) return null;
-  const stamp = report ? `Updated weekly · week of ${new Date(report.weekStart + "T00:00:00Z").toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : "Updated every Monday";
-  const waiting = "The first weekly report arrives on the next Monday update.";
+  const stamp = `Every two weeks · next ${formatNextReport()}`;
+  const waiting = `Your insights update every two weeks. Next update: ${formatNextReport()}.`;
   return (
     <>
       <Panel className="mt-10">
@@ -160,7 +161,7 @@ function WeeklySections({ report }: { report: WeeklyReport | null | undefined })
       </div>
 
       <Panel className="mt-6 bg-primary text-primary-foreground">
-        <Eyebrow><span className="flex items-center gap-2"><Sparkles className="h-3.5 w-3.5" /> AI insights · weekly</span></Eyebrow>
+        <Eyebrow><span className="flex items-center gap-2"><Sparkles className="h-3.5 w-3.5" /> AI insights · every two weeks</span></Eyebrow>
         {!report || report.aiInsights.length === 0 ? <p className="mt-4 text-sm opacity-80">{waiting}</p> : (
           <ul className="mt-4 grid gap-4 md:grid-cols-3">{report.aiInsights.map((t) => <li key={t} className="rounded-2xl bg-primary-foreground/10 p-4 font-serif text-lg leading-snug">{t}</li>)}</ul>
         )}

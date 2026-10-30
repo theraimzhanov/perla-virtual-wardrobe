@@ -1,8 +1,9 @@
-# Weekly Google Sheets reports
+# Fortnightly Google Sheets reports
 
 - Spreadsheet: https://docs.google.com/spreadsheets/d/1yXkvJBhuvcl8whJOGAc57Fa86uNOvXzbj0JKIE2PbwQ/edit
-- n8n workflow: **PERLA Weekly Google Sheets Report**, in **Perla Virtual Wardrobe**, at https://raimzhanov.app.n8n.cloud/workflow/ROvH93Z4FaM6vPsU
-- Schedule: every Monday at **06:15 UTC**. Manual execution can use **Every Monday 06:15 UTC** or the editor's **Send report now** trigger.
+- n8n workflow: **PERLA Fortnightly Google Sheets Report**, in **Perla Virtual Wardrobe**, at https://raimzhanov.app.n8n.cloud/workflow/ROvH93Z4FaM6vPsU
+- Schedule: every **14 days**, on alternate Fridays at **06:15 UTC**, starting **November 13, 2026** (then November 27, December 11, and so on). The immediate report is October 30, 2026. Manual execution uses the editor's **Send report now** trigger.
+- A Friday trigger feeds an anchored **Fortnightly date gate**. It returns no items on off-weeks; this prevents premature November 6 updates and keeps the schedule stable when republished. Manual triggers bypass the date gate.
 - The workflow makes one POST to `https://studioperla.live/api/public/insights/sheets`, authenticated with the existing **Supabase account 2** n8n credential. Never paste keys into node parameters.
 - Google Sheets authentication stays in the linked Lovable **Nursultan's Google Sheets** connection; the app writes through the connector gateway. There is no additional n8n Google OAuth setup.
 
@@ -16,7 +17,9 @@
 6. **Insights**: observed feedback trends, visual fit concerns, Shadow Wardrobe categories and any saved AI narrative with its report date.
 7. **Weekly history**: one snapshot per UTC week. Monday reports cover the previous full week; on other days manual tests cover the current partial week. Repeating a report updates its week instead of duplicating it.
 
-Latest product and feedback tabs are cumulative; weekly columns and history use the labelled reporting period. The original weekly Gemini/Style DNA workflow remains separate, scheduled at 06:00 UTC. Failure of AI analysis does not prevent the Sheets export of real numbers.
+Latest product and feedback tabs are cumulative; weekly columns and history retain their labelled UTC-week measurement period (the delivery cadence is now fortnightly). **PERLA Fortnightly Brand Insights & Style DNA** remains separate, scheduled on the same alternate Fridays at **06:00 UTC**. Its **Run insights now** trigger starts an immediate Gemini update. Failure of AI analysis does not prevent the Sheets export of real numbers.
+
+Gemini uses the credential-accessible **Gemini 3.1 Flash Lite** model for short analysis, after larger Flash models returned temporary 503 overload errors. Invalid or empty AI output fails before saving, preserving the previous report. The October 30 live run saved three fresh brand insights and five member Style DNA profiles.
 
 ## Privacy and reliability
 
