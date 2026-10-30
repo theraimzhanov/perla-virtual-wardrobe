@@ -23,4 +23,9 @@ describe("fortnightly reporting", () => {
     expect(nextReportDate(new Date("2026-11-14T00:00:00Z"))).toBe("2026-11-27");
     expect(nextReportDate(new Date("2026-12-26T00:00:00Z"))).toBe("2027-01-08");
   });
+
+  it("advances the next update after the scheduled Gemini time", () => {
+    expect(nextReportDate(new Date("2026-11-13T05:59:59Z"))).toBe("2026-11-13");
+    expect(nextReportDate(new Date("2026-11-13T06:00:00Z"))).toBe("2026-11-27");
+  });
 });

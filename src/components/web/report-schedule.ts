@@ -12,9 +12,8 @@ export function isReportDate(date: Date): boolean {
 }
 
 export function nextReportDate(date = new Date()): string {
-  const first = Date.parse(FIRST_SCHEDULED_REPORT + "T00:00:00Z");
-  const elapsed = Math.max(0, utcDay(date) - first);
-  const intervals = Math.ceil(elapsed / (REPORT_INTERVAL_DAYS * DAY_MS));
+  const first = Date.parse(FIRST_SCHEDULED_REPORT + "T06:00:00Z");
+  const intervals = date.getTime() < first ? 0 : Math.floor((date.getTime() - first) / (REPORT_INTERVAL_DAYS * DAY_MS)) + 1;
   return new Date(first + intervals * REPORT_INTERVAL_DAYS * DAY_MS).toISOString().slice(0, 10);
 }
 
