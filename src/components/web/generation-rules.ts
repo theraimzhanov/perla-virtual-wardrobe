@@ -89,9 +89,10 @@ export function trustedMediaUrl(value: string, kind: "input" | "result", supabas
 export type DirectJobState = { status: string; stage: string; kind: string; provider_task_id: string | null; created_at: string; updated_at: string; studio_scene?: string | null };
 export type DirectAction = "none" | "wait" | "submit" | "uncertain" | "poll" | "expired";
 export const DIRECT_STALE_MS = 90_000;
-// A Try-On photo that isn't ready within one minute is stopped; videos and AI Studio renders get longer.
+// A Try-On photo that isn't ready within one minute is stopped; AI Studio images within two minutes.
 export const TRY_ON_PHOTO_LIMIT_MS = 60_000;
-export const directLimitMs = (kind: string, studio = false) => kind === "video" ? 30 * 60_000 : studio ? 10 * 60_000 : TRY_ON_PHOTO_LIMIT_MS;
+export const STUDIO_PHOTO_LIMIT_MS = 120_000;
+export const directLimitMs = (_kind: string, studio = false) => studio ? STUDIO_PHOTO_LIMIT_MS : TRY_ON_PHOTO_LIMIT_MS;
 
 export const STUDIO_RENDER_STALE_MS = 5 * 60_000;
 export function nextDirectAction(job: DirectJobState, now: number): DirectAction {

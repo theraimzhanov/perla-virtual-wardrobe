@@ -1,12 +1,11 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Tables, TablesUpdate } from "@/integrations/supabase/types";
 import { DIRECT_STALE_MS, nextDirectAction, providerBody, providerEndpoint, resultObjectPath, trustedMediaUrl, type AccessoryFit } from "./generation-rules";
-import { boundedImage, boundedVideo, classifyProduct, describeLookForVideo, GenerationProviderError, pollPhoto, pollVideo, submitPhoto, submitVideo } from "./generation-provider.server";
+import { boundedImage, classifyProduct, GenerationProviderError, pollPhoto, submitPhoto } from "./generation-provider.server";
 import { uploadBucket } from "./upload-rules";
 import { renderStudioImage } from "./studio-provider.server";
 
 type Job = Tables<"generation_jobs">;
-const VIDEO_ENDPOINT = "image-to-video/youcam";
 
 export function directConfig() {
   const perfectKey = process.env['PERFECT_CORP_API_KEY'];
@@ -76,19 +75,15 @@ async function renderStudio(job: Job) {
 }
 
 async function submit(job: Job) {
-  if (job.kind === "photo" && job.studio_scene) return renderStudio(job);
+  if (job.kind !== "photo") return fail(job.id, "Video generation is no longer available.");
+  if (job.studio_scene) return renderStudio(job);
   const config = directConfig();
   // Prepare (classify / write motion prompt) under a claim; a stale claim can be retaken because nothing was sent yet.
   if (!await claim(job.id, "stage.in.(queued,ready),and(stage.eq.classifying,updated_at.lt.$STALE)", "classifying")) return;
   let send: () => Promise<{ taskId: string; endpoint: string }>;
   let endpoint: string;
   try {
-    if (job.kind === "video") {
-      const image = trustedMediaUrl(job.item_image_url, "input", config.supabaseOrigin);
-      const prompt = job.studio_prompt ?? await describeLookForVideo(image, config.geminiKey, config.supabaseOrigin);
-      endpoint = VIDEO_ENDPOINT;
-      send = () => submitVideo(image, prompt, config.perfectKey);
-    } else {
+    {
       const images = await inputImages(job, config.supabaseOrigin);
       let category = job.category;
       if (category === "unknown") {
@@ -123,20 +118,13 @@ async function submit(job: Job) {
 async function pollAndSave(job: Job) {
   const config = directConfig();
   const taskId = job.provider_task_id ?? "";
-  const result = job.kind === "video" ? await pollVideo(taskId, config.perfectKey) : await pollPhoto(job.provider_endpoint ?? "", taskId, config.perfectKey);
+  const result = await pollPhoto(job.provider_endpoint ?? "", taskId, config.perfectKey);
   if (!result.finished || !result.url) return;
   if (!await claim(job.id, "stage.eq.polling,and(stage.eq.saving,updated_at.lt.$STALE)", "saving")) return;
   try {
     const url = trustedMediaUrl(result.url, "result", config.supabaseOrigin);
     const storage = supabaseAdmin.storage.from("generated-looks");
-    if (job.kind === "video") {
-      const { bytes, mime } = await boundedVideo(url, 60 * 1024 * 1024);
-      const path = `${job.user_id}/video/${job.id}.${mime === "video/webm" ? "webm" : "mp4"}`;
-      const { error } = await storage.upload(path, bytes, { contentType: mime, upsert: true });
-      if (error) throw new GenerationProviderError("Couldn't save the generated video.", true);
-      // The finished try-on photo doubles as the video's poster image.
-      await updateJob(job.id, { status: "completed", stage: "completed", result_storage_path: path, result_video_url: storage.getPublicUrl(path).data.publicUrl, result_image_url: job.item_image_url, error_message: null });
-    } else {
+    {
       const { bytes, mime } = await boundedImage(url, 20 * 1024 * 1024);
       const path = resultObjectPath(job.user_id, job.id, mime);
       const { error } = await storage.upload(path, bytes, { contentType: mime, upsert: true });
@@ -157,7 +145,7 @@ export async function advanceDirectJob(id: string) {
     const action = nextDirectAction(job, Date.now());
     if (action === "submit") await submit(job);
     else if (action === "uncertain") await fail(id, "Submission status is uncertain, so it was not repeated. Please try again.");
-    else if (action === "expired") await fail(id, `This ${job.kind === "video" ? "video" : "try-on"} took too long, so it was stopped. Please try again.`);
+    else if (action === "expired") await fail(id, `This ${job.studio_scene ? "AI Studio image" : "try-on"} took too long, so it was stopped. Please try again.`);
     else if (action === "poll") await pollAndSave(job);
   } catch (cause) {
     if (cause instanceof GenerationProviderError && !cause.retryable) { await fail(id, cause.message).catch(() => undefined); return; }
