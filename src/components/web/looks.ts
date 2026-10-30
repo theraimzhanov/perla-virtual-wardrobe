@@ -22,6 +22,9 @@ export type Look = {
   product?: string;
   brand?: string | undefined;
   video?: { webm?: string; mp4?: string };
+  // What another member needs to try the same piece: a Discover id or the product photo.
+  catalogProductId?: string | null;
+  productImage?: string | null;
 };
 
 // Fixture looks for rule tests; the app itself shows only saved looks.

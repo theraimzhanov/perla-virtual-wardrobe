@@ -12,7 +12,7 @@ import { type Look, type LookSource } from "./looks";
 import { useSavedTryOnInputs } from "./useSavedTryOnInputs";
 
 export const jobLook = (job: PhotoJob): Look => ({ id: `job:${job.id}`, jobId: job.id, title: job.studioScene ? `${job.studioScene} · ${job.title}` : job.title, product: job.title, brand: job.brand ?? undefined, author: "You", kind: job.kind, image: job.image ?? "", ...(job.kind === "video" && job.video ? { video: { mp4: job.video } } : {}), source: job.source, likes: job.likes ?? 0, liked: job.liked, shared: job.shared, mine: true });
-const communityLook = (look: CommunityLook): Look => ({ id: `job:${look.jobId}`, jobId: look.jobId, title: look.product, product: look.product, brand: look.brand ?? undefined, author: look.author, kind: look.kind, image: look.image, ...(look.video ? { video: { mp4: look.video } } : {}), source: look.source, likes: look.likes, liked: look.liked, shared: true, mine: look.mine });
+const communityLook = (look: CommunityLook): Look => ({ id: `job:${look.jobId}`, jobId: look.jobId, title: look.product, product: look.product, brand: look.brand ?? undefined, author: look.author, kind: look.kind, image: look.image, catalogProductId: look.catalogProductId, productImage: look.productImage, source: look.source, likes: look.likes, liked: look.liked, shared: true, mine: look.mine });
 
 function useTryOnState(userId: string | null, authReady: boolean) {
   const savedInputs = useSavedTryOnInputs(userId, authReady);
@@ -81,7 +81,6 @@ function useTryOnState(userId: string | null, authReady: boolean) {
 
   // AI Studio creations live in Profile and Studio, never in the Try-On result slots.
   const photoJobs = jobs.filter((job) => job.kind === "photo" && !job.studioScene);
-  const videoJobs = jobs.filter((job) => job.kind === "video" && !job.studioScene);
   const studioJobs = jobs.filter((job) => Boolean(job.studioScene));
   const mineLooks = jobs.filter((job) => photoJobPhase(job) === "done").map(jobLook);
   const looks: Look[] = [...mineLooks, ...community.filter((item) => !jobs.some((job) => job.id === item.jobId)).map(communityLook), ...localLooks];
@@ -146,6 +145,19 @@ function useTryOnState(userId: string | null, authReady: boolean) {
   const deleteLook = (id: string) => { void changeLook(id, { deleted: true }).then((ok) => { if (ok) toast("Look deleted"); }); };
   const updateLookSource = (ids: string[], source: LookSource) => { if (source !== "discover") for (const id of ids) void changeLook(id, { source }); };
 
+  // "Try this look": put the same piece into the member's own Try-On selection.
+  const tryLook = async (look: Pick<Look, "catalogProductId" | "productImage" | "product" | "title">) => {
+    if (look.catalogProductId && catalog.some((p) => p.id === look.catalogProductId)) return selectProduct(look.catalogProductId);
+    if (!look.productImage) { toast.error("This piece can't be tried on yet."); return false; }
+    try {
+      const response = await fetch(look.productImage);
+      if (!response.ok) throw new Error();
+      const blob = await response.blob();
+      const type = ["image/png", "image/webp"].includes(blob.type) ? blob.type : "image/jpeg";
+      return await savedInputs.uploadProduct(new File([blob], `${(look.product ?? look.title).slice(0, 40) || "look"}.${type.split("/")[1]}`, { type }));
+    } catch { toast.error("Couldn't open this piece. Please try again."); return false; }
+  };
+
   // Signed-out demo keeps a local wardrobe; signed-in members read theirs from saved try-ons.
   const [triedIds, setTriedIds] = useState<string[]>([]);
   const markTried = (ids: string[]) => { if (!userId) setTriedIds((all) => [...new Set([...ids, ...all])]); };
@@ -159,7 +171,7 @@ function useTryOnState(userId: string | null, authReady: boolean) {
   };
   const triedProducts: WardrobePiece[] = userId ? wardrobe : triedIds.map((id) => catalog.find((p) => p.id === id)).filter((p): p is DiscoverProduct => !!p).map((p) => ({ id: p.id, name: p.name, brand: p.brand, image: p.image }));
 
-  return { ...savedInputs, userId, selectProduct, preparing, setPreparing, looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, deleteJob, triedProducts, markTried, removeTried, catalog, query, setQuery, photoJobs, videoJobs, studioJobs, refreshPhotoJobs, generationHistoryError, patchJob };
+  return { ...savedInputs, userId, selectProduct, preparing, setPreparing, looks, addLook, likeLook, shareLook, updateLookSource, unshareLook, deleteLook, deleteJob, triedProducts, markTried, removeTried, catalog, query, setQuery, photoJobs, studioJobs, tryLook, refreshPhotoJobs, generationHistoryError, patchJob };
 }
 
 type TryOnState = ReturnType<typeof useTryOnState>;
