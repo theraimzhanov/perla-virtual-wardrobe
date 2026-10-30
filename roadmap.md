@@ -3,7 +3,9 @@
 ## October 30 immediate and fortnightly reports
 - [x] Send the real Google Sheets report (execution 75); fresh Gemini analysis saved three insights and five Style DNA profiles (execution 76), followed by a refreshed export.
 - [x] Publish both active n8n schedules for alternate Fridays, next November 13, 2026 at 06:00/06:15 UTC; actual date gates tested at seven date boundaries and off-date runs stop before services.
-- [x] Update Style DNA/Insights timing messages and documentation; 124 full-suite tests plus the added next-date boundary test pass; build OK. Signed-in display check unavailable for external unmanaged Supabase; live wording awaits app publication.
+- [x] Update Style DNA/Insights timing messages and documentation; 125 full-suite tests plus the added next-date boundary test pass; build OK.
+- [x] Remove the "Next update: <date> · every two weeks" wording from Profile and Insights (user request); signed-in check as the supplied demo account confirms neither screen shows it, Profile keeps "Updated 10/30/2026", Insights shows no empty badge; 125 tests pass and build OK. Live wording awaits app publication.
+
 
 ## Weekly Google Sheets reporting
 - [x] Add real brand/product, personal-upload, survey and Insights report tables with private customer identities excluded.

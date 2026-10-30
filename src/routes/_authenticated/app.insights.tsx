@@ -9,7 +9,6 @@ import { useTryOn } from "@/components/web/TryOnContext";
 import { LookCard } from "@/components/web/LookCard";
 import { rankDiscoverProducts, sharedVirtualLooks } from "@/components/web/brand-insights-rules";
 import { StatStrip } from "@/components/web/StatStrip";
-import { formatNextReport } from "@/components/web/report-schedule";
 
 export const Route = createFileRoute("/_authenticated/app/insights")({
   head: () => ({
@@ -114,14 +113,13 @@ function Bar({ label, share, note }: { label: string; share: number; note?: stri
 
 function WeeklySections({ report }: { report: WeeklyReport | null | undefined }) {
   if (report === undefined) return null;
-  const stamp = `Every two weeks · next ${formatNextReport()}`;
-  const waiting = `Your insights update every two weeks. Next update: ${formatNextReport()}.`;
+  const waiting = "Your insights appear once shoppers have answered the try-on questions.";
+
   return (
     <>
       <Panel className="mt-10">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div><h2 className="font-serif text-3xl">Trends <em className="text-gold">from feedback</em></h2><p className="mt-1 text-sm text-muted-foreground">How shoppers answered the five try-on questions</p></div>
-          <span className="rounded-full border px-3 py-1 text-[10px] uppercase text-muted-foreground">{stamp}</span>
         </div>
         {!report || report.trends.length === 0 ? <div className="mt-5"><Empty text={report ? "No survey answers yet." : waiting} /></div> : (
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -161,7 +159,7 @@ function WeeklySections({ report }: { report: WeeklyReport | null | undefined })
       </div>
 
       <Panel className="mt-6 bg-primary text-primary-foreground">
-        <Eyebrow><span className="flex items-center gap-2"><Sparkles className="h-3.5 w-3.5" /> AI insights · every two weeks</span></Eyebrow>
+        <Eyebrow><span className="flex items-center gap-2"><Sparkles className="h-3.5 w-3.5" /> AI insights</span></Eyebrow>
         {!report || report.aiInsights.length === 0 ? <p className="mt-4 text-sm opacity-80">{waiting}</p> : (
           <ul className="mt-4 grid gap-4 md:grid-cols-3">{report.aiInsights.map((t) => <li key={t} className="rounded-2xl bg-primary-foreground/10 p-4 font-serif text-lg leading-snug">{t}</li>)}</ul>
         )}
