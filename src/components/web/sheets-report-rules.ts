@@ -75,7 +75,8 @@ export function buildSheetsReport(jobs: ReportJob[], products: ReportProduct[], 
     const intent = answers.filter((a) => a.question_id === "intent");
     brands.push([brand, [...new Set(mine.map((j) => j.category))].join(", "), new Set(mine.map(keyOf)).size, mine.length, new Set(mine.map((j) => j.user_id)).size, eligibleLikes.filter((l) => ids.has(l.job_id)).length, new Set(answers.map((a) => a.job_id)).size, intent.length, percentage(intent.filter((a) => a.answer === "Definitely").length, intent.length), mine.filter((j) => weeklyIds.has(j.id)).length, "Intent is self-reported; no sales/returns measured"]);
   }
-  const numbers = computeWeeklyNumbers(tryOns, products, fb);
+  const categories = new Map(tryOns.filter((j) => j.product_id && j.category !== "unknown").map((j) => [j.product_id, j.category]));
+  const numbers = computeWeeklyNumbers(tryOns, products.map((p) => ({ ...p, category: p.category === "unknown" ? categories.get(p.id) ?? p.category : p.category })), fb);
   const insights: SheetCell[][] = [["Section", "Signal", "Count", "Share %", "Meaning / limitation"]];
   for (const t of numbers.trends) for (const o of t.options) insights.push(["Feedback trends", `${t.title}: ${o.label}`, o.count, o.share, `${t.total} answers; self-reported preference`]);
   for (const r of numbers.fitRisk) insights.push(["Visual fit concerns", `${r.brand ?? ""} ${r.product}`.trim(), r.answers, r.risk, "Too fitted + too loose; visual feedback, not measured sizing or return risk"]);

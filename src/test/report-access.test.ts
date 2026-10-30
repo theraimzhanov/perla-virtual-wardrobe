@@ -18,4 +18,10 @@ describe("private n8n reporting access", () => {
     vi.stubEnv("PERLA_INSIGHTS_SECRET", "");
     expect(insightsAuthorized(new Request("https://perla.example", { headers: { apikey: "test-service-only" } }))).toBe(false);
   });
+
+  it("rejects the retired inline workflow bearer even if its old secret remains configured", () => {
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test-service-only");
+    vi.stubEnv("PERLA_INSIGHTS_SECRET", "retired-test-token");
+    expect(insightsAuthorized(new Request("https://perla.example", { headers: { Authorization: "Bearer retired-test-token" } }))).toBe(false);
+  });
 });
