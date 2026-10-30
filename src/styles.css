@@ -184,21 +184,15 @@
 .perla-mascot-sparkle { animation: perla-sparkle 1.2s ease-in-out infinite; }
 @keyframes perla-sparkle { 0%, 100% { opacity: 0; transform: scale(.5); } 50% { opacity: 1; transform: scale(1.2); } }
 
-/* Landing hero: mascot path is measured in useMascotJourney; once landed the handle struggles to pull the slider. */
-.perla-struggle { animation: perla-struggle 4.2s ease-in-out both; }
-@keyframes perla-struggle {
-  0% { transform: scale(1.15, .85); }
-  6% { transform: scale(.95, 1.05) rotate(-14deg); }
-  12%, 24%, 36% { transform: rotate(-18deg) scale(1.06, .94); }
-  18%, 30%, 42% { transform: rotate(-8deg) scale(.96, 1.04); }
-  50% { transform: rotate(10deg) scale(1.08, .92); }
-  58% { transform: rotate(-20deg) scale(1.1, .9); }
-  70% { transform: rotate(-24deg) scale(1.14, .86); }
-  85% { transform: rotate(6deg) scale(.94, 1.08); }
-  100% { transform: rotate(0) scale(1); }
+/* Subtle directional lean follows the comparison handle's ten-second glide. */
+.perla-mascot-glide { animation: perla-glide 10s linear infinite; transform-origin: 50% 65%; }
+@keyframes perla-glide {
+  0%, 100% { transform: rotate(-4deg); }
+  12.5%, 87.5% { transform: rotate(-2.8deg); }
+  25%, 75% { transform: rotate(0); }
+  37.5%, 62.5% { transform: rotate(2.8deg); }
+  50% { transform: rotate(4deg); }
 }
-.perla-sweat { animation: perla-sweat .9s ease-in 5 both; }
-@keyframes perla-sweat { 0% { opacity: 0; transform: translate(0,0) scale(.6); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(10px, 14px) scale(1); } }
 @media (prefers-reduced-motion: reduce) {
-  .perla-mascot-jump, .perla-mascot-look, .perla-mascot-happy, .perla-mascot-sparkle, .perla-struggle, .perla-sweat { animation: none; }
+  .perla-mascot-jump, .perla-mascot-look, .perla-mascot-happy, .perla-mascot-sparkle, .perla-mascot-glide { animation: none; }
 }
