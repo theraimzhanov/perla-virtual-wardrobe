@@ -11,8 +11,9 @@ import { GenerationSkeleton } from "@/components/web/GenerationSkeleton";
 import { LookCard } from "@/components/web/LookCard";
 import { changeGeneratedLook, createStudioJob, getPhotoJob } from "@/components/web/generation.functions";
 import { photoJobPhase } from "@/components/web/generation-rules";
-import { DEFAULT_STUDIO_SCENE, STUDIO_PROMPT_LIMIT, studioSceneNames, type StudioScene } from "@/components/web/studio-rules";
-import { PageHeader, Panel, Pill, GoldButton } from "@/components/web/ui";
+import { DEFAULT_STUDIO_SCENE, STUDIO_PROMPT_LIMIT, type StudioScene } from "@/components/web/studio-rules";
+import { PageHeader, Panel, GoldButton } from "@/components/web/ui";
+import { ScenePicker } from "@/components/web/ScenePicker";
 
 export const Route = createFileRoute("/_authenticated/app/studio")({
   head: () => ({
@@ -112,7 +113,7 @@ function Studio() {
           </div>
         )}
         <h2 className="mb-3 mt-6 font-serif text-2xl">2. Scene & idea <span className="text-sm text-muted-foreground">(optional)</span></h2>
-        <div role="group" aria-label="Studio scenes" className="mb-3 flex flex-wrap gap-2">{studioSceneNames.map((s) => <Pill key={s} active={s === scene} onClick={() => setScene(s)}>{s}</Pill>)}</div>
+        <ScenePicker value={scene} onChange={setScene} />
         <textarea value={prompt} maxLength={STUDIO_PROMPT_LIMIT} onChange={(e) => setPrompt(e.target.value)} rows={2} placeholder="e.g. in Paris, soft wind, film look" className="w-full resize-none rounded-2xl bg-secondary p-4 font-serif text-lg outline-none" />
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <div className="ml-auto flex items-center gap-2">

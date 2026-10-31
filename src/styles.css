@@ -284,7 +284,7 @@
   .perla-workspace article:hover { transform: translateY(-3px); box-shadow: var(--shadow-soft); }
 }
 @media (max-width: 767px) {
-  .perla-hero { min-height: 570px; }
+  .perla-hero { min-height: min(570px, calc(100svh - 130px)); }
   .perla-hero-photo { object-position: 64% center; }
   .perla-hero-veil { clip-path: none; background: color-mix(in oklch, var(--background) 72%, transparent); }
   .perla-hero-copy { padding-top: 2.5rem; padding-bottom: 2.5rem; }
@@ -297,4 +297,10 @@
   .perla-ribbon-track, .perla-page-header, .perla-landing-section { animation: none; }
   .perla-button, .perla-workspace article { transition: none; }
   .perla-button:not(:disabled):hover, .perla-workspace article:hover { transform: none; }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .perla-landing-section { animation: perla-reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 22%; }
+  }
 }
