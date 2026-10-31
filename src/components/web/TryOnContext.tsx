@@ -11,7 +11,7 @@ import { listProducts } from "./products.functions";
 import { type Look, type LookSource } from "./looks";
 import { useSavedTryOnInputs } from "./useSavedTryOnInputs";
 
-export const jobLook = (job: PhotoJob): Look => ({ id: `job:${job.id}`, jobId: job.id, title: job.studioScene ? `${job.studioScene} · ${job.title}` : job.title, product: job.title, brand: job.brand ?? undefined, author: "You", kind: job.kind, image: job.image ?? "", ...(job.kind === "video" && job.video ? { video: { mp4: job.video } } : {}), productId: job.productId, catalogProductId: job.catalogProductId, productImage: job.productImage, source: job.source, likes: job.likes ?? 0, liked: job.liked, shared: job.shared, mine: true });
+export const jobLook = (job: PhotoJob): Look => ({ id: `job:${job.id}`, jobId: job.id, title: job.studioScene ? `${job.studioScene} · ${job.title}` : job.title, product: job.title, brand: job.brand ?? undefined, author: "You", kind: job.kind, image: job.image ?? "", ...(job.kind === "video" && job.video ? { video: { mp4: job.video } } : {}), productId: job.productId, catalogProductId: job.catalogProductId ?? null, productImage: job.productImage ?? null, source: job.source, likes: job.likes ?? 0, liked: job.liked, shared: job.shared, mine: true });
 const communityLook = (look: CommunityLook): Look => ({ id: `job:${look.jobId}`, jobId: look.jobId, title: look.product, product: look.product, brand: look.brand ?? undefined, author: look.author, kind: look.kind, image: look.image, productId: look.productId, catalogProductId: look.catalogProductId, productImage: look.productImage, source: look.source, likes: look.likes, liked: look.liked, shared: true, mine: look.mine });
 
 function useTryOnState(userId: string | null, authReady: boolean) {
