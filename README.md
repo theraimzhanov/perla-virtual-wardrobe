@@ -163,3 +163,28 @@ Licensed under the [MIT License](./LICENSE).
 Copyright (c) 2026 Nursultan Raimzhanov. Created for the YouCam API Skin AI & eCommerce VTO Hackathon.
 
 Third-party services, trademarks and product imagery remain subject to their respective terms and rights.
+
+---
+
+## Screenshots
+
+![PERLA screenshot 1](docs/screenshots/Screenshot%202026-10-31%20021858.png)
+
+![PERLA screenshot 2](docs/screenshots/Screenshot%202026-10-31%20022630.png)
+
+![PERLA screenshot 3](docs/screenshots/Screenshot%202026-10-31%20022714.png)
+
+![PERLA screenshot 4](docs/screenshots/Screenshot%202026-10-31%20022801.png)
+
+![PERLA screenshot 5](docs/screenshots/Screenshot%202026-10-31%20022936.png)
+
+![PERLA screenshot 6](docs/screenshots/Screenshot%202026-10-31%20023044.png)
+
+![PERLA screenshot 7](docs/screenshots/Screenshot%202026-10-31%20023133.png)
+
+![PERLA screenshot 8](docs/screenshots/Screenshot%202026-10-31%20023158.png)
+
+![PERLA screenshot 9](docs/screenshots/Screenshot%202026-10-31%20023404.png)
+
+![PERLA screenshot 10](docs/screenshots/Screenshot%202026-10-31%20023536.png)
+
