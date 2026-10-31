@@ -19,7 +19,7 @@
 
 - **Event:** YouCam API Skin AI & eCommerce VTO Hackathon (Devpost)
 - **Category:** Fashion virtual try-on and eCommerce
-- **Live demo:** https://studioperla.live
+- **Live demo:** https://studioperla.live   Demo account: demo@perla.com  Password: 123456
 - **Author:** Nursultan Raimzhanov
 
 ---
@@ -99,7 +99,7 @@ TanStack Start app (React 19, Tailwind CSS v4, shadcn/ui, server functions)
 
 No installation needed.
 
-1. Open **https://studioperla.live** and sign in using the demo account provided in the private Devpost testing instructions, or create an account with email or Google.
+1. Open **https://studioperla.live** and sign in using the demo account: demo@perla.com password: 123456 , or create an account with email or Google.
 2. **Discover** — choose a clothing item, bag, hat or shoes, or use **Upload from local** for your own item.
 3. **Try On** — upload your photo or pick a sample model, then press **Generate**. Results usually arrive in under a minute.
 4. **Feedback** — answer the five quick questions under the result.
