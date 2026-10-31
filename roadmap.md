@@ -1,5 +1,8 @@
 # Perla update
 
+## README and licensing
+- [x] Remove the generation-job explanation and dedicated Gemini usage section; direct judges to private demo credentials, and add the MIT license. Documentation only; nothing published.
+
 ## Community product links
 - [x] Preserve original Discover/private-product references on Try-On and AI Studio images, including owner cards; Studio preserves the product image separately from the restyled scene.
 - [x] Exclude unlinked pictures from the community listing without deleting owners' saved creations. Database audit: all seven shared images already have intact product links; no backfill or deletion needed.
