@@ -26,7 +26,8 @@ export function fileStem(title: string) {
 
 /** Pick a file extension from the saved bytes, so the name matches the content. */
 export function fileExtension(mimeType: string) {
-  return EXTENSIONS[mimeType.toLowerCase().split(";")[0].trim()] ?? "jpg";
+  const type = (mimeType.split(";")[0] ?? "").trim().toLowerCase();
+  return EXTENSIONS[type] ?? "jpg";
 }
 
 /** Build the saved file name from a look title and the bytes we are about to save. */
