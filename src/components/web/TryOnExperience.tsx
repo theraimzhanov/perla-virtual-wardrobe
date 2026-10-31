@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { Check, Download, Trash2, Heart, ImagePlus, LoaderCircle, RefreshCw, Send, Sparkles, Upload, X } from "lucide-react";
+import { Check, Trash2, Heart, ImagePlus, LoaderCircle, RefreshCw, Send, Sparkles, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { CompareSlider } from "@/components/perla/CompareSlider";
 import { modelBefore, modelAfter } from "@/components/perla/data";
+import { DownloadButton } from "./DownloadButton";
 import { useTryOn } from "./TryOnContext";
 import { GenerationSkeleton } from "./GenerationSkeleton";
 import { ResultFeedback } from "./ResultFeedback";
@@ -18,23 +19,6 @@ import { SamplePhotoPicker } from "./SamplePhotoPicker";
 
 type Phase = "idle" | "loading" | "done";
 
-async function downloadMedia(url: string, filename: string) {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Download unavailable");
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = blobUrl;
-    anchor.download = filename;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-  } catch {
-    toast.error("Couldn't download. Please try again.");
-  }
-}
 
 export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   const { userId, selectedInputProductId, photo, photoId, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource, markTried, savingInputs, inputError, retryInputs, signedIn, photoJobs, deleteJob, patchJob, refreshPhotoJobs, generationHistoryError } = useTryOn();
