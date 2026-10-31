@@ -1,5 +1,10 @@
 # Perla update
 
+## Community product links
+- [ ] Preserve original Discover/private-product references on Try-On and AI Studio images, including owner cards.
+- [ ] Remove unlinked pictures from the community listing without deleting owners' saved creations; repair existing links only where verifiable.
+- [ ] Verify community stars restore the original product for both catalog and personal products, with privacy and regression tests; leave unpublished.
+
 ## Sunset Runway visual redesign
 - [x] Apply colorful elegant semantic tokens, animated ribbon/section reveals, reduced-motion support and shared controls; no business logic, database or workflow changes.
 - [x] Redesign homepage with generated fashion photography, account pages, Discover, Try-On, AI Studio scene picker, Profile and Insights; preserve existing photo-frame geometry.
