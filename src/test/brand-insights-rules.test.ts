@@ -24,7 +24,7 @@ describe("Brand Insights rules", () => {
     const base = seedLooks[0];
     if (!base) throw new Error("Missing sample look");
     const looks: Look[] = [
-      { ...base, id: "photo", shared: true, kind: "photo", likes: 4 },
+      { ...base, id: "photo", catalogProductId: "discover-id", shared: true, kind: "photo", likes: 4 },
       { ...base, id: "private", shared: false, likes: 100 },
       { ...base, id: "video", shared: true, kind: "video", video: { webm: "sample.webm" }, likes: 8 },
       { ...base, id: "no-video", shared: true, kind: "video", video: {}, likes: 50 },
@@ -34,13 +34,21 @@ describe("Brand Insights rules", () => {
   it("includes shared own and internet products without treating them as Discover", () => {
     const base = seedLooks[0];
     if (!base) throw new Error("Missing sample look");
-    const looks: Look[] = [{ ...base, id: "own", source: "own", shared: true }, { ...base, id: "internet", source: "internet", shared: true }];
+    const looks: Look[] = [{ ...base, id: "own", source: "own", productImage: "own-product.jpg", shared: true }, { ...base, id: "internet", source: "internet", productImage: "internet-product.jpg", shared: true }];
     expect(sharedVirtualLooks(looks).map((look) => look.source)).toEqual(["own", "internet"]);
   });
   it("counts shared virtual try-ons, updating when a look is shared", () => {
-    expect(sharedVirtualLooks(seedLooks)).toHaveLength(5);
-    const afterShare = seedLooks.map((look) => look.id === "l3" ? { ...look, shared: true } : look);
+    const linkedLooks = seedLooks.map((look) => ({ ...look, productImage: "original-product.jpg" }));
+    expect(sharedVirtualLooks(linkedLooks)).toHaveLength(5);
+    const afterShare = linkedLooks.map((look) => look.id === "l3" ? { ...look, shared: true } : look);
     expect(sharedVirtualLooks(afterShare)).toHaveLength(6);
+  });
+  it("excludes unlinked pictures from the community without removing saved pictures", () => {
+    const base = seedLooks[0];
+    if (!base) throw new Error("Missing sample look");
+    const saved = [{ ...base, id: "unlinked" }, { ...base, id: "studio", title: "Studio restyle", catalogProductId: "discover-product" }, { ...base, id: "personal-studio", source: "own" as const, productImage: "original-personal-product.jpg" }];
+    expect(sharedVirtualLooks(saved).map((look) => look.id)).toEqual(["studio", "personal-studio"]);
+    expect(saved.map((look) => look.id)).toEqual(["unlinked", "studio", "personal-studio"]);
   });
   it("counts each saved generated image and video once for the homepage", () => {
     expect(tallyGeneratedMedia([

@@ -6,6 +6,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { uploadBucket } from "./upload-rules";
 import { directGenerationEnabled, generationRequestSchema, type PhotoJob } from "./generation-rules";
 import { buildStudioPrompt, studioRequestSchema } from "./studio-rules";
+import { studioProductFields } from "./product-links";
 
 const LINK_SECONDS = 60 * 60 * 24;
 
@@ -74,7 +75,7 @@ export const createGenerationJob = createServerFn({ method: "POST" })
     return { jobId: job.id };
   });
 
-// AI Studio restyles a finished try-on photo into a new image or video with an enriched prompt.
+// AI Studio restyles a finished try-on photo while retaining its original product.
 export const createStudioJob = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => studioRequestSchema.parse(input))
@@ -90,13 +91,15 @@ export const createStudioJob = createServerFn({ method: "POST" })
     }
     const { data: base, error } = await context.supabase.from("generation_jobs").select("*").eq("id", data.baseJobId).eq("user_id", context.userId).eq("kind", "photo").eq("status", "completed").is("studio_scene", null).single();
     if (error || !base?.result_image_url) throw new Error("Choose one of your finished try-on photos first.");
+    const piece = base.product_id ? await context.supabase.from("try_on_products").select("id,user_id,source,catalog_product_id,storage_path,image_url").eq("id", base.product_id).eq("user_id", context.userId).maybeSingle() : null;
+    if (piece?.error) throw new Error("Couldn't load this look's original product.");
+    const productFields = studioProductFields(base, piece?.data ?? undefined);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: job, error: jobError } = await supabaseAdmin.from("generation_jobs").insert({
       user_id: context.userId, engine: "direct", request_id: data.requestId, kind: data.kind, status: "pending",
       studio_scene: data.scene, studio_prompt: buildStudioPrompt(data.kind, data.scene, data.prompt),
-      source: base.source, category: base.category, photo_id: base.photo_id, product_id: base.product_id,
-      person_image_url: base.result_image_url, item_image_url: base.result_image_url,
-      product_name: base.product_name, brand_name: base.brand_name,
+      ...productFields, photo_id: base.photo_id,
+      person_image_url: base.result_image_url,
     }).select("id").single();
     if (jobError || !job) throw new Error("Couldn't start your creation. Please retry.");
     await advanceDirectJob(job.id);
@@ -113,13 +116,15 @@ async function decorate(rows: JobRow[], userId: string, supabase: SupabaseClient
   if (rows.length === 0) return [];
   const ids = rows.map((row) => row.id);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const [likes, feedback] = await Promise.all([
+  const { loadProductLinks } = await import("./product-links.server");
+  const [likes, feedback, productLinks] = await Promise.all([
     supabaseAdmin.from("look_likes").select("job_id,user_id").in("job_id", ids),
     supabase.from("feedback_answers").select("job_id").eq("user_id", userId).in("job_id", ids),
+    loadProductLinks(supabase, rows),
   ]);
   const likeRows = likes.data ?? [];
   const sent = new Set((feedback.data ?? []).map((row) => row.job_id));
-  return rows.map((row) => jobDto(row, { likes: likeRows.filter((like) => like.job_id === row.id).length, liked: likeRows.some((like) => like.job_id === row.id && like.user_id === userId), feedbackSent: sent.has(row.id) }));
+  return rows.map((row) => ({ ...jobDto(row, { likes: likeRows.filter((like) => like.job_id === row.id).length, liked: likeRows.some((like) => like.job_id === row.id && like.user_id === userId), feedbackSent: sent.has(row.id) }), ...productLinks.get(row.id) }));
 }
 
 export const listPhotoJobs = createServerFn({ method: "POST" })
@@ -144,7 +149,9 @@ export const getPhotoJob = createServerFn({ method: "POST" })
       ({ data: row, error } = await read());
       if (error || !row) throw new Error("Couldn't find this generation request.");
     }
-    return (await decorate([row], context.userId, context.supabase))[0]!;
+    const job = (await decorate([row], context.userId, context.supabase))[0];
+    if (!job) throw new Error("Couldn't find this generation request.");
+    return job;
   });
 
 export const changeGeneratedLook = createServerFn({ method: "POST" })

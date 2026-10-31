@@ -11,8 +11,8 @@ import { listProducts } from "./products.functions";
 import { type Look, type LookSource } from "./looks";
 import { useSavedTryOnInputs } from "./useSavedTryOnInputs";
 
-export const jobLook = (job: PhotoJob): Look => ({ id: `job:${job.id}`, jobId: job.id, title: job.studioScene ? `${job.studioScene} · ${job.title}` : job.title, product: job.title, brand: job.brand ?? undefined, author: "You", kind: job.kind, image: job.image ?? "", ...(job.kind === "video" && job.video ? { video: { mp4: job.video } } : {}), source: job.source, likes: job.likes ?? 0, liked: job.liked, shared: job.shared, mine: true });
-const communityLook = (look: CommunityLook): Look => ({ id: `job:${look.jobId}`, jobId: look.jobId, title: look.product, product: look.product, brand: look.brand ?? undefined, author: look.author, kind: look.kind, image: look.image, catalogProductId: look.catalogProductId, productImage: look.productImage, source: look.source, likes: look.likes, liked: look.liked, shared: true, mine: look.mine });
+export const jobLook = (job: PhotoJob): Look => ({ id: `job:${job.id}`, jobId: job.id, title: job.studioScene ? `${job.studioScene} · ${job.title}` : job.title, product: job.title, brand: job.brand ?? undefined, author: "You", kind: job.kind, image: job.image ?? "", ...(job.kind === "video" && job.video ? { video: { mp4: job.video } } : {}), productId: job.productId, catalogProductId: job.catalogProductId ?? null, productImage: job.productImage ?? null, source: job.source, likes: job.likes ?? 0, liked: job.liked, shared: job.shared, mine: true });
+const communityLook = (look: CommunityLook): Look => ({ id: `job:${look.jobId}`, jobId: look.jobId, title: look.product, product: look.product, brand: look.brand ?? undefined, author: look.author, kind: look.kind, image: look.image, productId: look.productId, catalogProductId: look.catalogProductId, productImage: look.productImage, source: look.source, likes: look.likes, liked: look.liked, shared: true, mine: look.mine });
 
 function useTryOnState(userId: string | null, authReady: boolean) {
   const savedInputs = useSavedTryOnInputs(userId, authReady);
@@ -82,7 +82,11 @@ function useTryOnState(userId: string | null, authReady: boolean) {
   // AI Studio creations live in Profile and Studio, never in the Try-On result slots.
   const photoJobs = jobs.filter((job) => job.kind === "photo" && !job.studioScene);
   const studioJobs = jobs.filter((job) => Boolean(job.studioScene));
-  const mineLooks = jobs.filter((job) => photoJobPhase(job) === "done").map(jobLook);
+  const mineLooks = jobs.filter((job) => photoJobPhase(job) === "done").map((job) => {
+    const look = jobLook(job);
+    const shared = community.find((item) => item.jobId === job.id);
+    return shared ? { ...look, productId: shared.productId, catalogProductId: shared.catalogProductId, productImage: shared.productImage } : look;
+  });
   const looks: Look[] = [...mineLooks, ...community.filter((item) => !jobs.some((job) => job.id === item.jobId)).map(communityLook), ...localLooks];
 
   const addLook = (look: Omit<Look, "likes" | "liked" | "shared" | "mine" | "author">) => {

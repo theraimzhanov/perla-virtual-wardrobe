@@ -1,5 +1,6 @@
 import type { DiscoverProduct } from "./data";
 import { byLikes, type Look } from "./looks";
+import { canTryProduct } from "./product-links";
 
 export type ProductSignals = { id: string; tryOns: number; likes: number };
 export type RankedProduct = DiscoverProduct & ProductSignals;
@@ -16,7 +17,7 @@ export function rankDiscoverProducts(products: DiscoverProduct[], signals: Produ
 }
 
 export function sharedVirtualLooks(looks: Look[]) {
-  return byLikes(looks.filter((look) => look.shared && look.kind === "photo"));
+  return byLikes(looks.filter((look) => look.shared && look.kind === "photo" && Boolean(look.image) && canTryProduct({ catalogProductId: look.catalogProductId ?? null, productImage: look.productImage ?? null })));
 }
 
 // A saved job counts once for the image it made (photo jobs) or the video it made

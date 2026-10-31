@@ -34,6 +34,8 @@ export type PhotoJob = {
   shared: boolean;
   photoId: string | null;
   productId: string | null;
+  catalogProductId?: string | null;
+  productImage?: string | null;
 };
 
 export function providerEndpoint(category: string) {
