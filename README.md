@@ -17,7 +17,6 @@
 
 ## Hackathon Submission
 
-- **Event:** YouCam API Skin AI & eCommerce VTO Hackathon (Devpost)
 - **Category:** Fashion virtual try-on and eCommerce
 - **Live demo:** https://studioperla.live   Demo account: demo@perla.com  Password: 123456
 - **Author:** Nursultan Raimzhanov
