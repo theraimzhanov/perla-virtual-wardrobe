@@ -86,6 +86,7 @@
   --popover: var(--card);
   --popover-foreground: var(--foreground);
   --primary: oklch(0.53 0.18 20);
+  --primary-glow: oklch(0.56 0.19 24);
   --primary-foreground: oklch(0.995 0.002 20);
   --secondary: oklch(0.94 0.028 310);
   --secondary-foreground: var(--foreground);
@@ -115,7 +116,7 @@
   --ring: var(--primary);
   --chart-1: var(--coral); --chart-2: var(--sage); --chart-3: var(--lavender); --chart-4: var(--primary); --chart-5: var(--stat-sky);
   --sidebar: var(--lavender-soft); --sidebar-foreground: var(--foreground); --sidebar-primary: var(--primary); --sidebar-primary-foreground: var(--primary-foreground); --sidebar-accent: var(--card); --sidebar-accent-foreground: var(--foreground); --sidebar-border: var(--border); --sidebar-ring: var(--ring);
-  --gradient-gold: linear-gradient(120deg, var(--primary), var(--coral));
+  --gradient-gold: linear-gradient(120deg, var(--primary), var(--primary-glow));
   --gradient-sunset: linear-gradient(120deg, var(--coral-soft), var(--lavender-soft), var(--sage-soft));
   --shadow-soft: 0 14px 38px -15px oklch(0.43 0.1 335 / 0.25);
   --shadow-card: 0 5px 22px -10px oklch(0.4 0.05 335 / 0.16);
@@ -125,6 +126,7 @@
   --background: oklch(0.18 0.024 335); --foreground: oklch(0.95 0.012 330);
   --card: oklch(0.23 0.026 335); --popover: var(--card);
   --primary: oklch(0.76 0.14 24); --primary-foreground: oklch(0.2 0.04 20);
+  --primary-glow: oklch(0.7 0.16 24);
   --secondary: oklch(0.3 0.045 310); --muted: oklch(0.28 0.026 335);
   --muted-foreground: oklch(0.76 0.024 330); --accent: oklch(0.35 0.065 305);
   --coral-soft: oklch(0.31 0.065 25); --lavender-soft: oklch(0.3 0.055 305); --sage-soft: oklch(0.3 0.045 160);
