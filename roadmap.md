@@ -4,7 +4,10 @@
 - [x] Apply colorful elegant semantic tokens, animated ribbon/section reveals, reduced-motion support and shared controls; no business logic, database or workflow changes.
 - [x] Redesign homepage with generated fashion photography, account pages, Discover, Try-On, AI Studio scene picker, Profile and Insights; preserve existing photo-frame geometry.
 - [x] Verify homepage at 1280/681/390px, real aggregate counts, account mode controls, demo form, sample picker, mobile scene/Profile navigation and dark account theme; all 125 tests pass and preview build OK. Left unpublished as requested.
-- [ ] Review signed-in screens with real saved looks — external unmanaged Supabase has no available authenticated test session; user can review in their signed-in preview.
+- [x] Review signed-in screens with real saved looks — signed in through the app's own sign-in form as the supplied demo account; Try-On and AI Studio screens render real saved looks and their downloads save real files. Left unpublished as requested.
+
+## October 31 AI Studio download fix
+- [x] Make the download control save the picture instead of opening it in a new tab: read the storage bytes ahead of the click and hand over a same-origin file, with the phone share sheet as the touch path; AI Studio verified in preview (golden-hour-scarlet-slip-dress.png, 2.7 MB PNG, no new tab) and Try-On re-verified (perla-try-on.jpg, 171 KB JPEG); 129 tests pass and build OK.
 
 ## October 30 immediate and fortnightly reports
 - [x] Send the real Google Sheets report (execution 75); fresh Gemini analysis saved three insights and five Style DNA profiles (execution 76), followed by a refreshed export.
