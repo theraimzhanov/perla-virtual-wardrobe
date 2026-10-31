@@ -1,5 +1,11 @@
 # Perla update
 
+## Sunset Runway visual redesign
+- [x] Apply colorful elegant semantic tokens, animated ribbon/section reveals, reduced-motion support and shared controls; no business logic, database or workflow changes.
+- [x] Redesign homepage with generated fashion photography, account pages, Discover, Try-On, AI Studio scene picker, Profile and Insights; preserve existing photo-frame geometry.
+- [x] Verify homepage at 1280/681/390px, real aggregate counts, account mode controls, demo form, sample picker, mobile scene/Profile navigation and dark account theme; all 125 tests pass and preview build OK. Left unpublished as requested.
+- [ ] Review signed-in screens with real saved looks — external unmanaged Supabase has no available authenticated test session; user can review in their signed-in preview.
+
 ## October 30 immediate and fortnightly reports
 - [x] Send the real Google Sheets report (execution 75); fresh Gemini analysis saved three insights and five Style DNA profiles (execution 76), followed by a refreshed export.
 - [x] Publish both active n8n schedules for alternate Fridays, next November 13, 2026 at 06:00/06:15 UTC; actual date gates tested at seven date boundaries and off-date runs stop before services.

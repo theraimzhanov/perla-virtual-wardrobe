@@ -12,6 +12,7 @@ import bag from "@/assets/g-bag.jpg";
 import hat from "@/assets/g-hat.jpg";
 import classicDress from "@/assets/example-classic-dress.jpg";
 import hatDress from "@/assets/example-hat-dress.jpg";
+import runway from "@/assets/sunset-runway.jpg";
 import { useMascotJourney } from "@/components/perla/useMascotJourney";
 import { CompareSlider } from "@/components/perla/CompareSlider";
 import { modelBefore, modelAfter } from "@/components/perla/data";
@@ -89,23 +90,33 @@ function Landing() {
             <Button asChild variant="link" className="h-auto p-0 text-muted-foreground"><a href="#demo">Demo</a></Button>
             <a href="#examples" className="hidden text-muted-foreground hover:text-foreground md:inline">Examples</a>
             <a href="#brands" className="hidden text-muted-foreground hover:text-foreground md:inline">For brands</a>
-            <Link to="/login" className="whitespace-nowrap rounded-full border border-border px-4 py-2 text-foreground hover:bg-secondary sm:border-0 sm:px-0 sm:py-0 sm:text-muted-foreground">Sign in</Link>
-            <Link to="/app" className="hidden whitespace-nowrap rounded-full bg-primary px-5 py-2.5 text-primary-foreground sm:inline-block">Open app</Link>
+            <Button asChild variant="ghost" className="rounded-full"><Link to="/login">Sign in</Link></Button>
+            <Button asChild variant="runway" className="hidden rounded-full px-5 sm:inline-flex"><Link to="/app">Open app <ArrowRight /></Link></Button>
           </nav>
         </div>
       </header>
 
-      <section ref={heroRef} className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-10 sm:px-6 md:grid-cols-2 md:py-20">
+      <section ref={heroRef} className="relative">
         <img ref={mascotRef} src={logo.url} alt="" aria-hidden className="pointer-events-none absolute left-0 top-0 z-20 h-20 w-20 object-contain opacity-0 drop-shadow-lg" />
-        <div>
-          <div ref={eyebrowRef} className="inline-block"><Eyebrow>AI fashion discovery</Eyebrow></div>
-          <h1 className="mt-2 font-serif text-5xl leading-[1.02] sm:text-6xl md:text-7xl">Wear it <em className="text-gold">before</em> anyone.</h1>
-          <p className="mt-6 max-w-md text-lg text-muted-foreground">See yourself in any new piece <span ref={phraseRef}>with virtual try-on, turn</span> it into an AI photoshoot — and tell brands what you'd truly love to own.</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/app/try-on" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-primary-foreground shadow-soft">Try it on <ArrowRight className="h-4 w-4" /></Link>
-            <a href="#examples" className="rounded-full bg-card px-7 py-3.5 shadow-card">See examples</a>
+        <div className="perla-hero">
+          <img src={runway} alt="Coral satin dress and lavender scarf on a sunlit Mediterranean terrace" width={1920} height={1024} fetchPriority="high" className="perla-hero-photo" />
+          <div className="perla-hero-veil" />
+          <div className="perla-hero-copy mx-auto max-w-6xl px-6 sm:px-8">
+            <div className="max-w-md">
+              <div ref={eyebrowRef} className="inline-block"><Eyebrow>AI fashion discovery</Eyebrow></div>
+              <h1 className="mt-5 font-serif text-7xl leading-none text-ink sm:text-8xl">PERLA</h1>
+              <h2 className="mt-2 font-serif text-5xl leading-[1.02] text-ink sm:text-6xl">Wear it <em className="text-primary">before</em> anyone.</h2>
+              <p className="mt-6 max-w-sm text-base leading-relaxed text-ink">See yourself in any new piece <span ref={phraseRef}>with virtual try-on, turn</span> it into an AI photoshoot — and tell brands what you'd truly love to own.</p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild variant="runway" className="h-auto rounded-full px-7 py-3.5"><Link to="/app/try-on">Try it on <ArrowRight /></Link></Button>
+                <Button asChild variant="outline" className="h-auto rounded-full border-ink/25 bg-background/80 px-6 py-3.5 text-ink"><a href="#examples">See examples <ArrowRight /></a></Button>
+              </div>
+            </div>
           </div>
-          <StatStrip className="mt-9" items={[
+        </div>
+        <div className="perla-ribbon" aria-hidden="true"><div className="perla-ribbon-track">{Array.from({ length: 4 }, (_, i) => <span key={i}>Your style. Your possibility. <Sparkles className="h-4 w-4" /> Virtual try-on <Sparkles className="h-4 w-4" /> A new point of view <Sparkles className="h-4 w-4" /> AI fashion studio <Sparkles className="h-4 w-4" /></span>)}</div></div>
+        <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8">
+          <StatStrip items={[
             { value: activity?.members ?? 0, label: "Active users", icon: Users },
             { value: activity?.tryOns ?? 0, label: "Virtual try-ons", icon: Wand2 },
             { value: activity?.productsTried ?? 0, label: "Products tried", icon: Shirt },
@@ -113,10 +124,15 @@ function Landing() {
           ]} />
           <p className="mt-3 text-[10px] text-muted-foreground">Live totals from PERLA members.</p>
         </div>
-        <div ref={sliderRef} className="mx-auto w-full max-w-md rounded-[2rem] bg-card p-4 shadow-soft"><CompareSlider before={modelBefore} after={modelAfter} mascot autoPlay delayedMascot introDone={introDone} /></div>
+        <div className="perla-landing-section bg-sage-soft">
+          <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-12 sm:px-8 md:grid-cols-[1.1fr_0.9fr] md:py-16">
+            <div><Eyebrow>One photo. A new perspective.</Eyebrow><h2 className="mt-4 font-serif text-4xl leading-tight sm:text-5xl">The same you.<br /><em className="text-stat-mint">A different possibility.</em></h2><p className="mt-5 max-w-sm text-sm leading-relaxed text-muted-foreground">A piece you've had your eye on. A look you haven't tried yet. See it on yourself before you decide.</p><Button asChild variant="runway" className="mt-7 h-auto rounded-full px-6 py-3"><Link to="/app/try-on">Find your next look <ArrowRight /></Link></Button></div>
+            <div ref={sliderRef} className="mx-auto w-full max-w-sm"><CompareSlider before={modelBefore} after={modelAfter} mascot autoPlay delayedMascot introDone={introDone} /></div>
+          </div>
+        </div>
       </section>
 
-      <section id="demo" className="scroll-mt-24 border-y border-border bg-card py-16 sm:py-20">
+      <section id="demo" className="perla-landing-section scroll-mt-24 border-y border-border bg-card py-16 sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
           <div><Eyebrow>PERLA demo</Eyebrow><h2 className="mt-3 font-serif text-4xl sm:text-5xl">See the look.<br /><em className="text-gold">Meet the possibility.</em></h2>
             <video src={demoVideo.url} poster={modelAfter} controls muted playsInline preload="metadata" aria-label="PERLA fashion demo" className="mt-7 aspect-video w-full rounded-lg bg-muted object-contain" />
@@ -127,13 +143,13 @@ function Landing() {
         </div>
       </section>
 
-      <section id="problem" className="scroll-mt-20 bg-secondary/50 py-20">
+      <section id="problem" className="perla-landing-section scroll-mt-20 bg-background py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <Eyebrow>The problem</Eyebrow>
           <h2 className="mt-3 max-w-2xl font-serif text-4xl sm:text-5xl">Online fashion is a <em className="text-gold">guessing game</em> — for shoppers and brands.</h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
             {problems.map((p) => (
-              <div key={p.title} className="rounded-[1.75rem] bg-card p-8 shadow-card">
+              <div key={p.title} className="perla-problem-item rounded-lg bg-coral-soft p-7">
                 <p.icon className="h-6 w-6 text-gold" />
                 <p className="mt-5 font-serif text-4xl">{p.stat}</p>
                 <h3 className="mt-1 font-serif text-xl">{p.title}</h3>
@@ -145,12 +161,12 @@ function Landing() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+      <section className="perla-landing-section mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <Eyebrow>The fun part</Eyebrow>
         <h2 className="mt-3 font-serif text-4xl sm:text-5xl">Fashion you can <em className="text-gold">play</em> with.</h2>
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
           {fun.map((f) => (
-            <div key={f.title} className="rounded-[1.75rem] border border-border p-8">
+            <div key={f.title} className="perla-fun-item py-7">
               <f.icon className="h-6 w-6 text-gold" />
               <h3 className="mt-4 font-serif text-2xl">{f.title}</h3>
               <p className="mt-2 text-muted-foreground">{f.text}</p>
@@ -159,20 +175,20 @@ function Landing() {
         </div>
       </section>
 
-      <section id="examples" className="scroll-mt-20 mx-auto max-w-6xl px-4 pb-20 sm:px-6">
+      <section id="examples" className="perla-landing-section scroll-mt-20 mx-auto max-w-6xl px-4 pb-20 sm:px-6">
         <Eyebrow>Made with PERLA</Eyebrow>
         <h2 className="mt-3 font-serif text-4xl sm:text-5xl">A little color.<br /><em className="text-gold">A whole new you.</em></h2>
         <p className="mt-3 text-sm text-muted-foreground">Illustrative fashion samples · virtual try-on & AI Studio photos</p>
         <div className="mt-8 grid grid-cols-2 gap-4">
-          <figure className="example-lift overflow-hidden rounded-lg bg-card"><img src={hatDress} alt="Coral dress with a vivid blue wide-brim hat" width={768} height={1024} loading="lazy" className="aspect-[3/4] w-full object-contain" /><figcaption className="border-t p-4"><p className="text-xs uppercase text-stat-sky">Hat & dress</p><p className="mt-1 font-serif text-2xl">A bolder kind of day.</p></figcaption></figure>
-          <figure className="example-lift overflow-hidden rounded-lg bg-card"><img src={classicDress} alt="Elegant emerald green classic satin evening dress" width={768} height={1024} loading="lazy" className="aspect-[3/4] w-full object-contain" /><figcaption className="border-t p-4"><p className="text-xs uppercase text-stat-mint">Elegant classic dress</p><p className="mt-1 font-serif text-2xl">Timeless, in emerald.</p></figcaption></figure>
+          <figure className="example-lift overflow-hidden rounded-lg bg-lavender-soft"><img src={hatDress} alt="Coral dress with a vivid blue wide-brim hat" width={768} height={1024} loading="lazy" className="aspect-[3/4] w-full object-contain" /><figcaption className="p-5"><p className="text-xs uppercase text-stat-sky">Hat & dress</p><p className="mt-1 font-serif text-2xl">A bolder kind of day.</p></figcaption></figure>
+          <figure className="example-lift overflow-hidden rounded-lg bg-sage-soft"><img src={classicDress} alt="Elegant emerald green classic satin evening dress" width={768} height={1024} loading="lazy" className="aspect-[3/4] w-full object-contain" /><figcaption className="p-5"><p className="text-xs uppercase text-stat-mint">Elegant classic dress</p><p className="mt-1 font-serif text-2xl">Timeless, in emerald.</p></figcaption></figure>
         </div>
         <div className="mt-10 grid gap-6 md:grid-cols-2">
-          <figure className="overflow-hidden rounded-[1.75rem] bg-card shadow-card">
+          <figure className="overflow-hidden rounded-lg bg-coral-soft">
             <div className="grid grid-cols-2 gap-1"><img src={modelBefore} alt="Original photo" className="aspect-[3/4] w-full object-cover" /><img src={modelAfter} alt="Virtual try-on result" className="aspect-[3/4] w-full object-cover" /></div>
             <figcaption className="p-5"><p className="text-[10px] uppercase text-gold">Virtual try-on</p><p className="mt-1 font-serif text-xl">Before → after in seconds</p></figcaption>
           </figure>
-          <figure className="overflow-hidden rounded-[1.75rem] bg-card shadow-card">
+          <figure className="overflow-hidden rounded-lg bg-lavender-soft">
             <div className="grid grid-cols-2 gap-1"><img src={silk} alt="AI Studio editorial photo" className="aspect-[3/4] w-full object-cover" /><img src={slip} alt="AI Studio runway photo" className="aspect-[3/4] w-full object-cover" /></div>
             <figcaption className="p-5"><p className="text-[10px] uppercase text-gold">AI Studio photo</p><p className="mt-1 font-serif text-xl">Editorial & runway scenes</p></figcaption>
           </figure>
@@ -182,26 +198,26 @@ function Landing() {
         </div>
        </section>
 
-      <section id="brands" className="scroll-mt-20 bg-primary py-20 text-primary-foreground">
+      <section id="brands" className="perla-landing-section scroll-mt-20 bg-ink py-20 text-ink-foreground">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <p className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] opacity-80"><BarChart3 className="h-4 w-4" /> Brand insights · example week</p>
-          <h2 className="mt-3 max-w-2xl font-serif text-4xl sm:text-5xl">Know what sells <em className="text-gold">before</em> you make it.</h2>
+          <h2 className="mt-3 max-w-2xl font-serif text-4xl sm:text-5xl">Know what sells <em className="text-coral">before</em> you make it.</h2>
           <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
-            {insightsFor(activity).map(([v, l]) => <div key={l} className="rounded-2xl bg-primary-foreground/10 p-6"><p className="font-serif text-4xl text-gold">{v}</p><p className="mt-1 text-xs uppercase opacity-80">{l}</p></div>)}
+            {insightsFor(activity).map(([v, l]) => <div key={l} className="border-t border-ink-foreground/25 py-6"><p className="font-serif text-4xl text-coral">{v}</p><p className="mt-1 text-xs uppercase opacity-80">{l}</p></div>)}
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {[[Ruler, "Fit risk", "Moto Leather Jacket: half of shoppers say too fitted — add a size-up note."], [Shirt, "Shadow wardrobe", "Shoes are the most tried category from outside the catalog — a gap to fill."], [Sparkles, "AI insight", "Everyday wear leads at 38%. Versatile pieces beat event looks this week."]].map(([Icon, t, d]) => {
               const I = Icon as typeof Ruler;
-              return <div key={t as string} className="rounded-2xl border border-primary-foreground/20 p-6"><I className="h-5 w-5 text-gold" /><h3 className="mt-3 font-serif text-xl">{t as string}</h3><p className="mt-1 text-sm opacity-80">{d as string}</p></div>;
+              return <div key={t as string} className="border-t border-ink-foreground/20 py-6"><I className="h-5 w-5 text-coral" /><h3 className="mt-3 font-serif text-xl">{t as string}</h3><p className="mt-1 text-sm opacity-80">{d as string}</p></div>;
             })}
           </div>
           <p className="mt-4 text-xs opacity-60">Sample panel data for demonstration.</p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
-        <h2 className="font-serif text-4xl sm:text-5xl">Your next look is <em className="text-gold">one photo</em> away.</h2>
-        <Link to="/login" className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-primary-foreground shadow-soft">Get started free <ArrowRight className="h-4 w-4" /></Link>
+      <section className="perla-cta px-4 py-20 text-center sm:px-6">
+        <div className="mx-auto max-w-3xl"><h2 className="font-serif text-4xl sm:text-5xl">Your next look is <em className="text-gold">one photo</em> away.</h2>
+        <Button asChild variant="runway" className="mt-8 h-auto rounded-full px-8 py-4"><Link to="/login">Get started free <ArrowRight /></Link></Button></div>
       </section>
       <SiteFooter />
     </div>

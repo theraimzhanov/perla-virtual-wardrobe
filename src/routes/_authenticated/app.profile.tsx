@@ -76,7 +76,7 @@ function Profile() {
     <div>
       <PageHeader eyebrow={account?.email ?? "Member"} title={firstName || "You"} accent={restName.join(" ")} />
       <div className="space-y-6">
-        <Panel>
+        <Panel className="perla-profile-dna">
           {account?.avatarUrl ? <img src={account.avatarUrl} alt="" className="h-20 w-20 rounded-full object-cover" /> : <div className="grid h-20 w-20 place-items-center rounded-full bg-gold-gradient font-serif text-3xl text-primary-foreground">{(account?.name ?? "P").split(/\s+/).map((part) => part[0]?.toUpperCase() ?? "").join("").slice(0, 2) || "P"}</div>}
           <p className="mt-4 font-serif text-2xl">Style DNA</p>
           <p className="text-sm text-muted-foreground">{dna?.headline ?? "Your Style DNA is written from your try-ons every two weeks."}</p>

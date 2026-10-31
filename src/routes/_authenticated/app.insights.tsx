@@ -158,10 +158,10 @@ function WeeklySections({ report }: { report: WeeklyReport | null | undefined })
         </Panel>
       </div>
 
-      <Panel className="mt-6 bg-primary text-primary-foreground">
+      <Panel className="mt-6 border-t-0 bg-ink p-6 text-ink-foreground">
         <Eyebrow><span className="flex items-center gap-2"><Sparkles className="h-3.5 w-3.5" /> AI insights</span></Eyebrow>
         {!report || report.aiInsights.length === 0 ? <p className="mt-4 text-sm opacity-80">{waiting}</p> : (
-          <ul className="mt-4 grid gap-4 md:grid-cols-3">{report.aiInsights.map((t) => <li key={t} className="rounded-2xl bg-primary-foreground/10 p-4 font-serif text-lg leading-snug">{t}</li>)}</ul>
+          <ul className="mt-4 grid gap-4 md:grid-cols-3">{report.aiInsights.map((t) => <li key={t} className="border-l border-coral pl-4 font-serif text-lg leading-snug">{t}</li>)}</ul>
         )}
       </Panel>
     </>

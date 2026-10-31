@@ -21,7 +21,7 @@ export function LookCard({ look, showShare = false, showDelete = false, showDown
     <article aria-label={look.title} className="min-w-0 overflow-hidden rounded-lg bg-card shadow-card">
       <div className="relative aspect-[3/4] bg-secondary">
         <img src={look.image} alt={`${productName} virtual try-on by ${look.author}`} loading="lazy" width={768} height={1024} className="h-full w-full object-cover" />
-        {showTry && <button type="button" onClick={() => { void tryIt(); }} disabled={trying} aria-label={`Try on ${productName}`} title="Try this piece on" className="absolute left-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-background/90 text-gold shadow-card transition hover:scale-110 disabled:opacity-60"><Star className={cn("h-5 w-5 fill-current", trying && "motion-safe:animate-spin")} /></button>}
+        {showTry && <Button type="button" variant="secondary" size="icon" onClick={() => { void tryIt(); }} disabled={trying} aria-label={`Try on ${productName}`} title="Try this piece on" className="absolute left-3 top-3 h-10 w-10 rounded-full bg-background/90 text-gold shadow-card disabled:opacity-60"><Star className={cn("h-5 w-5 fill-current", trying && "motion-safe:animate-spin")} /></Button>}
       </div>
       <div className="p-3 sm:p-4">
         {look.brand && <p className="mb-1 break-words text-[10px] uppercase text-muted-foreground">{look.brand}</p>}

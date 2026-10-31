@@ -38,7 +38,7 @@ function AppLayout() {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="perla-workspace flex min-h-screen bg-background">
       <Toaster position="top-center" />
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r px-5 py-6 lg:flex">
         <Link to="/" className="flex items-center gap-3 px-2">
@@ -53,7 +53,7 @@ function AppLayout() {
               className="flex items-center gap-3 rounded-full px-4 py-2.5 text-sm text-muted-foreground transition hover:bg-secondary hover:text-foreground"
               activeProps={{ className: "!bg-primary !text-primary-foreground" }}
             >
-              <n.icon className="h-4 w-4" /> {n.label}
+              <n.icon className="h-5 w-5" /> {n.label}
             </Link>
           ))}
         </nav>
@@ -75,10 +75,10 @@ function AppLayout() {
             <Link to="/login" className="rounded-full bg-primary px-4 py-2 text-xs uppercase tracking-wide text-primary-foreground">Sign in</Link>
           )}
         </header>
-        <nav className="no-scrollbar flex gap-2 overflow-x-auto border-b px-6 py-3 lg:hidden">
+        <nav className="no-scrollbar flex gap-2 overflow-x-auto border-b bg-lavender-soft px-6 py-3 lg:hidden">
           {nav.map((n) => (
             <Link key={n.to} to={n.to} activeOptions={{ exact: "exact" in n }} className="whitespace-nowrap rounded-full bg-card px-4 py-1.5 text-sm shadow-card" activeProps={{ className: "!bg-primary !text-primary-foreground" }}>
-              {n.label}
+              <n.icon className="mr-2 inline h-4 w-4" />{n.label}
             </Link>
           ))}
         </nav>

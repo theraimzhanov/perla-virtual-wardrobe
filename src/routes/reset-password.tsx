@@ -48,7 +48,7 @@ function ResetPassword() {
 
   const input = "w-full rounded-full bg-card px-5 py-3.5 shadow-card outline-none";
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-6 py-12">
+    <div className="perla-auth flex min-h-screen items-center justify-center bg-background px-6 py-12">
       <div className="w-full max-w-sm">
         <img src={logo.url} alt="PERLA" className="mx-auto h-32 w-auto" />
         <h1 className="mt-4 text-center font-serif text-4xl">New <em className="text-gold">password</em></h1>

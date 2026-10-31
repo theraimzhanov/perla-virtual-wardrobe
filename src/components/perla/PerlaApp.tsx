@@ -13,7 +13,7 @@ type Tab = "tryon" | "studio" | "profile";
 export function PerlaApp() {
   const [tab, setTab] = useState<Tab>("tryon");
   return (
-    <div className="min-h-screen bg-secondary sm:py-8">
+    <div className="perla-mobile min-h-screen bg-lavender-soft sm:py-8">
       <Toaster position="top-center" />
       <div className="relative mx-auto flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-background sm:h-[860px] sm:rounded-[2.75rem] sm:border sm:shadow-soft">
         <header className="flex items-center justify-between gap-3 px-6 pb-2 pt-5">
