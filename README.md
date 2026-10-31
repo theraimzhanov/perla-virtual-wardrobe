@@ -84,12 +84,6 @@ TanStack Start app (React 19, Tailwind CSS v4, shadcn/ui, server functions)
 | `shoes-transfer` | Shoes virtual try-on |
 | `image-to-image/youcam` (`youcam-image-v2`) | AI Studio scene and prompt restyling |
 
-Generation runs as server-managed jobs: the app saves a job, submits it once to YouCam, polls status, stores the result in Supabase Storage, and stops automatically after 2 minutes. Submissions are never blindly retried, to avoid duplicate provider charges.
-
-### Gemini usage
-- Classifies the category of personal product uploads (clothes, bag, hat, shoes) to pick the right YouCam endpoint.
-- Writes the text of Brand Insights and Style DNA summaries. All numbers are computed by the app from real data, so AI cannot invent figures.
-
 ---
 
 ## Privacy
@@ -105,7 +99,7 @@ Generation runs as server-managed jobs: the app saves a job, submits it once to 
 
 No installation needed.
 
-1. Open **https://studioperla.live** and create an account with email or Google. (A ready-made demo account is provided in the private Devpost testing field.)
+1. Open **https://studioperla.live** and sign in using the demo account provided in the private Devpost testing instructions, or create an account with email or Google.
 2. **Discover** — choose a clothing item, bag, hat or shoes, or use **Upload from local** for your own item.
 3. **Try On** — upload your photo or pick a sample model, then press **Generate**. Results usually arrive in under a minute.
 4. **Feedback** — answer the five quick questions under the result.
@@ -164,4 +158,8 @@ bunx vitest run  # run tests
 
 ## License
 
-© 2026 Nursultan Raimzhanov. Created for the YouCam API Skin AI & eCommerce VTO Hackathon.
+Licensed under the [MIT License](./LICENSE).
+
+Copyright (c) 2026 Nursultan Raimzhanov. Created for the YouCam API Skin AI & eCommerce VTO Hackathon.
+
+Third-party services, trademarks and product imagery remain subject to their respective terms and rights.
