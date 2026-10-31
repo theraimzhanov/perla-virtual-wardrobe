@@ -1,0 +1,2 @@
+UPDATE public.try_on_products SET catalog_product_id = NULL WHERE catalog_product_id = 'b08c1d75-6ece-43ca-8877-7eb705b7c616';
+DELETE FROM public.products WHERE id = 'b08c1d75-6ece-43ca-8877-7eb705b7c616';
