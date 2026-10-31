@@ -22,7 +22,8 @@ export type Look = {
   product?: string;
   brand?: string | undefined;
   video?: { webm?: string; mp4?: string };
-  // What another member needs to try the same piece: a Discover id or the product photo.
+  // Original saved input, plus what another member needs to try the same piece.
+  productId?: string | null;
   catalogProductId?: string | null;
   productImage?: string | null;
 };

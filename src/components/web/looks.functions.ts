@@ -5,8 +5,9 @@ import { uploadBucket } from "./upload-rules";
 import { feedbackSchema } from "./generation-rules";
 import { tallyGeneratedMedia, type GeneratedMedia } from "./brand-insights-rules";
 import type { WeeklyReport } from "./weekly-insights-rules";
+import { canTryProduct, emptyProductLink } from "./product-links";
 
-export type CommunityLook = { jobId: string; kind: "photo"; image: string; catalogProductId: string | null; productImage: string | null; product: string; brand: string | null; author: string; source: "discover" | "own" | "internet" | "store"; likes: number; liked: boolean; mine: boolean };
+export type CommunityLook = { jobId: string; kind: "photo"; image: string; productId: string | null; catalogProductId: string | null; productImage: string | null; product: string; brand: string | null; author: string; source: "discover" | "own" | "internet" | "store"; likes: number; liked: boolean; mine: boolean };
 export type ProductSignal = { id: string; tryOns: number; likes: number };
 export type WardrobePiece = { id: string; name: string; brand: string | null; image: string };
 export type { GeneratedMedia };
@@ -20,26 +21,21 @@ export const listCommunityLooks = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: jobs, error } = await supabaseAdmin.from("generation_jobs").select("id,user_id,kind,product_id,result_image_url,product_name,brand_name,source").eq("kind", "photo").eq("shared", true).eq("status", "completed").is("deleted_at", null).order("created_at", { ascending: false }).limit(100);
     if (error) throw new Error("Couldn't load community looks.");
-    const rows = (jobs ?? []).filter((job) => job.result_image_url);
+    const rows = (jobs ?? []).filter((job): job is typeof job & { result_image_url: string } => Boolean(job.result_image_url));
     if (rows.length === 0) return [];
-    const productIds = [...new Set(rows.map((row) => row.product_id).filter((id): id is string => Boolean(id)))];
-    const [likes, profiles, pieces] = await Promise.all([
-      supabaseAdmin.from("look_likes").select("job_id,user_id").in("job_id", rows.map((row) => row.id)),
-      supabaseAdmin.from("profiles").select("id,display_name,email").in("id", [...new Set(rows.map((row) => row.user_id))]),
-      productIds.length ? supabaseAdmin.from("try_on_products").select("id,catalog_product_id,storage_path,image_url").in("id", productIds) : Promise.resolve({ data: [] as { id: string; catalog_product_id: string | null; storage_path: string | null; image_url: string | null }[] }),
+    const { loadProductLinks } = await import("./product-links.server");
+    const productLinks = await loadProductLinks(supabaseAdmin, rows);
+    const linkedRows = rows.filter((row) => canTryProduct(productLinks.get(row.id) ?? emptyProductLink()));
+    if (!linkedRows.length) return [];
+    const [likes, profiles] = await Promise.all([
+      supabaseAdmin.from("look_likes").select("job_id,user_id").in("job_id", linkedRows.map((row) => row.id)),
+      supabaseAdmin.from("profiles").select("id,display_name,email").in("id", [...new Set(linkedRows.map((row) => row.user_id))]),
     ]);
     const likeRows = likes.data ?? [];
-    // Product image lets another member try the same piece; private uploads get a short-lived link.
-    const productOf = new Map(await Promise.all((pieces.data ?? []).map(async (piece) => {
-      let image = piece.image_url;
-      if (piece.storage_path) image = (await supabaseAdmin.storage.from(uploadBucket).createSignedUrl(piece.storage_path, 3600)).data?.signedUrl ?? null;
-      return [piece.id, { catalogProductId: piece.catalog_product_id, image }] as const;
-    })));
-    return rows.map((row) => {
-      const piece = row.product_id ? productOf.get(row.product_id) : undefined;
+    return linkedRows.map((row) => {
       const profile = profiles.data?.find((item) => item.id === row.user_id);
       const author = profile?.display_name || profile?.email?.split("@")[0] || "PERLA member";
-      return { jobId: row.id, kind: "photo" as const, image: row.result_image_url!, catalogProductId: piece?.catalogProductId ?? null, productImage: piece?.image ?? null, product: row.product_name ?? "New look", brand: row.brand_name, author: row.user_id === context.userId ? "You" : author, source: source(row.source), likes: likeRows.filter((like) => like.job_id === row.id).length, liked: likeRows.some((like) => like.job_id === row.id && like.user_id === context.userId), mine: row.user_id === context.userId };
+      return { jobId: row.id, kind: "photo" as const, image: row.result_image_url, ...(productLinks.get(row.id) ?? emptyProductLink()), product: row.product_name ?? "New look", brand: row.brand_name, author: row.user_id === context.userId ? "You" : author, source: source(row.source), likes: likeRows.filter((like) => like.job_id === row.id).length, liked: likeRows.some((like) => like.job_id === row.id && like.user_id === context.userId), mine: row.user_id === context.userId };
     });
   });
 
