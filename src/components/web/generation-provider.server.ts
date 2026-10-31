@@ -80,8 +80,17 @@ export async function submitPhoto(category: string, person: string, item: string
   return { taskId: result.data.task_id, endpoint };
 }
 
+export const STUDIO_ENDPOINT = "image-to-image/youcam";
+
+// AI Studio restyle through YouCam AI Image Generator V2 (image-to-image); prompts are capped at 800 characters.
+export async function submitStudio(image: string, prompt: string, key: string) {
+  const body = { model: "youcam-image-v2", src_file_urls: [image], prompt: prompt.slice(0, 800), size: "1024*1536" };
+  const result = taskSchema.parse(await providerRequest(STUDIO_ENDPOINT, key, body));
+  return { taskId: result.data.task_id, endpoint: STUDIO_ENDPOINT };
+}
+
 export async function pollPhoto(endpoint: string, taskId: string, key: string) {
-  if (!["cloth-v4", "bag", "hat", "shoes-transfer"].includes(endpoint)) throw new GenerationProviderError("Unknown generation task.");
+  if (![...["cloth-v4", "bag", "hat", "shoes-transfer"], STUDIO_ENDPOINT].includes(endpoint)) throw new GenerationProviderError("Unknown generation task.");
   const result = pollSchema.parse(await providerRequest(`${endpoint}/${encodeURIComponent(taskId)}`, key));
   if (result.data.task_status === "error") throw new GenerationProviderError("Perfect Corp couldn't generate this look. Try another photo.");
   if (result.data.task_status === "success" && !result.data.results?.url) throw new GenerationProviderError("Perfect Corp returned no image.");

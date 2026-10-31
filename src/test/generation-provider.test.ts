@@ -1,8 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { boundedImage, pollPhoto, submitPhoto } from "@/components/web/generation-provider.server";
+import { boundedImage, pollPhoto, submitPhoto, submitStudio } from "@/components/web/generation-provider.server";
 
 describe("Perfect Corp photo adapter", () => {
   afterEach(() => vi.unstubAllGlobals());
+  it("sends AI Studio restyles to YouCam image-to-image with an 800-character prompt", async () => {
+    const fetcher = vi.fn().mockResolvedValue(Response.json({ status: 200, data: { task_id: "studio-task" } }));
+    vi.stubGlobal("fetch", fetcher);
+    expect(await submitStudio("https://x/look.jpg", "a".repeat(900), "k")).toEqual({ taskId: "studio-task", endpoint: "image-to-image/youcam" });
+    expect(fetcher.mock.calls[0]?.[0]).toBe("https://yce-api-01.makeupar.com/s2s/v2.0/task/image-to-image/youcam");
+    const body = JSON.parse(fetcher.mock.calls[0]?.[1].body);
+    expect(body.model).toBe("youcam-image-v2");
+    expect(body.prompt).toHaveLength(800);
+  });
   it("submits the clothes-v4 contract and saves the opaque task ID", async () => {
     const fetcher = vi.fn().mockResolvedValue(Response.json({ status: 200, data: { task_id: "opaque-task" } }));
     vi.stubGlobal("fetch", fetcher);
