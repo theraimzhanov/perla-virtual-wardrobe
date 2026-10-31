@@ -1,24 +1,167 @@
-# Perla Virtual Wardrobe
+# PERLA — AI Fashion Discovery & Demand-Intelligence Platform
 
-can you build prototype front end of mobile application.I uploaded picture of app name and logo. put some data as example ,build clean,elegent designs fully based on the attached fashion application specification (PERLA - Elegance, Reimagined), including the 3 tabs (Try On, AI Studio, Profile), photo upload, wardrobe selector with sample clothes, outfit builder, before/after comparison slider, and credit system.
+<p align="center">
+  <img src="https://studioperla.live/favicon.svg" alt="PERLA logo" width="96" />
+</p>
 
-This project was built with [Lovable](https://lovable.dev).
+<p align="center">
+  <strong>Wear it before anyone.</strong><br />
+  A two-sided platform connecting shopper virtual try-on with real-time brand demand insights.
+</p>
 
-## Build with Lovable
+<p align="center">
+  <a href="https://studioperla.live"><strong>Live app: studioperla.live</strong></a>
+</p>
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/28f6b7fb-b1c5-4225-961d-f5059c9a6b66).
+---
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Hackathon Submission
 
-## Development
+- **Event:** YouCam API Skin AI & eCommerce VTO Hackathon (Devpost)
+- **Category:** Fashion virtual try-on and eCommerce
+- **Live demo:** https://studioperla.live
+- **Author:** Nursultan Raimzhanov
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+---
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+## Problem & Solution
+
+### The problem
+- **Shoppers** can't see how clothes and accessories look on them before buying, so online fashion has high return rates.
+- **Brands** decide what to produce from guesswork, which leads to deadstock and waste.
+
+### How PERLA solves it
+1. **Shoppers** pick a catalog piece or upload their own and see it on their photo with Perfect Corp YouCam virtual try-on.
+2. **Every try-on becomes a demand signal.** A short 5-question survey after each try-on captures fit, occasion, color, perceived quality and purchase intent.
+3. **Brands** see this in **Brand Insights**: most-tried and most-liked products, feedback trends, fit and sizing risk, and AI summaries — before committing to production.
+
+---
+
+## Key Features
+
+- **Multi-category virtual try-on** — clothes, bags, hats and shoes.
+- **Smart routing for personal uploads** — Gemini classifies an uploaded item's category, then PERLA calls the matching YouCam endpoint.
+- **Sample models** — male and female sample photos so anyone can try it instantly.
+- **AI Studio** — restyle a try-on look into editorial scenes or a custom prompt with YouCam image-to-image.
+- **Feedback survey** — five quick questions after each try-on, saved to the database.
+- **Community looks** — shared generated photos; tap the star on any look to try the same product yourself.
+- **Brand Insights dashboard** — real member, try-on, like and product counts; product rankings; feedback trends; fit risk.
+- **Automated reports** — n8n sends aggregated, anonymized product and survey reports to Google Sheets every two weeks, with Gemini-written summaries.
+- **Accounts** — email/password and Google sign-in, password reset, saved looks and wardrobe in Profile.
+
+---
+
+## Architecture
+
+```text
+Shopper (web / mobile browser)
+   │
+   ▼
+TanStack Start app (React 19, Tailwind CSS v4, shadcn/ui, server functions)
+   │
+   ├── Supabase: Auth, PostgreSQL with Row Level Security, Storage
+   │     ├── private bucket: user photos and personal product uploads
+   │     └── generated-looks bucket: saved try-on results
+   │
+   ├── Perfect Corp YouCam AI APIs (visual engine)
+   │     ├── cloth-v4         clothes try-on
+   │     ├── bag              bag try-on
+   │     ├── hat              hat try-on
+   │     ├── shoes-transfer   shoes try-on
+   │     └── image-to-image   AI Studio restyling (youcam-image-v2)
+   │
+   ├── Google Gemini API: product classification, insight and Style DNA text
+   │
+   └── n8n: scheduled Brand Insights and Google Sheets reports
 ```
+
+### YouCam APIs used
+| Endpoint | Used for |
+|---|---|
+| `cloth-v4` | Clothing virtual try-on |
+| `bag` | Bag virtual try-on |
+| `hat` | Hat virtual try-on |
+| `shoes-transfer` | Shoes virtual try-on |
+| `image-to-image/youcam` (`youcam-image-v2`) | AI Studio scene and prompt restyling |
+
+Generation runs as server-managed jobs: the app saves a job, submits it once to YouCam, polls status, stores the result in Supabase Storage, and stops automatically after 2 minutes. Submissions are never blindly retried, to avoid duplicate provider charges.
+
+### Gemini usage
+- Classifies the category of personal product uploads (clothes, bag, hat, shoes) to pick the right YouCam endpoint.
+- Writes the text of Brand Insights and Style DNA summaries. All numbers are computed by the app from real data, so AI cannot invent figures.
+
+---
+
+## Privacy
+
+- User photos and personal uploads are private, owner-scoped, and shown only through short-lived signed links.
+- Community looks share only the generated image and the product — never the original model photo.
+- Brand Insights and Google Sheets reports contain only aggregated data, with no customer names, emails or private images.
+- Privacy notice: [PRIVACY.md](./PRIVACY.md)
+
+---
+
+## Testing Instructions for Judges
+
+No installation needed.
+
+1. Open **https://studioperla.live** and create an account with email or Google. (A ready-made demo account is provided in the private Devpost testing field.)
+2. **Discover** — choose a clothing item, bag, hat or shoes, or use **Upload from local** for your own item.
+3. **Try On** — upload your photo or pick a sample model, then press **Generate**. Results usually arrive in under a minute.
+4. **Feedback** — answer the five quick questions under the result.
+5. **AI Studio** — pick a scene or type a prompt to restyle your look.
+6. **Brand Insights** — see product rankings, community looks, feedback trends and fit risk update with real activity.
+
+---
+
+## Local Development
+
+### Requirements
+- [Bun](https://bun.sh) (or Node.js 20+)
+- Supabase project
+- Perfect Corp YouCam API key
+- Google Gemini API key
+
+### Setup
+```bash
+git clone https://github.com/<your-username>/perla.git
+cd perla
+bun install
+```
+
+Create a `.env` file:
+```env
+# Browser (public)
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+
+# Server (secret)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+PERFECT_CORP_API_KEY=your_youcam_api_key
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+Apply the database migrations in `supabase/migrations`, then run:
+```bash
+bun dev        # start at http://localhost:8080
+bunx vitest run  # run tests
+```
+
+---
+
+## Built With
+
+- Perfect Corp YouCam AI APIs — virtual try-on and image generation
+- Google Gemini API — classification and insight text
+- TanStack Start, React 19, TypeScript, Tailwind CSS v4, shadcn/ui
+- Supabase — Auth, PostgreSQL, Storage
+- n8n and Google Sheets — scheduled reporting
+- Built with the help of Lovable
+
+---
+
+## License
+
+© 2026 Nursultan Raimzhanov. Created for the YouCam API Skin AI & eCommerce VTO Hackathon.
