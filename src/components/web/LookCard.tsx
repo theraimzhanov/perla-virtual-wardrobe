@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Download, Heart, Send, Star, Trash2 } from "lucide-react";
+import { Heart, Send, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTryOn } from "./TryOnContext";
+import { DownloadButton } from "./DownloadButton";
 import { sourceLabel, type Look } from "./looks";
 
 export function LookCard({ look, showShare = false, showDelete = false, showDownload = false, showTry = false }: { look: Look; showShare?: boolean; showDelete?: boolean; showDownload?: boolean; showTry?: boolean }) {
@@ -32,7 +33,7 @@ export function LookCard({ look, showShare = false, showDelete = false, showDown
           <Button size="sm" variant="ghost" aria-pressed={look.liked} aria-label={`Like ${look.title}`} title={`Like ${look.title}`} onClick={() => likeLook(look.id)} className={cn("shrink-0 rounded-full px-2 tabular-nums", look.liked && "text-gold")}><Heart className={look.liked ? "fill-current" : ""} />{look.likes.toLocaleString()}</Button>
           {showShare && !look.shared && <Button size="icon" variant="outline" aria-label={`Share ${look.title} to Brand Insights`} title="Share to Brand Insights" onClick={() => shareLook(look.id)} className="h-8 w-8 shrink-0 rounded-full"><Send /></Button>}
           {showShare && look.shared && <Button size="icon" variant="default" aria-label={`Unshare ${look.title} from Brand Insights`} title="Shared — click to remove from Brand Insights" onClick={() => unshareLook(look.id)} className="h-8 w-8 shrink-0 rounded-full"><Send /></Button>}
-          {showDownload && <Button size="icon" variant="outline" asChild className="h-8 w-8 shrink-0 rounded-full"><a href={look.image} download target="_blank" rel="noreferrer" aria-label={`Download ${look.title}`} title="Download"><Download /></a></Button>}
+          {showDownload && <DownloadButton url={look.image} title={look.title} label={`Download ${look.title}`} className="h-8 w-8 shrink-0" />}
           {showDelete && <Button size="icon" variant="outline" aria-label={`Delete ${look.title}`} title="Delete" onClick={() => deleteLook(look.id)} className="h-8 w-8 shrink-0 rounded-full text-destructive"><Trash2 /></Button>}
         </div>
       </div>

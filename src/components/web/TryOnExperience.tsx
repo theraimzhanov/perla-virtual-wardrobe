@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { Check, Download, Trash2, Heart, ImagePlus, LoaderCircle, RefreshCw, Send, Sparkles, Upload, X } from "lucide-react";
+import { Check, Trash2, Heart, ImagePlus, LoaderCircle, RefreshCw, Send, Sparkles, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { CompareSlider } from "@/components/perla/CompareSlider";
 import { modelBefore, modelAfter } from "@/components/perla/data";
+import { DownloadButton } from "./DownloadButton";
 import { useTryOn } from "./TryOnContext";
 import { GenerationSkeleton } from "./GenerationSkeleton";
 import { ResultFeedback } from "./ResultFeedback";
@@ -18,23 +19,6 @@ import { SamplePhotoPicker } from "./SamplePhotoPicker";
 
 type Phase = "idle" | "loading" | "done";
 
-async function downloadMedia(url: string, filename: string) {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Download unavailable");
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = blobUrl;
-    anchor.download = filename;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-  } catch {
-    toast.error("Couldn't download. Please try again.");
-  }
-}
 
 export function TryOnExperience({ compact = false }: { compact?: boolean }) {
   const { userId, selectedInputProductId, photo, photoId, setPhoto, uploadPhoto, uploadProduct, selected, selectedIds, mode, setMode, personal, setPersonal, removeProduct, preparing, setPreparing, addLook, shareLook, looks, likeLook, updateLookSource, markTried, savingInputs, inputError, retryInputs, signedIn, photoJobs, deleteJob, patchJob, refreshPhotoJobs, generationHistoryError } = useTryOn();
@@ -199,7 +183,7 @@ export function TryOnExperience({ compact = false }: { compact?: boolean }) {
         {preparing || photoPhase === "loading" ? <div className="mx-auto max-w-md"><GenerationSkeleton kind={preparing ? "prepare" : "photo"} />{signedIn && generation.job && photoPhase === "loading" && <Button variant="outline" disabled={deleting !== null} onClick={() => { void stopPhoto(); }} className="mt-4 w-full rounded-full"><X />{deleting === "photo" ? "Stopping…" : "Stop generating"}</Button>}</div> : photoPhase === "failed" ? <div role="alert" className="border-y py-6 text-sm text-destructive">{generation.error}</div> : <>
           <div className={cn("grid items-start gap-7", !compact && "sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10")}>
             <div className="min-w-0">{compare && photo ? <CompareSlider before={photo} after={signedIn ? resultImage ?? "" : modelAfter} /> : <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl bg-muted"><img src={signedIn ? resultImage ?? "" : modelAfter} alt={signedIn ? "Your generated try-on look" : "Sample generated try-on look"} className="h-full w-full object-contain" /></div>}
-              <div className="mt-3 flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Like picture" title="Like picture" aria-pressed={likedPhoto} onClick={() => likeLook(photoLookId)} className={cn("rounded-full", likedPhoto && "border-gold text-gold")}><Heart className={likedPhoto ? "fill-current" : ""} /></Button><Button size="icon" variant="outline" aria-label="Download picture" title="Download picture" onClick={() => { if (!signedIn || resultImage) void downloadMedia(resultImage ?? modelAfter, "perla-try-on.jpg"); }} className="rounded-full"><Download /></Button><Button size="icon" variant="outline" aria-label="Delete picture" title="Delete picture" disabled={deleting !== null} onClick={() => { void removePhoto(); }} className="rounded-full text-destructive">{deleting === "photo" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Trash2 />}</Button><Button variant="outline" aria-pressed={compare} onClick={() => setCompare((value) => !value)} className="ml-auto rounded-full text-xs">{compare ? "View picture" : "Compare"}</Button></div><div className="mt-2"><ShareButton id={photoLookId} /></div>
+              <div className="mt-3 flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Like picture" title="Like picture" aria-pressed={likedPhoto} onClick={() => likeLook(photoLookId)} className={cn("rounded-full", likedPhoto && "border-gold text-gold")}><Heart className={likedPhoto ? "fill-current" : ""} /></Button><DownloadButton url={!signedIn || resultImage ? resultImage ?? modelAfter : undefined} title="perla try-on" label="Download picture" /><Button size="icon" variant="outline" aria-label="Delete picture" title="Delete picture" disabled={deleting !== null} onClick={() => { void removePhoto(); }} className="rounded-full text-destructive">{deleting === "photo" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Trash2 />}</Button><Button variant="outline" aria-pressed={compare} onClick={() => setCompare((value) => !value)} className="ml-auto rounded-full text-xs">{compare ? "View picture" : "Compare"}</Button></div><div className="mt-2"><ShareButton id={photoLookId} /></div>
             </div>
             <div className="min-w-0"><p className="text-xs uppercase text-gold">Photo complete <Check className="ml-1 inline h-3 w-3" /></p><h3 className="mt-2 font-serif text-3xl">A different point of view.</h3>{showFeedback(feedbackMode) && <ResultFeedback key={`photo:${generation.job?.id ?? `${mode}:${selectionKey}:${lookId}`}`} kind="photo" mode={feedbackMode} jobId={signedIn ? generation.job?.id : undefined} alreadySent={signedIn && Boolean(generation.job?.feedbackSent)} onSent={() => { if (generation.job) patchJob(generation.job.id, { feedbackSent: true }); }} onAnswer={recordSource} />}</div>
           </div>
