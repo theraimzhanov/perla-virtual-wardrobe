@@ -57,8 +57,9 @@ async function claim(id: string, from: string, to: string, extra: TablesUpdate<"
 // AI Studio photo: submitted once to YouCam image-to-image, then polled and saved like a try-on.
 async function submitStudioJob(job: Job) {
   const config = directConfig();
+  // Restyle the finished try-on photo (the person), not the bare product image; item_image_url stays the original product for provenance.
   let image: string;
-  try { image = trustedMediaUrl(job.item_image_url, "input", config.supabaseOrigin); }
+  try { image = trustedMediaUrl(job.person_image_url, "input", config.supabaseOrigin); }
   catch { return fail(job.id, "This look can't be restyled. Please pick another try-on."); }
   if (!await claim(job.id, "stage.in.(queued,ready)", "submitting", { provider_endpoint: STUDIO_ENDPOINT })) return;
   let task: { taskId: string; endpoint: string };
