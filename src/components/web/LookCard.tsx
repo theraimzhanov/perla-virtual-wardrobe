@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTryOn } from "./TryOnContext";
 import { DownloadButton } from "./DownloadButton";
-import { sourceLabel, type Look } from "./looks";
+import { lookDisplayName, sourceLabel, type Look } from "./looks";
 
 export function LookCard({ look, showShare = false, showDelete = false, showDownload = false, showTry = false }: { look: Look; showShare?: boolean; showDelete?: boolean; showDownload?: boolean; showTry?: boolean }) {
   const { likeLook, shareLook, unshareLook, deleteLook, tryLook } = useTryOn();
