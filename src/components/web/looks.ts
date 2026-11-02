@@ -51,8 +51,15 @@ export function sourceFromFeedback(answer: string): LookSource | undefined {
 }
 
 export function sourceLabel(source: LookSource | undefined) {
-  if (source === "own") return "Own upload · outside Discover";
-  if (source === "internet") return "Internet · outside Discover";
-  if (source === "store") return "Store · outside Discover";
+  if (source === "own" || source === "internet" || source === "store") return "Outside Discover";
   return null;
+}
+
+// Pieces from outside Discover carry the member's upload file name as their stored title,
+// which is unreadable on a shared card — show a plain category name instead.
+export function lookDisplayName(look: Pick<Look, "source" | "product" | "title">) {
+  if (look.source === "own") return "Own upload";
+  if (look.source === "internet") return "Internet find";
+  if (look.source === "store") return "Store piece";
+  return look.product ?? look.title;
 }
